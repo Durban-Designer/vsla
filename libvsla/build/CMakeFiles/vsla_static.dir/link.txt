@@ -1,0 +1,2 @@
+/usr/bin/ar qc libvsla.a CMakeFiles/vsla_static.dir/src/vsla_core.c.o CMakeFiles/vsla_static.dir/src/vsla_tensor.c.o CMakeFiles/vsla_static.dir/src/vsla_ops.c.o CMakeFiles/vsla_static.dir/src/vsla_io.c.o CMakeFiles/vsla_static.dir/src/vsla_conv.c.o CMakeFiles/vsla_static.dir/src/vsla_kron.c.o CMakeFiles/vsla_static.dir/src/vsla_autograd.c.o CMakeFiles/vsla_static.dir/src/vsla_utils.c.o
+/usr/bin/ranlib libvsla.a
