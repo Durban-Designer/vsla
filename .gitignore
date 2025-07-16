@@ -1,0 +1,89 @@
+# Build directories
+build/
+**/build/
+cmake-build-*/
+out/
+
+# Compiled executables
+*.exe
+*.out
+*.app
+simple_test
+test_simple
+test_core_only
+test_final
+validate_benchmark
+basic_usage
+
+# Object files
+*.o
+*.obj
+*.ko
+*.elf
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+*.so
+*.so.*
+*.dylib
+*.dll
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+*.egg
+.Python
+.venv/
+venv/
+ENV/
+env/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake
+Testing/
+
+# Documentation build
+docs/_build/
+docs/html/
+*.aux
+*.log
+*.out
+*.pdf
+*.toc
+*.bbl
+*.blg
+*.synctex.gz
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Coverage
+*.gcov
+*.gcda
+*.gcno
+coverage.xml
+htmlcov/
+
+# OS files
+Thumbs.db
+.directory

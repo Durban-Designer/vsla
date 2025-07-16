@@ -18,6 +18,28 @@ VSLA revolutionizes linear algebra by incorporating dimension information direct
   - **Model B**: Kronecker product-based (non-commutative) semiring - ideal for tensor networks
 - **Enterprise-Grade Implementation**: Production-ready code with comprehensive error handling and memory management
 
+## 📁 Project Structure
+
+```
+vsla/
+├── src/               # Core library implementation
+├── include/vsla/      # Public header files
+├── tests/             # Comprehensive test suite
+├── bench/             # Performance benchmarks
+├── docs/              # Documentation and papers
+├── python/            # Python bindings
+├── examples/          # Usage examples
+├── CMakeLists.txt     # Build configuration
+├── pyproject.toml     # Python packaging
+├── cibuildwheel.toml  # CI wheel building
+├── CITATION.cff       # Citation information
+├── LICENSE            # MIT license
+├── README.md          # This file
+├── STATUS.md          # Development status
+├── SECURITY.md        # Security policy
+└── CODE_OF_CONDUCT.md # Community guidelines
+```
+
 ## 🏗️ Architecture
 
 ### Core Tensor Structure
@@ -58,7 +80,7 @@ make
 
 # Run tests
 make test
-# or directly: ./tests/vsla_tests
+# or directly: ctest
 ```
 
 ### Build Options
@@ -180,15 +202,17 @@ vsla_error_t vsla_sum(const vsla_tensor_t* tensor, double* sum);
 The library includes a comprehensive test suite with 100% code coverage of implemented modules:
 
 ```bash
-# Run all tests
-./tests/vsla_tests
+# Run all tests from build directory
+ctest
 
-# Run specific test suites
-./tests/vsla_tests --suite=core
-./tests/vsla_tests --suite=tensor
+# Run tests with verbose output
+ctest -V
+
+# Run specific test
+ctest -R test_core
 
 # Memory leak testing (requires valgrind)
-make memory_tests
+ctest -T memcheck
 ```
 
 ### Test Coverage
