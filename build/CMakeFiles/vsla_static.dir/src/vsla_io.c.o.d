@@ -1,9 +1,8 @@
 CMakeFiles/vsla_static.dir/src/vsla_io.c.o: \
- /home/kenth56/Documents/vsla/libvsla/src/vsla_io.c \
- /usr/include/stdc-predef.h \
- /home/kenth56/Documents/vsla/libvsla/include/vsla/vsla_io.h \
- /home/kenth56/Documents/vsla/libvsla/include/vsla/vsla_tensor.h \
- /home/kenth56/Documents/vsla/libvsla/include/vsla/vsla_core.h \
+ /home/kenth56/vsla/src/vsla_io.c /usr/include/stdc-predef.h \
+ /home/kenth56/vsla/include/vsla/vsla_io.h \
+ /home/kenth56/vsla/include/vsla/vsla_tensor.h \
+ /home/kenth56/vsla/include/vsla/vsla_core.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -21,8 +20,8 @@ CMakeFiles/vsla_static.dir/src/vsla_io.c.o: \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h \
- /home/kenth56/Documents/vsla/libvsla/include/vsla/vsla_tensor.h \
- /usr/include/stdio.h /usr/lib/gcc/x86_64-linux-gnu/13/include/stdarg.h \
+ /home/kenth56/vsla/include/vsla/vsla_tensor.h /usr/include/stdio.h \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/stdarg.h \
  /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h \

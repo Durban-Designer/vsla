@@ -4,7 +4,7 @@
 # compile C with /usr/bin/cc
 C_DEFINES = -Dvsla_shared_EXPORTS
 
-C_INCLUDES = -I/home/kenth56/Documents/vsla/libvsla/include
+C_INCLUDES = -I/home/kenth56/vsla/include
 
 C_FLAGS = -std=c99 -fPIC -Wall -Wextra -Wpedantic -Wstrict-prototypes -O3
 

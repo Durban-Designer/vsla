@@ -17,6 +17,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/vsla_tests.dir/test_ops.c.o.d"
   "CMakeFiles/vsla_tests.dir/test_tensor.c.o"
   "CMakeFiles/vsla_tests.dir/test_tensor.c.o.d"
+  "CMakeFiles/vsla_tests.dir/test_utils.c.o"
+  "CMakeFiles/vsla_tests.dir/test_utils.c.o.d"
   "vsla_tests"
   "vsla_tests.pdb"
 )

@@ -1,0 +1,44 @@
+[tool.cibuildwheel]
+# Build Python 3.8-3.12 wheels for major platforms
+build = "cp38-* cp39-* cp310-* cp311-* cp312-*"
+
+# Skip 32-bit builds and musllinux (for now)
+skip = "*-win32 *-manylinux_i686 *-musllinux* pp*"
+
+# Build configuration
+build-verbosity = 1
+
+# Test command to verify wheels work
+test-command = "python -c \"import vsla; print('VSLA version:', vsla.__version__)\""
+test-requires = ["numpy"]
+
+# Dependencies that need to be installed before building
+before-build = [
+    "pip install numpy pybind11 cmake",
+]
+
+# Linux-specific configuration
+[tool.cibuildwheel.linux]
+before-build = [
+    "yum install -y fftw-devel blas-devel lapack-devel || apt-get update && apt-get install -y libfftw3-dev libblas-dev liblapack-dev",
+    "pip install numpy pybind11 cmake",
+]
+
+# macOS-specific configuration  
+[tool.cibuildwheel.macos]
+before-build = [
+    "brew install fftw openblas",
+    "pip install numpy pybind11 cmake",
+]
+
+# Set environment variables for better performance
+environment = { CMAKE_BUILD_PARALLEL_LEVEL = "4" }
+
+# Windows-specific configuration
+[tool.cibuildwheel.windows]
+before-build = [
+    "pip install numpy pybind11 cmake",
+]
+
+# Use MSVC on Windows
+environment = { CMAKE_BUILD_PARALLEL_LEVEL = "4", CMAKE_GENERATOR = "Visual Studio 17 2022" }

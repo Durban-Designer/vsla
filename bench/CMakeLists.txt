@@ -35,25 +35,29 @@ if(FFTW3_FOUND)
     add_definitions(-DHAVE_FFTW3)
 endif()
 
-# Vector addition benchmark
-add_executable(bench_vector_add src/bench_vector_add.c)
-target_link_libraries(bench_vector_add ${BENCHMARK_LIBS})
+# Vector addition benchmark (TODO: implement)
+# add_executable(bench_vector_add src/bench_vector_add.c)
+# target_link_libraries(bench_vector_add ${BENCHMARK_LIBS})
 
-# Matrix-vector multiplication benchmark  
-add_executable(bench_matvec src/bench_matvec.c)
-target_link_libraries(bench_matvec ${BENCHMARK_LIBS})
+# Matrix-vector multiplication benchmark (TODO: implement)
+# add_executable(bench_matvec src/bench_matvec.c)
+# target_link_libraries(bench_matvec ${BENCHMARK_LIBS})
 
-# Kronecker product benchmark
-add_executable(bench_kronecker src/bench_kronecker.c)
-target_link_libraries(bench_kronecker ${BENCHMARK_LIBS})
+# Kronecker product benchmark (TODO: implement)
+# add_executable(bench_kronecker src/bench_kronecker.c)
+# target_link_libraries(bench_kronecker ${BENCHMARK_LIBS})
 
 # Convolution benchmark
-add_executable(bench_convolution src/bench_convolution.c)
+add_executable(bench_convolution src/bench_convolution.c src/benchmark_utils.c)
 target_link_libraries(bench_convolution ${BENCHMARK_LIBS})
 
-# Master benchmark runner
-add_executable(run_all_benchmarks src/run_all_benchmarks.c)
-target_link_libraries(run_all_benchmarks ${BENCHMARK_LIBS})
+# Fair comparison benchmark (VSLA vs manual padding)
+add_executable(bench_comparison src/bench_comparison.c src/benchmark_utils.c)
+target_link_libraries(bench_comparison ${BENCHMARK_LIBS})
+
+# Master benchmark runner (TODO: implement)
+# add_executable(run_all_benchmarks src/run_all_benchmarks.c)
+# target_link_libraries(run_all_benchmarks ${BENCHMARK_LIBS})
 
 # Create directories for results
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/results)
@@ -68,7 +72,7 @@ add_custom_target(bench_all
 )
 
 # Install benchmarks
-install(TARGETS bench_vector_add bench_matvec bench_kronecker bench_convolution run_all_benchmarks
+install(TARGETS bench_convolution
     RUNTIME DESTINATION bin
 )
 

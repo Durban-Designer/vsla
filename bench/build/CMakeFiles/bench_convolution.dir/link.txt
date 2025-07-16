@@ -1,0 +1,1 @@
+/usr/bin/cc -O3 -DNDEBUG -march=native -ffast-math CMakeFiles/bench_convolution.dir/src/bench_convolution.c.o CMakeFiles/bench_convolution.dir/src/benchmark_utils.c.o -o bench_convolution   -L/home/kenth56/vsla/bench/../build  -Wl,-rpath,/home/kenth56/vsla/bench/../build: libbenchmark_utils.a -lvsla /usr/lib/x86_64-linux-gnu/libblas.so -lm -lfftw3 

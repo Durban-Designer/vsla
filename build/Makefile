@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/kenth56/Documents/vsla/libvsla
+CMAKE_SOURCE_DIR = /home/kenth56/vsla
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/kenth56/Documents/vsla/libvsla/build
+CMAKE_BINARY_DIR = /home/kenth56/vsla/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -142,9 +142,9 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kenth56/Documents/vsla/libvsla/build/CMakeFiles /home/kenth56/Documents/vsla/libvsla/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kenth56/vsla/build/CMakeFiles /home/kenth56/vsla/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kenth56/Documents/vsla/libvsla/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kenth56/vsla/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target

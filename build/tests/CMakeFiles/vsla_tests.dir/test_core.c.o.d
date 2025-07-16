@@ -1,8 +1,6 @@
 tests/CMakeFiles/vsla_tests.dir/test_core.c.o: \
- /home/kenth56/Documents/vsla/libvsla/tests/test_core.c \
- /usr/include/stdc-predef.h \
- /home/kenth56/Documents/vsla/libvsla/tests/test_framework.h \
- /usr/include/stdio.h \
+ /home/kenth56/vsla/tests/test_core.c /usr/include/stdc-predef.h \
+ /home/kenth56/vsla/tests/test_framework.h /usr/include/stdio.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
@@ -39,7 +37,7 @@ tests/CMakeFiles/vsla_tests.dir/test_core.c.o: \
  /usr/include/x86_64-linux-gnu/bits/fp-fast.h \
  /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h \
  /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
- /home/kenth56/Documents/vsla/libvsla/include/vsla/vsla_core.h \
+ /home/kenth56/vsla/include/vsla/vsla_core.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/wchar.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \

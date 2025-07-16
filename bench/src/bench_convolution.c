@@ -3,12 +3,15 @@
  * @brief Benchmark FFT convolution performance
  */
 
+#define _USE_MATH_DEFINES
 #include "benchmark_utils.h"
 #include "vsla/vsla.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
+#include <math.h>
+#include <time.h>
 
 // Default test parameters
 static size_t default_sizes[] = {64, 128, 256, 512, 1024, 2048, 4096};
@@ -65,10 +68,18 @@ static void benchmark_vsla_convolution(size_t signal_size, size_t kernel_size,
     benchmark_timer_t* timer = benchmark_timer_new(iterations);
     
     // Timed iterations
+    benchmark_timer_start(timer);
     for (size_t i = 0; i < iterations; i++) {
-        benchmark_timer_start(timer);
+        struct timespec iter_start;
+        clock_gettime(CLOCK_MONOTONIC, &iter_start);
         vsla_conv(result, signal, kernel);
-        benchmark_timer_lap(timer);
+        struct timespec iter_end;
+        clock_gettime(CLOCK_MONOTONIC, &iter_end);
+        
+        double elapsed = (iter_end.tv_sec - iter_start.tv_sec) + 
+                        (iter_end.tv_nsec - iter_start.tv_nsec) * 1e-9;
+        timer->iteration_times[timer->num_iterations] = elapsed * 1e6;
+        timer->num_iterations++;
     }
     
     benchmark_result_t bench_result = benchmark_timer_finish(timer);
@@ -132,10 +143,18 @@ static void benchmark_vsla_direct_convolution(size_t signal_size, size_t kernel_
     benchmark_timer_t* timer = benchmark_timer_new(iterations);
     
     // Timed iterations  
+    benchmark_timer_start(timer);
     for (size_t i = 0; i < iterations; i++) {
-        benchmark_timer_start(timer);
+        struct timespec iter_start;
+        clock_gettime(CLOCK_MONOTONIC, &iter_start);
         vsla_conv_direct(result, signal, kernel);
-        benchmark_timer_lap(timer);
+        struct timespec iter_end;
+        clock_gettime(CLOCK_MONOTONIC, &iter_end);
+        
+        double elapsed = (iter_end.tv_sec - iter_start.tv_sec) + 
+                        (iter_end.tv_nsec - iter_start.tv_nsec) * 1e-9;
+        timer->iteration_times[timer->num_iterations] = elapsed * 1e6;
+        timer->num_iterations++;
     }
     
     benchmark_result_t bench_result = benchmark_timer_finish(timer);

@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/kenth56/Documents/vsla/libvsla
+CMAKE_SOURCE_DIR = /home/kenth56/vsla
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/kenth56/Documents/vsla/libvsla/build
+CMAKE_BINARY_DIR = /home/kenth56/vsla/build
 
 # Include any dependencies generated for this target.
 include tests/CMakeFiles/vsla_tests.dir/depend.make
@@ -70,130 +70,144 @@ include tests/CMakeFiles/vsla_tests.dir/progress.make
 include tests/CMakeFiles/vsla_tests.dir/flags.make
 
 tests/CMakeFiles/vsla_tests.dir/test_framework.c.o: tests/CMakeFiles/vsla_tests.dir/flags.make
-tests/CMakeFiles/vsla_tests.dir/test_framework.c.o: /home/kenth56/Documents/vsla/libvsla/tests/test_framework.c
+tests/CMakeFiles/vsla_tests.dir/test_framework.c.o: /home/kenth56/vsla/tests/test_framework.c
 tests/CMakeFiles/vsla_tests.dir/test_framework.c.o: tests/CMakeFiles/vsla_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/Documents/vsla/libvsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object tests/CMakeFiles/vsla_tests.dir/test_framework.c.o"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_framework.c.o -MF CMakeFiles/vsla_tests.dir/test_framework.c.o.d -o CMakeFiles/vsla_tests.dir/test_framework.c.o -c /home/kenth56/Documents/vsla/libvsla/tests/test_framework.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/vsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object tests/CMakeFiles/vsla_tests.dir/test_framework.c.o"
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_framework.c.o -MF CMakeFiles/vsla_tests.dir/test_framework.c.o.d -o CMakeFiles/vsla_tests.dir/test_framework.c.o -c /home/kenth56/vsla/tests/test_framework.c
 
 tests/CMakeFiles/vsla_tests.dir/test_framework.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/vsla_tests.dir/test_framework.c.i"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/Documents/vsla/libvsla/tests/test_framework.c > CMakeFiles/vsla_tests.dir/test_framework.c.i
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/vsla/tests/test_framework.c > CMakeFiles/vsla_tests.dir/test_framework.c.i
 
 tests/CMakeFiles/vsla_tests.dir/test_framework.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/vsla_tests.dir/test_framework.c.s"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/Documents/vsla/libvsla/tests/test_framework.c -o CMakeFiles/vsla_tests.dir/test_framework.c.s
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/vsla/tests/test_framework.c -o CMakeFiles/vsla_tests.dir/test_framework.c.s
 
 tests/CMakeFiles/vsla_tests.dir/test_main.c.o: tests/CMakeFiles/vsla_tests.dir/flags.make
-tests/CMakeFiles/vsla_tests.dir/test_main.c.o: /home/kenth56/Documents/vsla/libvsla/tests/test_main.c
+tests/CMakeFiles/vsla_tests.dir/test_main.c.o: /home/kenth56/vsla/tests/test_main.c
 tests/CMakeFiles/vsla_tests.dir/test_main.c.o: tests/CMakeFiles/vsla_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/Documents/vsla/libvsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object tests/CMakeFiles/vsla_tests.dir/test_main.c.o"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_main.c.o -MF CMakeFiles/vsla_tests.dir/test_main.c.o.d -o CMakeFiles/vsla_tests.dir/test_main.c.o -c /home/kenth56/Documents/vsla/libvsla/tests/test_main.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/vsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object tests/CMakeFiles/vsla_tests.dir/test_main.c.o"
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_main.c.o -MF CMakeFiles/vsla_tests.dir/test_main.c.o.d -o CMakeFiles/vsla_tests.dir/test_main.c.o -c /home/kenth56/vsla/tests/test_main.c
 
 tests/CMakeFiles/vsla_tests.dir/test_main.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/vsla_tests.dir/test_main.c.i"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/Documents/vsla/libvsla/tests/test_main.c > CMakeFiles/vsla_tests.dir/test_main.c.i
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/vsla/tests/test_main.c > CMakeFiles/vsla_tests.dir/test_main.c.i
 
 tests/CMakeFiles/vsla_tests.dir/test_main.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/vsla_tests.dir/test_main.c.s"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/Documents/vsla/libvsla/tests/test_main.c -o CMakeFiles/vsla_tests.dir/test_main.c.s
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/vsla/tests/test_main.c -o CMakeFiles/vsla_tests.dir/test_main.c.s
 
 tests/CMakeFiles/vsla_tests.dir/test_core.c.o: tests/CMakeFiles/vsla_tests.dir/flags.make
-tests/CMakeFiles/vsla_tests.dir/test_core.c.o: /home/kenth56/Documents/vsla/libvsla/tests/test_core.c
+tests/CMakeFiles/vsla_tests.dir/test_core.c.o: /home/kenth56/vsla/tests/test_core.c
 tests/CMakeFiles/vsla_tests.dir/test_core.c.o: tests/CMakeFiles/vsla_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/Documents/vsla/libvsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object tests/CMakeFiles/vsla_tests.dir/test_core.c.o"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_core.c.o -MF CMakeFiles/vsla_tests.dir/test_core.c.o.d -o CMakeFiles/vsla_tests.dir/test_core.c.o -c /home/kenth56/Documents/vsla/libvsla/tests/test_core.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/vsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object tests/CMakeFiles/vsla_tests.dir/test_core.c.o"
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_core.c.o -MF CMakeFiles/vsla_tests.dir/test_core.c.o.d -o CMakeFiles/vsla_tests.dir/test_core.c.o -c /home/kenth56/vsla/tests/test_core.c
 
 tests/CMakeFiles/vsla_tests.dir/test_core.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/vsla_tests.dir/test_core.c.i"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/Documents/vsla/libvsla/tests/test_core.c > CMakeFiles/vsla_tests.dir/test_core.c.i
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/vsla/tests/test_core.c > CMakeFiles/vsla_tests.dir/test_core.c.i
 
 tests/CMakeFiles/vsla_tests.dir/test_core.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/vsla_tests.dir/test_core.c.s"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/Documents/vsla/libvsla/tests/test_core.c -o CMakeFiles/vsla_tests.dir/test_core.c.s
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/vsla/tests/test_core.c -o CMakeFiles/vsla_tests.dir/test_core.c.s
 
 tests/CMakeFiles/vsla_tests.dir/test_tensor.c.o: tests/CMakeFiles/vsla_tests.dir/flags.make
-tests/CMakeFiles/vsla_tests.dir/test_tensor.c.o: /home/kenth56/Documents/vsla/libvsla/tests/test_tensor.c
+tests/CMakeFiles/vsla_tests.dir/test_tensor.c.o: /home/kenth56/vsla/tests/test_tensor.c
 tests/CMakeFiles/vsla_tests.dir/test_tensor.c.o: tests/CMakeFiles/vsla_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/Documents/vsla/libvsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object tests/CMakeFiles/vsla_tests.dir/test_tensor.c.o"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_tensor.c.o -MF CMakeFiles/vsla_tests.dir/test_tensor.c.o.d -o CMakeFiles/vsla_tests.dir/test_tensor.c.o -c /home/kenth56/Documents/vsla/libvsla/tests/test_tensor.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/vsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object tests/CMakeFiles/vsla_tests.dir/test_tensor.c.o"
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_tensor.c.o -MF CMakeFiles/vsla_tests.dir/test_tensor.c.o.d -o CMakeFiles/vsla_tests.dir/test_tensor.c.o -c /home/kenth56/vsla/tests/test_tensor.c
 
 tests/CMakeFiles/vsla_tests.dir/test_tensor.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/vsla_tests.dir/test_tensor.c.i"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/Documents/vsla/libvsla/tests/test_tensor.c > CMakeFiles/vsla_tests.dir/test_tensor.c.i
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/vsla/tests/test_tensor.c > CMakeFiles/vsla_tests.dir/test_tensor.c.i
 
 tests/CMakeFiles/vsla_tests.dir/test_tensor.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/vsla_tests.dir/test_tensor.c.s"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/Documents/vsla/libvsla/tests/test_tensor.c -o CMakeFiles/vsla_tests.dir/test_tensor.c.s
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/vsla/tests/test_tensor.c -o CMakeFiles/vsla_tests.dir/test_tensor.c.s
 
 tests/CMakeFiles/vsla_tests.dir/test_ops.c.o: tests/CMakeFiles/vsla_tests.dir/flags.make
-tests/CMakeFiles/vsla_tests.dir/test_ops.c.o: /home/kenth56/Documents/vsla/libvsla/tests/test_ops.c
+tests/CMakeFiles/vsla_tests.dir/test_ops.c.o: /home/kenth56/vsla/tests/test_ops.c
 tests/CMakeFiles/vsla_tests.dir/test_ops.c.o: tests/CMakeFiles/vsla_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/Documents/vsla/libvsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object tests/CMakeFiles/vsla_tests.dir/test_ops.c.o"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_ops.c.o -MF CMakeFiles/vsla_tests.dir/test_ops.c.o.d -o CMakeFiles/vsla_tests.dir/test_ops.c.o -c /home/kenth56/Documents/vsla/libvsla/tests/test_ops.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/vsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object tests/CMakeFiles/vsla_tests.dir/test_ops.c.o"
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_ops.c.o -MF CMakeFiles/vsla_tests.dir/test_ops.c.o.d -o CMakeFiles/vsla_tests.dir/test_ops.c.o -c /home/kenth56/vsla/tests/test_ops.c
 
 tests/CMakeFiles/vsla_tests.dir/test_ops.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/vsla_tests.dir/test_ops.c.i"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/Documents/vsla/libvsla/tests/test_ops.c > CMakeFiles/vsla_tests.dir/test_ops.c.i
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/vsla/tests/test_ops.c > CMakeFiles/vsla_tests.dir/test_ops.c.i
 
 tests/CMakeFiles/vsla_tests.dir/test_ops.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/vsla_tests.dir/test_ops.c.s"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/Documents/vsla/libvsla/tests/test_ops.c -o CMakeFiles/vsla_tests.dir/test_ops.c.s
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/vsla/tests/test_ops.c -o CMakeFiles/vsla_tests.dir/test_ops.c.s
 
 tests/CMakeFiles/vsla_tests.dir/test_io.c.o: tests/CMakeFiles/vsla_tests.dir/flags.make
-tests/CMakeFiles/vsla_tests.dir/test_io.c.o: /home/kenth56/Documents/vsla/libvsla/tests/test_io.c
+tests/CMakeFiles/vsla_tests.dir/test_io.c.o: /home/kenth56/vsla/tests/test_io.c
 tests/CMakeFiles/vsla_tests.dir/test_io.c.o: tests/CMakeFiles/vsla_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/Documents/vsla/libvsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object tests/CMakeFiles/vsla_tests.dir/test_io.c.o"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_io.c.o -MF CMakeFiles/vsla_tests.dir/test_io.c.o.d -o CMakeFiles/vsla_tests.dir/test_io.c.o -c /home/kenth56/Documents/vsla/libvsla/tests/test_io.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/vsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object tests/CMakeFiles/vsla_tests.dir/test_io.c.o"
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_io.c.o -MF CMakeFiles/vsla_tests.dir/test_io.c.o.d -o CMakeFiles/vsla_tests.dir/test_io.c.o -c /home/kenth56/vsla/tests/test_io.c
 
 tests/CMakeFiles/vsla_tests.dir/test_io.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/vsla_tests.dir/test_io.c.i"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/Documents/vsla/libvsla/tests/test_io.c > CMakeFiles/vsla_tests.dir/test_io.c.i
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/vsla/tests/test_io.c > CMakeFiles/vsla_tests.dir/test_io.c.i
 
 tests/CMakeFiles/vsla_tests.dir/test_io.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/vsla_tests.dir/test_io.c.s"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/Documents/vsla/libvsla/tests/test_io.c -o CMakeFiles/vsla_tests.dir/test_io.c.s
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/vsla/tests/test_io.c -o CMakeFiles/vsla_tests.dir/test_io.c.s
 
 tests/CMakeFiles/vsla_tests.dir/test_conv.c.o: tests/CMakeFiles/vsla_tests.dir/flags.make
-tests/CMakeFiles/vsla_tests.dir/test_conv.c.o: /home/kenth56/Documents/vsla/libvsla/tests/test_conv.c
+tests/CMakeFiles/vsla_tests.dir/test_conv.c.o: /home/kenth56/vsla/tests/test_conv.c
 tests/CMakeFiles/vsla_tests.dir/test_conv.c.o: tests/CMakeFiles/vsla_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/Documents/vsla/libvsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object tests/CMakeFiles/vsla_tests.dir/test_conv.c.o"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_conv.c.o -MF CMakeFiles/vsla_tests.dir/test_conv.c.o.d -o CMakeFiles/vsla_tests.dir/test_conv.c.o -c /home/kenth56/Documents/vsla/libvsla/tests/test_conv.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/vsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object tests/CMakeFiles/vsla_tests.dir/test_conv.c.o"
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_conv.c.o -MF CMakeFiles/vsla_tests.dir/test_conv.c.o.d -o CMakeFiles/vsla_tests.dir/test_conv.c.o -c /home/kenth56/vsla/tests/test_conv.c
 
 tests/CMakeFiles/vsla_tests.dir/test_conv.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/vsla_tests.dir/test_conv.c.i"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/Documents/vsla/libvsla/tests/test_conv.c > CMakeFiles/vsla_tests.dir/test_conv.c.i
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/vsla/tests/test_conv.c > CMakeFiles/vsla_tests.dir/test_conv.c.i
 
 tests/CMakeFiles/vsla_tests.dir/test_conv.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/vsla_tests.dir/test_conv.c.s"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/Documents/vsla/libvsla/tests/test_conv.c -o CMakeFiles/vsla_tests.dir/test_conv.c.s
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/vsla/tests/test_conv.c -o CMakeFiles/vsla_tests.dir/test_conv.c.s
 
 tests/CMakeFiles/vsla_tests.dir/test_kron.c.o: tests/CMakeFiles/vsla_tests.dir/flags.make
-tests/CMakeFiles/vsla_tests.dir/test_kron.c.o: /home/kenth56/Documents/vsla/libvsla/tests/test_kron.c
+tests/CMakeFiles/vsla_tests.dir/test_kron.c.o: /home/kenth56/vsla/tests/test_kron.c
 tests/CMakeFiles/vsla_tests.dir/test_kron.c.o: tests/CMakeFiles/vsla_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/Documents/vsla/libvsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object tests/CMakeFiles/vsla_tests.dir/test_kron.c.o"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_kron.c.o -MF CMakeFiles/vsla_tests.dir/test_kron.c.o.d -o CMakeFiles/vsla_tests.dir/test_kron.c.o -c /home/kenth56/Documents/vsla/libvsla/tests/test_kron.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/vsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object tests/CMakeFiles/vsla_tests.dir/test_kron.c.o"
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_kron.c.o -MF CMakeFiles/vsla_tests.dir/test_kron.c.o.d -o CMakeFiles/vsla_tests.dir/test_kron.c.o -c /home/kenth56/vsla/tests/test_kron.c
 
 tests/CMakeFiles/vsla_tests.dir/test_kron.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/vsla_tests.dir/test_kron.c.i"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/Documents/vsla/libvsla/tests/test_kron.c > CMakeFiles/vsla_tests.dir/test_kron.c.i
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/vsla/tests/test_kron.c > CMakeFiles/vsla_tests.dir/test_kron.c.i
 
 tests/CMakeFiles/vsla_tests.dir/test_kron.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/vsla_tests.dir/test_kron.c.s"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/Documents/vsla/libvsla/tests/test_kron.c -o CMakeFiles/vsla_tests.dir/test_kron.c.s
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/vsla/tests/test_kron.c -o CMakeFiles/vsla_tests.dir/test_kron.c.s
 
 tests/CMakeFiles/vsla_tests.dir/test_autograd.c.o: tests/CMakeFiles/vsla_tests.dir/flags.make
-tests/CMakeFiles/vsla_tests.dir/test_autograd.c.o: /home/kenth56/Documents/vsla/libvsla/tests/test_autograd.c
+tests/CMakeFiles/vsla_tests.dir/test_autograd.c.o: /home/kenth56/vsla/tests/test_autograd.c
 tests/CMakeFiles/vsla_tests.dir/test_autograd.c.o: tests/CMakeFiles/vsla_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/Documents/vsla/libvsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building C object tests/CMakeFiles/vsla_tests.dir/test_autograd.c.o"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_autograd.c.o -MF CMakeFiles/vsla_tests.dir/test_autograd.c.o.d -o CMakeFiles/vsla_tests.dir/test_autograd.c.o -c /home/kenth56/Documents/vsla/libvsla/tests/test_autograd.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/vsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building C object tests/CMakeFiles/vsla_tests.dir/test_autograd.c.o"
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_autograd.c.o -MF CMakeFiles/vsla_tests.dir/test_autograd.c.o.d -o CMakeFiles/vsla_tests.dir/test_autograd.c.o -c /home/kenth56/vsla/tests/test_autograd.c
 
 tests/CMakeFiles/vsla_tests.dir/test_autograd.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/vsla_tests.dir/test_autograd.c.i"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/Documents/vsla/libvsla/tests/test_autograd.c > CMakeFiles/vsla_tests.dir/test_autograd.c.i
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/vsla/tests/test_autograd.c > CMakeFiles/vsla_tests.dir/test_autograd.c.i
 
 tests/CMakeFiles/vsla_tests.dir/test_autograd.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/vsla_tests.dir/test_autograd.c.s"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/Documents/vsla/libvsla/tests/test_autograd.c -o CMakeFiles/vsla_tests.dir/test_autograd.c.s
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/vsla/tests/test_autograd.c -o CMakeFiles/vsla_tests.dir/test_autograd.c.s
+
+tests/CMakeFiles/vsla_tests.dir/test_utils.c.o: tests/CMakeFiles/vsla_tests.dir/flags.make
+tests/CMakeFiles/vsla_tests.dir/test_utils.c.o: /home/kenth56/vsla/tests/test_utils.c
+tests/CMakeFiles/vsla_tests.dir/test_utils.c.o: tests/CMakeFiles/vsla_tests.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kenth56/vsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building C object tests/CMakeFiles/vsla_tests.dir/test_utils.c.o"
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT tests/CMakeFiles/vsla_tests.dir/test_utils.c.o -MF CMakeFiles/vsla_tests.dir/test_utils.c.o.d -o CMakeFiles/vsla_tests.dir/test_utils.c.o -c /home/kenth56/vsla/tests/test_utils.c
+
+tests/CMakeFiles/vsla_tests.dir/test_utils.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/vsla_tests.dir/test_utils.c.i"
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kenth56/vsla/tests/test_utils.c > CMakeFiles/vsla_tests.dir/test_utils.c.i
+
+tests/CMakeFiles/vsla_tests.dir/test_utils.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/vsla_tests.dir/test_utils.c.s"
+	cd /home/kenth56/vsla/build/tests && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kenth56/vsla/tests/test_utils.c -o CMakeFiles/vsla_tests.dir/test_utils.c.s
 
 # Object files for target vsla_tests
 vsla_tests_OBJECTS = \
@@ -205,7 +219,8 @@ vsla_tests_OBJECTS = \
 "CMakeFiles/vsla_tests.dir/test_io.c.o" \
 "CMakeFiles/vsla_tests.dir/test_conv.c.o" \
 "CMakeFiles/vsla_tests.dir/test_kron.c.o" \
-"CMakeFiles/vsla_tests.dir/test_autograd.c.o"
+"CMakeFiles/vsla_tests.dir/test_autograd.c.o" \
+"CMakeFiles/vsla_tests.dir/test_utils.c.o"
 
 # External object files for target vsla_tests
 vsla_tests_EXTERNAL_OBJECTS =
@@ -219,21 +234,22 @@ tests/vsla_tests: tests/CMakeFiles/vsla_tests.dir/test_io.c.o
 tests/vsla_tests: tests/CMakeFiles/vsla_tests.dir/test_conv.c.o
 tests/vsla_tests: tests/CMakeFiles/vsla_tests.dir/test_kron.c.o
 tests/vsla_tests: tests/CMakeFiles/vsla_tests.dir/test_autograd.c.o
+tests/vsla_tests: tests/CMakeFiles/vsla_tests.dir/test_utils.c.o
 tests/vsla_tests: tests/CMakeFiles/vsla_tests.dir/build.make
 tests/vsla_tests: libvsla.a
 tests/vsla_tests: tests/CMakeFiles/vsla_tests.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/kenth56/Documents/vsla/libvsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking C executable vsla_tests"
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/vsla_tests.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/kenth56/vsla/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking C executable vsla_tests"
+	cd /home/kenth56/vsla/build/tests && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/vsla_tests.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 tests/CMakeFiles/vsla_tests.dir/build: tests/vsla_tests
 .PHONY : tests/CMakeFiles/vsla_tests.dir/build
 
 tests/CMakeFiles/vsla_tests.dir/clean:
-	cd /home/kenth56/Documents/vsla/libvsla/build/tests && $(CMAKE_COMMAND) -P CMakeFiles/vsla_tests.dir/cmake_clean.cmake
+	cd /home/kenth56/vsla/build/tests && $(CMAKE_COMMAND) -P CMakeFiles/vsla_tests.dir/cmake_clean.cmake
 .PHONY : tests/CMakeFiles/vsla_tests.dir/clean
 
 tests/CMakeFiles/vsla_tests.dir/depend:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/kenth56/Documents/vsla/libvsla /home/kenth56/Documents/vsla/libvsla/tests /home/kenth56/Documents/vsla/libvsla/build /home/kenth56/Documents/vsla/libvsla/build/tests /home/kenth56/Documents/vsla/libvsla/build/tests/CMakeFiles/vsla_tests.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/kenth56/vsla/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/kenth56/vsla /home/kenth56/vsla/tests /home/kenth56/vsla/build /home/kenth56/vsla/build/tests /home/kenth56/vsla/build/tests/CMakeFiles/vsla_tests.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : tests/CMakeFiles/vsla_tests.dir/depend
 

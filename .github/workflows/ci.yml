@@ -1,0 +1,359 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  release:
+    types: [ published ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  # ============================================================================
+  # Core Library Testing
+  # ============================================================================
+  test-core:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-20.04, macos-12, macos-14]
+        compiler: [gcc, clang]
+        exclude:
+          # macOS only has clang by default
+          - os: macos-12
+            compiler: gcc
+          - os: macos-14
+            compiler: gcc
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies (Ubuntu)
+      if: startsWith(matrix.os, 'ubuntu')
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          libfftw3-dev \
+          libblas-dev \
+          liblapack-dev \
+          valgrind
+    
+    - name: Install dependencies (macOS)
+      if: startsWith(matrix.os, 'macos')
+      run: |
+        brew update
+        brew install cmake fftw openblas
+    
+    - name: Set up compiler (GCC)
+      if: matrix.compiler == 'gcc' && startsWith(matrix.os, 'ubuntu')
+      run: |
+        echo "CC=gcc" >> $GITHUB_ENV
+        echo "CXX=g++" >> $GITHUB_ENV
+    
+    - name: Set up compiler (Clang)
+      if: matrix.compiler == 'clang'
+      run: |
+        echo "CC=clang" >> $GITHUB_ENV
+        echo "CXX=clang++" >> $GITHUB_ENV
+    
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+          -DVSLA_ENABLE_TESTS=ON \
+          -DVSLA_ENABLE_BENCHMARKS=ON \
+          -DVSLA_BUILD_EXAMPLES=ON
+    
+    - name: Build
+      run: cmake --build build --config $BUILD_TYPE --parallel $(nproc 2>/dev/null || sysctl -n hw.ncpu)
+    
+    - name: Test
+      working-directory: build
+      run: ctest --output-on-failure --parallel $(nproc 2>/dev/null || sysctl -n hw.ncpu)
+    
+    - name: Run memory tests (Linux only)
+      if: startsWith(matrix.os, 'ubuntu') && matrix.compiler == 'gcc'
+      working-directory: build
+      run: |
+        valgrind --tool=memcheck --leak-check=full --error-exitcode=1 \
+          ./tests/vsla_tests
+    
+    - name: Run benchmarks (smoke test)
+      working-directory: bench
+      run: |
+        python3 run_benchmarks.py \
+          --iterations 5 \
+          --warmup 2 \
+          --benchmarks convolution
+
+  # ============================================================================
+  # Python Wheels
+  # ============================================================================
+  build-wheels:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022, macos-12, macos-14]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install cibuildwheel
+      run: python -m pip install cibuildwheel==2.16.2
+    
+    - name: Install dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-22.04'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libfftw3-dev libblas-dev liblapack-dev
+    
+    - name: Install dependencies (macOS)
+      if: startsWith(matrix.os, 'macos')
+      run: |
+        brew install fftw openblas
+    
+    - name: Build wheels
+      run: python -m cibuildwheel --output-dir wheelhouse
+      env:
+        # Build Python 3.8-3.12 wheels
+        CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-* cp312-*"
+        
+        # Skip 32-bit builds and musllinux (for now)
+        CIBW_SKIP: "*-win32 *-manylinux_i686 *-musllinux*"
+        
+        # Install build dependencies
+        CIBW_BEFORE_BUILD_LINUX: |
+          yum install -y fftw-devel blas-devel lapack-devel || \
+          apt-get update && apt-get install -y libfftw3-dev libblas-dev liblapack-dev
+        
+        CIBW_BEFORE_BUILD_MACOS: |
+          brew install fftw openblas
+        
+        CIBW_BEFORE_BUILD_WINDOWS: |
+          pip install numpy scipy
+        
+        # Test the built wheels
+        CIBW_TEST_COMMAND: |
+          python -c "import vsla; print('VSLA version:', vsla.__version__)"
+        
+        # Set environment variables for compilation
+        CIBW_ENVIRONMENT_LINUX: "CMAKE_BUILD_PARALLEL_LEVEL=4"
+        CIBW_ENVIRONMENT_MACOS: "CMAKE_BUILD_PARALLEL_LEVEL=4"
+        CIBW_ENVIRONMENT_WINDOWS: "CMAKE_BUILD_PARALLEL_LEVEL=4"
+    
+    - name: Upload wheels
+      uses: actions/upload-artifact@v3
+      with:
+        name: wheels-${{ matrix.os }}
+        path: ./wheelhouse/*.whl
+
+  # ============================================================================
+  # Documentation
+  # ============================================================================
+  build-docs:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install LaTeX
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          texlive-latex-base \
+          texlive-latex-extra \
+          texlive-fonts-recommended \
+          texlive-fonts-extra \
+          texlive-publishers
+    
+    - name: Build paper (original)
+      working-directory: docs
+      run: |
+        pdflatex vsla_paper.tex
+        pdflatex vsla_paper.tex  # Second pass for references
+    
+    - name: Build paper (ACM template)
+      working-directory: docs
+      run: |
+        pdflatex vsla_paper_acm.tex
+        pdflatex vsla_paper_acm.tex  # Second pass for references
+    
+    - name: Upload PDFs
+      uses: actions/upload-artifact@v3
+      with:
+        name: papers
+        path: docs/*.pdf
+
+  # ============================================================================
+  # Static Analysis
+  # ============================================================================
+  static-analysis:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang-tidy \
+          cppcheck \
+          clang-format
+    
+    - name: Run clang-format check
+      run: |
+        find src include tests -name "*.c" -o -name "*.h" | \
+        xargs clang-format --dry-run --Werror
+    
+    - name: Run cppcheck
+      run: |
+        cppcheck --enable=all --error-exitcode=1 \
+          --suppress=missingIncludeSystem \
+          --suppress=unusedFunction \
+          -I include src/
+    
+    - name: Configure for clang-tidy
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+          -DVSLA_ENABLE_TESTS=ON
+    
+    - name: Run clang-tidy
+      run: |
+        clang-tidy src/*.c tests/*.c \
+          -p build \
+          --warnings-as-errors=*
+
+  # ============================================================================
+  # Security Scans
+  # ============================================================================
+  security-scan:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: cpp
+    
+    - name: Build for CodeQL
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Debug
+        cmake --build build
+    
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+
+  # ============================================================================
+  # Benchmarks (Performance Regression Detection)
+  # ============================================================================
+  benchmarks:
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'pull_request'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 2  # Need history for comparison
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          libfftw3-dev \
+          libblas-dev \
+          liblapack-dev \
+          python3-pip
+        pip3 install numpy scipy matplotlib
+    
+    - name: Build current version
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Release -DVSLA_ENABLE_BENCHMARKS=ON
+        cmake --build build --parallel $(nproc)
+    
+    - name: Run benchmarks (current)
+      working-directory: bench
+      run: |
+        python3 run_benchmarks.py \
+          --iterations 50 \
+          --warmup 10 \
+          --output current_results
+    
+    - name: Checkout base branch
+      run: |
+        git checkout HEAD~1
+        cmake --build build --parallel $(nproc)
+    
+    - name: Run benchmarks (baseline)
+      working-directory: bench
+      run: |
+        python3 run_benchmarks.py \
+          --iterations 50 \
+          --warmup 10 \
+          --output baseline_results
+    
+    - name: Compare performance
+      working-directory: bench
+      run: |
+        python3 scripts/compare_benchmarks.py \
+          --baseline baseline_results \
+          --current current_results \
+          --threshold 0.05  # 5% regression threshold
+
+  # ============================================================================
+  # Release
+  # ============================================================================
+  release:
+    needs: [test-core, build-wheels, static-analysis]
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'release'
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download all wheels
+      uses: actions/download-artifact@v3
+      with:
+        path: dist/
+    
+    - name: Flatten wheel directory
+      run: |
+        mkdir -p final-dist/
+        find dist/ -name "*.whl" -exec cp {} final-dist/ \;
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install twine
+      run: pip install twine
+    
+    - name: Upload to PyPI
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        twine upload final-dist/*.whl
+    
+    - name: Upload release assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./final-dist/
+        asset_name: wheels
+        asset_content_type: application/zip

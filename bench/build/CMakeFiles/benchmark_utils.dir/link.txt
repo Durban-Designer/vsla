@@ -1,0 +1,2 @@
+/usr/bin/ar qc libbenchmark_utils.a CMakeFiles/benchmark_utils.dir/src/benchmark_utils.c.o
+/usr/bin/ranlib libbenchmark_utils.a

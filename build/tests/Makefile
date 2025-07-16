@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/kenth56/Documents/vsla/libvsla
+CMAKE_SOURCE_DIR = /home/kenth56/vsla
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/kenth56/Documents/vsla/libvsla/build
+CMAKE_BINARY_DIR = /home/kenth56/vsla/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -142,14 +142,14 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/kenth56/Documents/vsla/libvsla/build/CMakeFiles /home/kenth56/Documents/vsla/libvsla/build/tests//CMakeFiles/progress.marks
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kenth56/Documents/vsla/libvsla/build/CMakeFiles 0
+	cd /home/kenth56/vsla/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/kenth56/vsla/build/CMakeFiles /home/kenth56/vsla/build/tests//CMakeFiles/progress.marks
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kenth56/vsla/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/clean
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/clean
 .PHONY : clean
 
 # The main clean target
@@ -158,22 +158,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/preinstall
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/preinstall
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/kenth56/vsla/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 tests/CMakeFiles/vsla_tests.dir/rule:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/CMakeFiles/vsla_tests.dir/rule
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/CMakeFiles/vsla_tests.dir/rule
 .PHONY : tests/CMakeFiles/vsla_tests.dir/rule
 
 # Convenience name for target.
@@ -182,7 +182,7 @@ vsla_tests: tests/CMakeFiles/vsla_tests.dir/rule
 
 # fast build rule for target.
 vsla_tests/fast:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/build
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/build
 .PHONY : vsla_tests/fast
 
 test_autograd.o: test_autograd.c.o
@@ -190,7 +190,7 @@ test_autograd.o: test_autograd.c.o
 
 # target to build an object file
 test_autograd.c.o:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_autograd.c.o
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_autograd.c.o
 .PHONY : test_autograd.c.o
 
 test_autograd.i: test_autograd.c.i
@@ -198,7 +198,7 @@ test_autograd.i: test_autograd.c.i
 
 # target to preprocess a source file
 test_autograd.c.i:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_autograd.c.i
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_autograd.c.i
 .PHONY : test_autograd.c.i
 
 test_autograd.s: test_autograd.c.s
@@ -206,7 +206,7 @@ test_autograd.s: test_autograd.c.s
 
 # target to generate assembly for a file
 test_autograd.c.s:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_autograd.c.s
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_autograd.c.s
 .PHONY : test_autograd.c.s
 
 test_conv.o: test_conv.c.o
@@ -214,7 +214,7 @@ test_conv.o: test_conv.c.o
 
 # target to build an object file
 test_conv.c.o:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_conv.c.o
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_conv.c.o
 .PHONY : test_conv.c.o
 
 test_conv.i: test_conv.c.i
@@ -222,7 +222,7 @@ test_conv.i: test_conv.c.i
 
 # target to preprocess a source file
 test_conv.c.i:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_conv.c.i
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_conv.c.i
 .PHONY : test_conv.c.i
 
 test_conv.s: test_conv.c.s
@@ -230,7 +230,7 @@ test_conv.s: test_conv.c.s
 
 # target to generate assembly for a file
 test_conv.c.s:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_conv.c.s
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_conv.c.s
 .PHONY : test_conv.c.s
 
 test_core.o: test_core.c.o
@@ -238,7 +238,7 @@ test_core.o: test_core.c.o
 
 # target to build an object file
 test_core.c.o:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_core.c.o
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_core.c.o
 .PHONY : test_core.c.o
 
 test_core.i: test_core.c.i
@@ -246,7 +246,7 @@ test_core.i: test_core.c.i
 
 # target to preprocess a source file
 test_core.c.i:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_core.c.i
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_core.c.i
 .PHONY : test_core.c.i
 
 test_core.s: test_core.c.s
@@ -254,7 +254,7 @@ test_core.s: test_core.c.s
 
 # target to generate assembly for a file
 test_core.c.s:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_core.c.s
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_core.c.s
 .PHONY : test_core.c.s
 
 test_framework.o: test_framework.c.o
@@ -262,7 +262,7 @@ test_framework.o: test_framework.c.o
 
 # target to build an object file
 test_framework.c.o:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_framework.c.o
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_framework.c.o
 .PHONY : test_framework.c.o
 
 test_framework.i: test_framework.c.i
@@ -270,7 +270,7 @@ test_framework.i: test_framework.c.i
 
 # target to preprocess a source file
 test_framework.c.i:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_framework.c.i
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_framework.c.i
 .PHONY : test_framework.c.i
 
 test_framework.s: test_framework.c.s
@@ -278,7 +278,7 @@ test_framework.s: test_framework.c.s
 
 # target to generate assembly for a file
 test_framework.c.s:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_framework.c.s
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_framework.c.s
 .PHONY : test_framework.c.s
 
 test_io.o: test_io.c.o
@@ -286,7 +286,7 @@ test_io.o: test_io.c.o
 
 # target to build an object file
 test_io.c.o:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_io.c.o
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_io.c.o
 .PHONY : test_io.c.o
 
 test_io.i: test_io.c.i
@@ -294,7 +294,7 @@ test_io.i: test_io.c.i
 
 # target to preprocess a source file
 test_io.c.i:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_io.c.i
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_io.c.i
 .PHONY : test_io.c.i
 
 test_io.s: test_io.c.s
@@ -302,7 +302,7 @@ test_io.s: test_io.c.s
 
 # target to generate assembly for a file
 test_io.c.s:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_io.c.s
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_io.c.s
 .PHONY : test_io.c.s
 
 test_kron.o: test_kron.c.o
@@ -310,7 +310,7 @@ test_kron.o: test_kron.c.o
 
 # target to build an object file
 test_kron.c.o:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_kron.c.o
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_kron.c.o
 .PHONY : test_kron.c.o
 
 test_kron.i: test_kron.c.i
@@ -318,7 +318,7 @@ test_kron.i: test_kron.c.i
 
 # target to preprocess a source file
 test_kron.c.i:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_kron.c.i
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_kron.c.i
 .PHONY : test_kron.c.i
 
 test_kron.s: test_kron.c.s
@@ -326,7 +326,7 @@ test_kron.s: test_kron.c.s
 
 # target to generate assembly for a file
 test_kron.c.s:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_kron.c.s
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_kron.c.s
 .PHONY : test_kron.c.s
 
 test_main.o: test_main.c.o
@@ -334,7 +334,7 @@ test_main.o: test_main.c.o
 
 # target to build an object file
 test_main.c.o:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_main.c.o
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_main.c.o
 .PHONY : test_main.c.o
 
 test_main.i: test_main.c.i
@@ -342,7 +342,7 @@ test_main.i: test_main.c.i
 
 # target to preprocess a source file
 test_main.c.i:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_main.c.i
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_main.c.i
 .PHONY : test_main.c.i
 
 test_main.s: test_main.c.s
@@ -350,7 +350,7 @@ test_main.s: test_main.c.s
 
 # target to generate assembly for a file
 test_main.c.s:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_main.c.s
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_main.c.s
 .PHONY : test_main.c.s
 
 test_ops.o: test_ops.c.o
@@ -358,7 +358,7 @@ test_ops.o: test_ops.c.o
 
 # target to build an object file
 test_ops.c.o:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_ops.c.o
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_ops.c.o
 .PHONY : test_ops.c.o
 
 test_ops.i: test_ops.c.i
@@ -366,7 +366,7 @@ test_ops.i: test_ops.c.i
 
 # target to preprocess a source file
 test_ops.c.i:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_ops.c.i
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_ops.c.i
 .PHONY : test_ops.c.i
 
 test_ops.s: test_ops.c.s
@@ -374,7 +374,7 @@ test_ops.s: test_ops.c.s
 
 # target to generate assembly for a file
 test_ops.c.s:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_ops.c.s
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_ops.c.s
 .PHONY : test_ops.c.s
 
 test_tensor.o: test_tensor.c.o
@@ -382,7 +382,7 @@ test_tensor.o: test_tensor.c.o
 
 # target to build an object file
 test_tensor.c.o:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_tensor.c.o
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_tensor.c.o
 .PHONY : test_tensor.c.o
 
 test_tensor.i: test_tensor.c.i
@@ -390,7 +390,7 @@ test_tensor.i: test_tensor.c.i
 
 # target to preprocess a source file
 test_tensor.c.i:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_tensor.c.i
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_tensor.c.i
 .PHONY : test_tensor.c.i
 
 test_tensor.s: test_tensor.c.s
@@ -398,8 +398,32 @@ test_tensor.s: test_tensor.c.s
 
 # target to generate assembly for a file
 test_tensor.c.s:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_tensor.c.s
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_tensor.c.s
 .PHONY : test_tensor.c.s
+
+test_utils.o: test_utils.c.o
+.PHONY : test_utils.o
+
+# target to build an object file
+test_utils.c.o:
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_utils.c.o
+.PHONY : test_utils.c.o
+
+test_utils.i: test_utils.c.i
+.PHONY : test_utils.i
+
+# target to preprocess a source file
+test_utils.c.i:
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_utils.c.i
+.PHONY : test_utils.c.i
+
+test_utils.s: test_utils.c.s
+.PHONY : test_utils.s
+
+# target to generate assembly for a file
+test_utils.c.s:
+	cd /home/kenth56/vsla/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/vsla_tests.dir/build.make tests/CMakeFiles/vsla_tests.dir/test_utils.c.s
+.PHONY : test_utils.c.s
 
 # Help Target
 help:
@@ -442,6 +466,9 @@ help:
 	@echo "... test_tensor.o"
 	@echo "... test_tensor.i"
 	@echo "... test_tensor.s"
+	@echo "... test_utils.o"
+	@echo "... test_utils.i"
+	@echo "... test_utils.s"
 .PHONY : help
 
 
@@ -453,6 +480,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/kenth56/Documents/vsla/libvsla/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/kenth56/vsla/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

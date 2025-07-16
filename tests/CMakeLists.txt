@@ -19,6 +19,7 @@ set(TEST_SOURCES
     test_conv.c
     test_kron.c
     test_autograd.c
+    test_utils.c
 )
 
 # Create test executable
@@ -40,6 +41,7 @@ add_test(NAME io_tests COMMAND vsla_tests --suite=io)
 add_test(NAME conv_tests COMMAND vsla_tests --suite=conv)
 add_test(NAME kron_tests COMMAND vsla_tests --suite=kron)
 add_test(NAME autograd_tests COMMAND vsla_tests --suite=autograd)
+add_test(NAME utils_tests COMMAND vsla_tests --suite=utils)
 add_test(NAME all_tests COMMAND vsla_tests)
 
 # Memory leak testing with valgrind (if available)

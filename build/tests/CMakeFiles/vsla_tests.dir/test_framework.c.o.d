@@ -1,8 +1,6 @@
 tests/CMakeFiles/vsla_tests.dir/test_framework.c.o: \
- /home/kenth56/Documents/vsla/libvsla/tests/test_framework.c \
- /usr/include/stdc-predef.h \
- /home/kenth56/Documents/vsla/libvsla/tests/test_framework.h \
- /usr/include/stdio.h \
+ /home/kenth56/vsla/tests/test_framework.c /usr/include/stdc-predef.h \
+ /home/kenth56/vsla/tests/test_framework.h /usr/include/stdio.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \

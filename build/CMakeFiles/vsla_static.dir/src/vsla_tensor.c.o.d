@@ -1,8 +1,7 @@
 CMakeFiles/vsla_static.dir/src/vsla_tensor.c.o: \
- /home/kenth56/Documents/vsla/libvsla/src/vsla_tensor.c \
- /usr/include/stdc-predef.h \
- /home/kenth56/Documents/vsla/libvsla/include/vsla/vsla_tensor.h \
- /home/kenth56/Documents/vsla/libvsla/include/vsla/vsla_core.h \
+ /home/kenth56/vsla/src/vsla_tensor.c /usr/include/stdc-predef.h \
+ /home/kenth56/vsla/include/vsla/vsla_tensor.h \
+ /home/kenth56/vsla/include/vsla/vsla_core.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \

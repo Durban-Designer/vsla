@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 3.14)
-project(libvsla VERSION 1.0.0 LANGUAGES C)
+project(libvsla VERSION 1.0.0 LANGUAGES C CXX)
 
 # Options
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
+option(VSLA_BUILD_PYTHON "Build Python bindings" OFF)
+option(VSLA_ENABLE_TESTS "Enable testing" ON)
+option(VSLA_ENABLE_BENCHMARKS "Enable benchmarks" OFF)
 option(USE_FFTW "Use FFTW library for FFT operations" OFF)
 
 # C99 standard
@@ -77,6 +80,29 @@ endif()
 # Examples
 if(BUILD_EXAMPLES AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/examples/CMakeLists.txt)
     add_subdirectory(examples)
+endif()
+
+# Python bindings
+if(VSLA_BUILD_PYTHON)
+    find_package(pybind11 REQUIRED)
+    
+    # Enable C++ for bindings
+    enable_language(CXX)
+    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    
+    pybind11_add_module(_core python/src/bindings.cpp)
+    target_link_libraries(_core PRIVATE vsla_static)
+    target_compile_definitions(_core PRIVATE VERSION_INFO=\"${PROJECT_VERSION}\")
+    
+    # Include directories for bindings
+    target_include_directories(_core PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    
+    # Set properties for Python module
+    set_target_properties(_core PROPERTIES
+        CXX_VISIBILITY_PRESET "hidden"
+        VISIBILITY_INLINES_HIDDEN YES
+    )
 endif()
 
 # Install targets

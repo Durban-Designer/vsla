@@ -127,6 +127,60 @@ void print_test_summary(void);
 int run_test_suite(const char* suite_name);
 void register_test_suite(const test_suite_t* suite);
 
+/* Assertion macros for void functions */
+#define ASSERT_TRUE_VOID(expr) \
+    do { \
+        if (!(expr)) { \
+            printf("\n    ASSERTION FAILED: %s at %s:%d\n", #expr, __FILE__, __LINE__); \
+            exit(1); \
+        } \
+    } while(0)
+
+#define ASSERT_EQ_VOID(a, b) \
+    do { \
+        if ((a) != (b)) { \
+            printf("\n    ASSERTION FAILED: %s != %s (%ld != %ld) at %s:%d\n", \
+                   #a, #b, (long)(a), (long)(b), __FILE__, __LINE__); \
+            exit(1); \
+        } \
+    } while(0)
+
+#define ASSERT_NOT_NULL_VOID(ptr) \
+    do { \
+        if ((ptr) == NULL) { \
+            printf("\n    ASSERTION FAILED: %s is NULL at %s:%d\n", #ptr, __FILE__, __LINE__); \
+            exit(1); \
+        } \
+    } while(0)
+
+#define ASSERT_FLOAT_EQ_VOID(a, b, eps) \
+    do { \
+        double _diff = fabs((double)(a) - (double)(b)); \
+        if (_diff > (eps)) { \
+            printf("\n    ASSERTION FAILED: %s != %s (%.6f != %.6f, diff=%.6f > %.6f) at %s:%d\n", \
+                   #a, #b, (double)(a), (double)(b), _diff, (double)(eps), __FILE__, __LINE__); \
+            exit(1); \
+        } \
+    } while(0)
+
+#define ASSERT_FLOAT_EQ(a, b, eps) \
+    do { \
+        double _diff = fabs((double)(a) - (double)(b)); \
+        if (_diff > (eps)) { \
+            printf("\n    ASSERTION FAILED: %s != %s (%.6f != %.6f, diff=%.6f > %.6f) at %s:%d\n", \
+                   #a, #b, (double)(a), (double)(b), _diff, (double)(eps), __FILE__, __LINE__); \
+            return 0; \
+        } \
+    } while(0)
+
+/* Simplified test case macro for void functions */
+#define TEST_CASE(name, func) \
+    do { \
+        printf("    Running %s...", name); \
+        func(); \
+        printf(" PASSED\n"); \
+    } while(0)
+
 #ifdef __cplusplus
 }
 #endif

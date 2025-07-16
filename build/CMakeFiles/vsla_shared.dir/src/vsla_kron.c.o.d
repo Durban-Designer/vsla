@@ -1,9 +1,8 @@
 CMakeFiles/vsla_shared.dir/src/vsla_kron.c.o: \
- /home/kenth56/Documents/vsla/libvsla/src/vsla_kron.c \
- /usr/include/stdc-predef.h \
- /home/kenth56/Documents/vsla/libvsla/include/vsla/vsla_kron.h \
- /home/kenth56/Documents/vsla/libvsla/include/vsla/vsla_tensor.h \
- /home/kenth56/Documents/vsla/libvsla/include/vsla/vsla_core.h \
+ /home/kenth56/vsla/src/vsla_kron.c /usr/include/stdc-predef.h \
+ /home/kenth56/vsla/include/vsla/vsla_kron.h \
+ /home/kenth56/vsla/include/vsla/vsla_tensor.h \
+ /home/kenth56/vsla/include/vsla/vsla_core.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -21,10 +20,10 @@ CMakeFiles/vsla_shared.dir/src/vsla_kron.c.o: \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h \
- /home/kenth56/Documents/vsla/libvsla/include/vsla/vsla_tensor.h \
- /home/kenth56/Documents/vsla/libvsla/include/vsla/vsla_core.h \
- /home/kenth56/Documents/vsla/libvsla/include/vsla/vsla_ops.h \
- /usr/include/math.h /usr/include/x86_64-linux-gnu/bits/math-vector.h \
+ /home/kenth56/vsla/include/vsla/vsla_tensor.h \
+ /home/kenth56/vsla/include/vsla/vsla_core.h \
+ /home/kenth56/vsla/include/vsla/vsla_ops.h /usr/include/math.h \
+ /usr/include/x86_64-linux-gnu/bits/math-vector.h \
  /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
  /usr/include/x86_64-linux-gnu/bits/floatn.h \
  /usr/include/x86_64-linux-gnu/bits/floatn-common.h \

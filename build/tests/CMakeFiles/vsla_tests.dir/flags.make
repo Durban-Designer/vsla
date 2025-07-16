@@ -4,7 +4,7 @@
 # compile C with /usr/bin/cc
 C_DEFINES = 
 
-C_INCLUDES = -I/home/kenth56/Documents/vsla/libvsla/include -I/home/kenth56/Documents/vsla/libvsla/tests
+C_INCLUDES = -I/home/kenth56/vsla/include -I/home/kenth56/vsla/tests
 
 C_FLAGS = -std=c99 -Wall -Wextra -Wpedantic -Wstrict-prototypes -O3
 
