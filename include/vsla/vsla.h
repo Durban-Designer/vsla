@@ -21,6 +21,7 @@
 #include "vsla_conv.h"
 #include "vsla_kron.h"
 #include "vsla_autograd.h"
+#include "vsla_gpu.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,6 +69,13 @@ const char* vsla_version(void);
  * @return 1 if FFTW is available, 0 otherwise
  */
 int vsla_has_fftw(void);
+
+/**
+ * @brief Check if GPU support is compiled in
+ * 
+ * @return 1 if CUDA is available, 0 otherwise
+ */
+int vsla_has_gpu(void);
 
 #ifdef __cplusplus
 }

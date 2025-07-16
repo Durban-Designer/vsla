@@ -32,7 +32,9 @@ typedef enum {
     VSLA_ERROR_OVERFLOW,           /**< Numeric overflow detected */
     VSLA_ERROR_FFT,                /**< FFT operation failed */
     VSLA_ERROR_INVALID_FILE,       /**< Invalid file format */
-    VSLA_ERROR_INCOMPATIBLE_MODELS /**< Incompatible models in operation */
+    VSLA_ERROR_INCOMPATIBLE_MODELS, /**< Incompatible models in operation */
+    VSLA_ERROR_GPU_FAILURE,        /**< GPU operation failed */
+    VSLA_ERROR_INVALID_STATE       /**< Invalid object state */
 } vsla_error_t;
 
 /**

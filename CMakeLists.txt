@@ -9,6 +9,7 @@ option(VSLA_BUILD_PYTHON "Build Python bindings" OFF)
 option(VSLA_ENABLE_TESTS "Enable testing" ON)
 option(VSLA_ENABLE_BENCHMARKS "Enable benchmarks" OFF)
 option(USE_FFTW "Use FFTW library for FFT operations" OFF)
+option(VSLA_ENABLE_CUDA "Enable CUDA GPU acceleration" OFF)
 
 # C99 standard
 set(CMAKE_C_STANDARD 99)
@@ -34,6 +35,29 @@ if(USE_FFTW)
     endif()
 endif()
 
+# CUDA support
+if(VSLA_ENABLE_CUDA)
+    # Set environment variables before enabling CUDA language
+    set(ENV{CUDAHOSTCXX} "/usr/bin/g++")
+    set(ENV{CUDACXX} "/usr/bin/nvcc")
+    
+    # Set flags before enabling the language
+    set(CMAKE_CUDA_FLAGS "-allow-unsupported-compiler -std=c++17")
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -D__STDC_WANT_IEC_60559_TYPES_EXT__=0")
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -D__STDC_WANT_IEC_60559_FUNCS_EXT__=0")
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -D__STDC_WANT_IEC_60559_ATTRIBS_EXT__=0")
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -D__STDC_WANT_IEC_60559_BFP_EXT__=0")
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -D__STDC_WANT_IEC_60559_DFP_EXT__=0")
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -D__STDC_WANT_IEC_60559_EXT__=0")
+    
+    enable_language(CUDA)
+    find_package(CUDAToolkit REQUIRED)
+    set(CMAKE_CUDA_STANDARD 17)
+    set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+    # Use older CUDA architecture that's more compatible
+    set(CMAKE_CUDA_ARCHITECTURES "70;75;80;86;89;90")
+endif()
+
 # Include directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -48,6 +72,13 @@ set(VSLA_SOURCES
     src/vsla_autograd.c
     src/vsla_utils.c
 )
+
+# Add GPU sources conditionally
+if(VSLA_ENABLE_CUDA)
+    list(APPEND VSLA_SOURCES src/vsla_gpu.cu)
+else()
+    list(APPEND VSLA_SOURCES src/vsla_gpu.c)
+endif()
 
 # Create library targets
 add_library(vsla_static STATIC ${VSLA_SOURCES})
@@ -69,6 +100,17 @@ if(USE_FFTW AND FFTW_FOUND)
     target_link_libraries(vsla_static PRIVATE ${FFTW_LIBRARIES})
     target_include_directories(vsla_static PRIVATE ${FFTW_INCLUDE_DIRS})
     target_compile_definitions(vsla_static PRIVATE USE_FFTW)
+endif()
+
+# CUDA configuration
+if(VSLA_ENABLE_CUDA)
+    target_compile_definitions(vsla_static PRIVATE VSLA_ENABLE_CUDA)
+    target_link_libraries(vsla_static PRIVATE CUDA::cudart)
+    
+    if(BUILD_SHARED_LIBS)
+        target_compile_definitions(vsla_shared PRIVATE VSLA_ENABLE_CUDA)
+        target_link_libraries(vsla_shared PRIVATE CUDA::cudart)
+    endif()
 endif()
 
 # Tests

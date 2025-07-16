@@ -38,6 +38,10 @@ const char* vsla_error_string(vsla_error_t error) {
             return "Invalid file format";
         case VSLA_ERROR_INCOMPATIBLE_MODELS:
             return "Incompatible models in operation";
+        case VSLA_ERROR_GPU_FAILURE:
+            return "GPU operation failed";
+        case VSLA_ERROR_INVALID_STATE:
+            return "Invalid object state";
         default:
             return "Unknown error";
     }

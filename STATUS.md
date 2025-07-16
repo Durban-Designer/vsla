@@ -213,4 +213,165 @@ This document tracks the implementation progress of the Variable-Shape Linear Al
   - `python/` - Python bindings
   - `examples/` - Usage examples
 
+## GPU Acceleration Implementation Plan 🚀 (2025-07-16)
+
+### CUDA Integration Roadmap
+
+#### Phase 1: Core CUDA Infrastructure (Weeks 1-2)
+- **CUDA Tensor Support**: Extend `vsla_tensor_t` with GPU memory management
+- **Memory Management**: Implement unified memory and explicit GPU/CPU transfers
+- **Build System**: Add CUDA compiler integration to CMake
+- **Error Handling**: Extend error codes for CUDA-specific failures
+
+#### Phase 2: GPU Kernels (Weeks 3-4)
+- **Element-wise Operations**: CUDA kernels for add, subtract, scale
+- **FFT Convolution**: cuFFT integration for high-performance convolution
+- **Matrix Operations**: cuBLAS integration for dense linear algebra
+- **Memory Optimization**: Coalesced memory access patterns
+
+#### Phase 3: Variable-Shape GPU Algorithms (Weeks 5-6)
+- **Adaptive Padding**: GPU-efficient automatic shape handling
+- **Kernel Fusion**: Combine multiple operations in single GPU launches
+- **Stream Processing**: Asynchronous execution for pipeline optimization
+- **Memory Pooling**: Reduce allocation overhead for variable shapes
+
+#### Phase 4: Advanced GPU Features (Weeks 7-8)
+- **Multi-GPU Support**: Distribute large tensors across multiple GPUs
+- **Tensor Cores**: Leverage mixed-precision for supported operations
+- **Graph Optimization**: Fuse operation sequences for maximum throughput
+- **Benchmarking**: Comprehensive GPU performance validation
+
+### Technical Implementation Details
+
+#### CUDA Tensor Structure
+```c
+typedef struct {
+    // Existing CPU fields
+    uint8_t    rank;
+    uint8_t    model;
+    uint8_t    dtype;
+    uint8_t    flags;
+    uint64_t  *shape;
+    uint64_t  *cap;
+    uint64_t  *stride;
+    void      *data;
+    
+    // New GPU fields
+    void      *gpu_data;        // GPU memory pointer
+    cudaStream_t stream;        // CUDA stream for async operations
+    uint8_t   location;         // 0=CPU, 1=GPU, 2=UNIFIED
+    uint8_t   gpu_id;          // GPU device ID
+} vsla_tensor_t;
+```
+
+#### GPU Memory Management
+- **Unified Memory**: Automatic migration between CPU/GPU
+- **Explicit Control**: Manual GPU memory management for performance
+- **Memory Pools**: Pre-allocated GPU memory for variable shapes
+- **Synchronization**: Efficient CPU-GPU data transfers
+
+#### CUDA Kernel Design
+- **Coalesced Access**: Optimize memory bandwidth utilization
+- **Occupancy Optimization**: Maximize GPU core utilization
+- **Dynamic Parallelism**: Handle variable-shape operations efficiently
+- **Error Handling**: Robust GPU error detection and recovery
+
+### Performance Targets
+
+#### GPU vs CPU Speedup Goals
+- **Element-wise Operations**: 10-50× speedup for large tensors
+- **FFT Convolution**: 20-100× speedup using cuFFT
+- **Matrix Operations**: 50-200× speedup using cuBLAS
+- **Variable-Shape**: 5-20× speedup with efficient padding
+
+#### Memory Efficiency Goals
+- **Bandwidth Utilization**: >80% of theoretical GPU memory bandwidth
+- **Occupancy**: >75% GPU core utilization for compute kernels
+- **Memory Overhead**: <20% additional memory for shape management
+- **Transfer Efficiency**: Minimize CPU-GPU data movement
+
+### Competitive Benchmarking Plan
+
+#### Top 3 Competitors for GPU Comparison
+1. **CuPy**: GPU-accelerated NumPy equivalent
+2. **cuBLAS**: NVIDIA's optimized BLAS for GPU
+3. **cuFFT**: NVIDIA's optimized FFT library
+
+#### Fair Comparison Strategy
+- **Same Hardware**: All benchmarks on same GPU (RTX 5090)
+- **Same Precision**: Float32 and Float64 comparisons
+- **Same Algorithms**: FFT convolution, matrix operations, element-wise
+- **Realistic Workloads**: Variable-shape scenarios from real applications
+
+### Risk Assessment
+
+#### Technical Risks
+- **CUDA Complexity**: Steep learning curve for GPU programming
+- **Memory Management**: Complex unified memory performance tuning
+- **Debugging**: Limited GPU debugging tools compared to CPU
+- **Platform Dependence**: CUDA locks us to NVIDIA hardware
+
+#### Mitigation Strategies
+- **Incremental Development**: Start with simple kernels, add complexity gradually
+- **Comprehensive Testing**: Extensive GPU validation and correctness tests
+- **Performance Profiling**: Use NVIDIA Nsight for optimization
+- **Fallback Support**: Maintain CPU-only execution path
+
+### Success Metrics
+
+#### Development Milestones
+- **Week 2**: Basic GPU tensor creation and memory management
+- **Week 4**: Element-wise operations achieving 10× speedup
+- **Week 6**: FFT convolution achieving 20× speedup
+- **Week 8**: Complete GPU benchmark suite vs top 3 competitors
+
+#### Quality Gates
+- **Correctness**: All existing tests pass on GPU
+- **Performance**: GPU operations must be faster than CPU for sizes >1024
+- **Memory Safety**: Zero GPU memory leaks in valgrind/cuda-memcheck
+- **Reproducibility**: Consistent results across multiple GPU runs
+
+## GPU Implementation Status 🚀 (2025-07-16)
+
+### Completed GPU Tasks ✅
+1. ✅ **GPU Implementation Started** - Created vsla_gpu.cu with pure CUDA kernels
+2. ✅ **Removed Competitor Dependencies** - Eliminated cuBLAS/cuFFT usage per competitive requirements
+3. ✅ **Pure CUDA Kernels** - Implemented custom kernels for all operations:
+   - Element-wise addition (float32/float64)
+   - Scalar multiplication
+   - Matrix multiplication (tiled algorithm)
+   - Memory management (allocation, copy, synchronization)
+4. ✅ **C23 Compatibility Layer** - Created vsla_gpu_types.h to handle CUDA's lack of C23 support
+5. ✅ **Build System Integration** - Updated CMakeLists.txt for CUDA compilation
+6. ✅ **Compiler Compatibility** - Resolved gcc-13 issues by switching to gcc-12
+7. ✅ **Comprehensive GPU Tests** - Created test_gpu.c with 8 test categories:
+   - Device detection and information
+   - Context management
+   - Memory management
+   - Tensor operations (add, scale, matmul)
+   - Error handling
+   - CPU-GPU consistency verification
+
+### Current GPU Architecture
+- **Pure CUDA Implementation**: No dependency on cuBLAS, cuFFT, or other NVIDIA libraries
+- **Custom Kernels**: Hand-optimized CUDA kernels for variable-shape operations
+- **Compatibility Layer**: Abstracts C23 types for CUDA compatibility
+- **Extensible Design**: Test framework accommodates future optimizations
+
+### GPU Performance Expectations
+- **Element-wise Operations**: Expected 10-50× speedup vs CPU
+- **Matrix Multiplication**: Custom tiled algorithm targeting 20-100× speedup
+- **Memory Efficiency**: Coalesced access patterns for optimal bandwidth
+
+### Next Steps for GPU
+1. **Enable GPU Compilation**: Need to ensure vsla_gpu.cu is compiled (currently using stub)
+2. **Run GPU Tests**: Validate all GPU functionality works correctly
+3. **Performance Benchmarking**: Compare against CPU implementation
+4. **Optimization**: Further kernel optimization based on profiling
+
+### Technical Decisions Made
+- **No cuBLAS/cuFFT**: Ensures fair competition by not using the libraries we're competing against
+- **C99/CUDA Compatibility**: Avoided C23 features that CUDA doesn't support
+- **gcc-12 Requirement**: CUDA 12.0 requires gcc ≤ 12 for compilation
+
 Last updated: 2025-07-16

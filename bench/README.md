@@ -17,13 +17,18 @@ The benchmark suite measures VSLA performance against traditional approaches acr
 - **Wall-clock time**: Primary performance measure (microseconds)
 - **Memory usage**: Peak RSS and allocation patterns
 - **Scalability**: Performance vs dimension size (64, 256, 1024, 4096, 16384)
-- **Cache efficiency**: Cache miss rates (optional, Linux perf)
+- **Statistical analysis**: Mean, std deviation, confidence intervals
 
-### Baselines
-- **Manual zero-padding + OpenBLAS**: Traditional approach
-- **NumPy/SciPy**: Python scientific computing stack
-- **Direct implementations**: Naive algorithms for comparison
-- **FFTW**: Gold standard for FFT operations
+### Competitors (Top 3 GPU Libraries)
+- **CuPy**: GPU-accelerated NumPy equivalent with CUDA
+- **cuBLAS**: NVIDIA's GPU-optimized BLAS library
+- **cuFFT**: NVIDIA's GPU-accelerated FFT library
+- **Legacy baselines**: OpenBLAS, NumPy/SciPy, FFTW for reference
+
+### Benchmarked Operations
+- **Vector Addition**: Element-wise addition with variable shapes
+- **Matrix Multiplication**: Dense matrix operations
+- **Convolution**: FFT-based convolution for signal processing
 
 ### Test Matrix
 
@@ -87,26 +92,65 @@ make
 ```
 
 ### Run All Benchmarks
-```bash
-# Run complete benchmark suite (takes ~10 minutes)
-python ../run_benchmarks.py --output results/$(date +%Y-%m-%d)
 
-# Run specific benchmarks
+#### Comprehensive Competitor Benchmark (Recommended)
+```bash
+# Single command to run full competitive analysis
+python run_full_benchmark.py --reproducible
+
+# Custom configuration
+python run_full_benchmark.py \
+    --sizes 64,256,1024,4096 \
+    --iterations 100 \
+    --competitors cupy,cublas,cufft \
+    --output-dir results/$(date +%Y-%m-%d) \
+    --enable-gpu
+```
+
+#### Individual Benchmark Components
+```bash
+# Original benchmark suite (legacy)
+python run_benchmarks.py --output results/$(date +%Y-%m-%d)
+
+# Specific operation benchmarks
 ./build/bench_vector_add --sizes 64,256,1024 --iterations 1000
 ./build/bench_matvec --matrices small,medium,large --methods vsla,blas
 ./build/bench_kronecker --dimensions 32,64,128 --compare-all
 ./build/bench_convolution --signals 256,512,1024 --fft-comparison
 ```
 
+#### Competitor Setup
+```bash
+# Build GPU competitor benchmarks (requires CUDA)
+cd competitors/
+make all
+
+# Test competitor availability
+make check-cuda
+make test
+```
+
 ### Generate Results
 ```bash
-# Analyze results and generate Table 2
+# Comprehensive benchmark generates automatic report
+python run_full_benchmark.py --reproducible
+# Output: benchmark_results.json + comprehensive_report.md
+
+# Legacy analysis tools
 python scripts/analyze_results.py results/latest/
 python scripts/generate_table2.py --output table2.tex
 
 # Create performance plots
 python scripts/plot_performance.py --input results/latest/ --output plots/
 ```
+
+### Benchmark Output
+
+The comprehensive benchmark generates:
+- **benchmark_results.json**: Raw performance data with system info
+- **comprehensive_report.md**: Executive summary and detailed analysis
+- **Competitive analysis**: Direct comparison with CuPy, cuBLAS, cuFFT
+- **Reproducibility info**: Complete environment specification
 
 ## Benchmark Implementations
 

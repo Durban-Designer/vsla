@@ -55,6 +55,10 @@ target_link_libraries(bench_convolution ${BENCHMARK_LIBS})
 add_executable(bench_comparison src/bench_comparison.c src/benchmark_utils.c)
 target_link_libraries(bench_comparison ${BENCHMARK_LIBS})
 
+# Fair comparison against established C libraries
+add_executable(bench_fair_comparison src/bench_fair_comparison.c src/benchmark_utils.c)
+target_link_libraries(bench_fair_comparison ${BENCHMARK_LIBS})
+
 # Master benchmark runner (TODO: implement)
 # add_executable(run_all_benchmarks src/run_all_benchmarks.c)
 # target_link_libraries(run_all_benchmarks ${BENCHMARK_LIBS})

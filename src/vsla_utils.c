@@ -49,3 +49,11 @@ int vsla_has_fftw(void) {
     return 0;
 #endif
 }
+
+int vsla_has_gpu(void) {
+#ifdef VSLA_ENABLE_CUDA
+    return 1;
+#else
+    return 0;
+#endif
+}

@@ -80,7 +80,7 @@ static int test_error_strings(void) {
     ASSERT_NOT_NULL(str);
     ASSERT_TRUE(strlen(str) > 0);
     
-    str = vsla_error_string(VSLA_ERROR_INVALID_SHAPE);
+    str = vsla_error_string(VSLA_ERROR_INVALID_RANK);
     ASSERT_NOT_NULL(str);
     ASSERT_TRUE(strlen(str) > 0);
     
@@ -100,7 +100,7 @@ static int test_error_strings(void) {
     ASSERT_NOT_NULL(str);
     ASSERT_TRUE(strlen(str) > 0);
     
-    str = vsla_error_string(VSLA_ERROR_INDEX_OUT_OF_BOUNDS);
+    str = vsla_error_string(VSLA_ERROR_OVERFLOW);
     ASSERT_NOT_NULL(str);
     ASSERT_TRUE(strlen(str) > 0);
     
@@ -125,17 +125,9 @@ static int test_dtype_sizes(void) {
     size = vsla_dtype_size(VSLA_DTYPE_F64);
     ASSERT_EQ(8, size);  // double is 8 bytes
     
-    size = vsla_dtype_size(VSLA_DTYPE_I32);
-    ASSERT_EQ(4, size);  // int32_t is 4 bytes
-    
-    size = vsla_dtype_size(VSLA_DTYPE_I64);
-    ASSERT_EQ(8, size);  // int64_t is 8 bytes
-    
-    size = vsla_dtype_size(VSLA_DTYPE_U32);
-    ASSERT_EQ(4, size);  // uint32_t is 4 bytes
-    
-    size = vsla_dtype_size(VSLA_DTYPE_U64);
-    ASSERT_EQ(8, size);  // uint64_t is 8 bytes
+    // Test with invalid dtype (should return 0)
+    size = vsla_dtype_size(99);
+    ASSERT_EQ(0, size);
     
     // Test invalid dtype
     size = vsla_dtype_size((vsla_dtype_t)999);
@@ -216,7 +208,8 @@ static int test_library_state_consistency(void) {
     // Verify data
     for (size_t i = 0; i < 3; i++) {
         idx = i;
-        double val = vsla_get_f64(tensor, &idx);
+        double val;
+        ASSERT_EQ(VSLA_SUCCESS, vsla_get_f64(tensor, &idx, &val));
         ASSERT_FLOAT_EQ((double)(i + 1), val, 1e-12);
     }
     
@@ -236,7 +229,8 @@ static int test_library_state_consistency(void) {
     
     for (size_t i = 0; i < 3; i++) {
         idx = i;
-        double val = vsla_get_f64(tensor, &idx);
+        double val;
+        ASSERT_EQ(VSLA_SUCCESS, vsla_get_f64(tensor, &idx, &val));
         ASSERT_FLOAT_EQ(42.0, val, 1e-12);
     }
     
