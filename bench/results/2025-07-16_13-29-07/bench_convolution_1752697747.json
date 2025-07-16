@@ -1,0 +1,309 @@
+[
+  // Signal size: 64, Kernel size: 8
+{
+  "benchmark": "convolution",
+  "method": "vsla_fft",
+  "timestamp": "1752697747",
+  "signal_size": 64,
+  "kernel_size": 8,
+  "output_size": 71,
+  "results": {
+    "iterations": 10,
+    "mean_time_us": 7.380,
+    "std_time_us": 0.416,
+    "min_time_us": 7.070,
+    "max_time_us": 8.444,
+    "peak_memory_mb": 13.469
+  },
+  "system_info": {
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "os": "Linux 6.11.0-29-generic",
+    "compiler": "GCC 13.3.0",
+    "memory_gb": 15,
+    "cores": 32,
+    "blas": "Generic BLAS"
+  }
+}
+,
+{
+  "benchmark": "convolution",
+  "method": "vsla_direct",
+  "timestamp": "1752697747",
+  "signal_size": 64,
+  "kernel_size": 8,
+  "output_size": 71,
+  "results": {
+    "iterations": 10,
+    "mean_time_us": 16.623,
+    "std_time_us": 1.756,
+    "min_time_us": 12.580,
+    "max_time_us": 18.193,
+    "peak_memory_mb": 13.469
+  },
+  "system_info": {
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "os": "Linux 6.11.0-29-generic",
+    "compiler": "GCC 13.3.0",
+    "memory_gb": 15,
+    "cores": 32,
+    "blas": "Generic BLAS"
+  }
+}
+,
+  // Signal size: 128, Kernel size: 16
+{
+  "benchmark": "convolution",
+  "method": "vsla_fft",
+  "timestamp": "1752697747",
+  "signal_size": 128,
+  "kernel_size": 16,
+  "output_size": 143,
+  "results": {
+    "iterations": 10,
+    "mean_time_us": 14.683,
+    "std_time_us": 0.389,
+    "min_time_us": 14.373,
+    "max_time_us": 15.735,
+    "peak_memory_mb": 13.469
+  },
+  "system_info": {
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "os": "Linux 6.11.0-29-generic",
+    "compiler": "GCC 13.3.0",
+    "memory_gb": 15,
+    "cores": 32,
+    "blas": "Generic BLAS"
+  }
+}
+,
+{
+  "benchmark": "convolution",
+  "method": "vsla_direct",
+  "timestamp": "1752697747",
+  "signal_size": 128,
+  "kernel_size": 16,
+  "output_size": 143,
+  "results": {
+    "iterations": 10,
+    "mean_time_us": 46.336,
+    "std_time_us": 2.213,
+    "min_time_us": 42.856,
+    "max_time_us": 51.276,
+    "peak_memory_mb": 13.469
+  },
+  "system_info": {
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "os": "Linux 6.11.0-29-generic",
+    "compiler": "GCC 13.3.0",
+    "memory_gb": 15,
+    "cores": 32,
+    "blas": "Generic BLAS"
+  }
+}
+,
+  // Signal size: 256, Kernel size: 32
+{
+  "benchmark": "convolution",
+  "method": "vsla_fft",
+  "timestamp": "1752697747",
+  "signal_size": 256,
+  "kernel_size": 32,
+  "output_size": 287,
+  "results": {
+    "iterations": 10,
+    "mean_time_us": 33.163,
+    "std_time_us": 0.368,
+    "min_time_us": 32.848,
+    "max_time_us": 33.904,
+    "peak_memory_mb": 13.469
+  },
+  "system_info": {
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "os": "Linux 6.11.0-29-generic",
+    "compiler": "GCC 13.3.0",
+    "memory_gb": 15,
+    "cores": 32,
+    "blas": "Generic BLAS"
+  }
+}
+,
+{
+  "benchmark": "convolution",
+  "method": "vsla_direct",
+  "timestamp": "1752697747",
+  "signal_size": 256,
+  "kernel_size": 32,
+  "output_size": 287,
+  "results": {
+    "iterations": 10,
+    "mean_time_us": 236.624,
+    "std_time_us": 20.523,
+    "min_time_us": 207.291,
+    "max_time_us": 273.279,
+    "peak_memory_mb": 13.469
+  },
+  "system_info": {
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "os": "Linux 6.11.0-29-generic",
+    "compiler": "GCC 13.3.0",
+    "memory_gb": 15,
+    "cores": 32,
+    "blas": "Generic BLAS"
+  }
+}
+,
+  // Signal size: 512, Kernel size: 64
+{
+  "benchmark": "convolution",
+  "method": "vsla_fft",
+  "timestamp": "1752697747",
+  "signal_size": 512,
+  "kernel_size": 64,
+  "output_size": 575,
+  "results": {
+    "iterations": 10,
+    "mean_time_us": 101.074,
+    "std_time_us": 6.817,
+    "min_time_us": 92.519,
+    "max_time_us": 111.398,
+    "peak_memory_mb": 13.469
+  },
+  "system_info": {
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "os": "Linux 6.11.0-29-generic",
+    "compiler": "GCC 13.3.0",
+    "memory_gb": 15,
+    "cores": 32,
+    "blas": "Generic BLAS"
+  }
+}
+,
+{
+  "benchmark": "convolution",
+  "method": "vsla_direct",
+  "timestamp": "1752697747",
+  "signal_size": 512,
+  "kernel_size": 64,
+  "output_size": 575,
+  "results": {
+    "iterations": 10,
+    "mean_time_us": 727.402,
+    "std_time_us": 107.885,
+    "min_time_us": 620.814,
+    "max_time_us": 892.458,
+    "peak_memory_mb": 13.469
+  },
+  "system_info": {
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "os": "Linux 6.11.0-29-generic",
+    "compiler": "GCC 13.3.0",
+    "memory_gb": 15,
+    "cores": 32,
+    "blas": "Generic BLAS"
+  }
+}
+,
+  // Signal size: 1024, Kernel size: 128
+{
+  "benchmark": "convolution",
+  "method": "vsla_fft",
+  "timestamp": "1752697747",
+  "signal_size": 1024,
+  "kernel_size": 128,
+  "output_size": 1151,
+  "results": {
+    "iterations": 10,
+    "mean_time_us": 138.699,
+    "std_time_us": 2.372,
+    "min_time_us": 136.789,
+    "max_time_us": 143.754,
+    "peak_memory_mb": 13.469
+  },
+  "system_info": {
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "os": "Linux 6.11.0-29-generic",
+    "compiler": "GCC 13.3.0",
+    "memory_gb": 15,
+    "cores": 32,
+    "blas": "Generic BLAS"
+  }
+}
+,
+{
+  "benchmark": "convolution",
+  "method": "vsla_direct",
+  "timestamp": "1752697747",
+  "signal_size": 1024,
+  "kernel_size": 128,
+  "output_size": 1151,
+  "results": {
+    "iterations": 10,
+    "mean_time_us": 2917.895,
+    "std_time_us": 259.944,
+    "min_time_us": 2708.026,
+    "max_time_us": 3490.495,
+    "peak_memory_mb": 13.469
+  },
+  "system_info": {
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "os": "Linux 6.11.0-29-generic",
+    "compiler": "GCC 13.3.0",
+    "memory_gb": 15,
+    "cores": 32,
+    "blas": "Generic BLAS"
+  }
+}
+,
+  // Signal size: 2048, Kernel size: 256
+{
+  "benchmark": "convolution",
+  "method": "vsla_fft",
+  "timestamp": "1752697747",
+  "signal_size": 2048,
+  "kernel_size": 256,
+  "output_size": 2303,
+  "results": {
+    "iterations": 10,
+    "mean_time_us": 445.310,
+    "std_time_us": 90.997,
+    "min_time_us": 371.691,
+    "max_time_us": 680.312,
+    "peak_memory_mb": 13.469
+  },
+  "system_info": {
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "os": "Linux 6.11.0-29-generic",
+    "compiler": "GCC 13.3.0",
+    "memory_gb": 15,
+    "cores": 32,
+    "blas": "Generic BLAS"
+  }
+}
+,
+{
+  "benchmark": "convolution",
+  "method": "vsla_direct",
+  "timestamp": "1752697747",
+  "signal_size": 2048,
+  "kernel_size": 256,
+  "output_size": 2303,
+  "results": {
+    "iterations": 10,
+    "mean_time_us": 11605.857,
+    "std_time_us": 1259.278,
+    "min_time_us": 10407.201,
+    "max_time_us": 13569.418,
+    "peak_memory_mb": 13.469
+  },
+  "system_info": {
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "os": "Linux 6.11.0-29-generic",
+    "compiler": "GCC 13.3.0",
+    "memory_gb": 15,
+    "cores": 32,
+    "blas": "Generic BLAS"
+  }
+}
+,
+  {"end": true}
+]

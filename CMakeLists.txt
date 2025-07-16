@@ -39,7 +39,7 @@ endif()
 if(VSLA_ENABLE_CUDA)
     # Set environment variables before enabling CUDA language
     set(ENV{CUDAHOSTCXX} "/usr/bin/g++")
-    set(ENV{CUDACXX} "/usr/bin/nvcc")
+    set(ENV{CUDACXX} "/usr/local/cuda-12.6/bin/nvcc")
     
     # Set flags before enabling the language
     set(CMAKE_CUDA_FLAGS "-allow-unsupported-compiler -std=c++17")

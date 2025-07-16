@@ -1,0 +1,256 @@
+{
+  "metadata": {
+    "timestamp": "2025-07-16T14:01:01.337320",
+    "system": {
+      "cpu": {
+        "name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+        "threads": 32,
+        "cores": 24
+      },
+      "memory": {
+        "total_gb": 15
+      },
+      "gpu": {
+        "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "memory_mb": 8188,
+        "driver_version": "575.64.03",
+        "compute_capability": "8.9",
+        "available": true
+      }
+    },
+    "software": {
+      "python_version": "3.12.3 (main, Jun 18 2025, 17:59:45) [GCC 13.3.0]",
+      "vsla_version": "1.0.0"
+    }
+  },
+  "config": {
+    "sizes": [
+      64,
+      128,
+      256
+    ],
+    "iterations": 10,
+    "warmup": 5,
+    "output_dir": "./bench/reports",
+    "enable_gpu": true,
+    "enable_competitors": false,
+    "enable_cpu": true,
+    "precision": "float32",
+    "reproducible": true
+  },
+  "cpu_results": [
+    {
+      "method": "vsla_cpu",
+      "operation": "vector_add",
+      "size1": 64,
+      "size2": 64,
+      "size3": 64,
+      "iterations": 10,
+      "mean_time_us": 1.543,
+      "std_time_us": 0.145,
+      "min_time_us": 1.338,
+      "max_time_us": 1.861,
+      "platform": "cpu",
+      "size": 64
+    },
+    {
+      "method": "vsla_cpu",
+      "operation": "vector_add",
+      "size1": 128,
+      "size2": 128,
+      "size3": 128,
+      "iterations": 10,
+      "mean_time_us": 4.46,
+      "std_time_us": 0.162,
+      "min_time_us": 4.366,
+      "max_time_us": 4.919,
+      "platform": "cpu",
+      "size": 128
+    },
+    {
+      "method": "vsla_cpu",
+      "operation": "vector_add",
+      "size1": 256,
+      "size2": 256,
+      "size3": 256,
+      "iterations": 10,
+      "mean_time_us": 10.436,
+      "std_time_us": 0.308,
+      "min_time_us": 10.172,
+      "max_time_us": 11.096,
+      "platform": "cpu",
+      "size": 256
+    },
+    {
+      "method": "vsla_cpu",
+      "operation": "convolution",
+      "size1": 64,
+      "size2": 8,
+      "size3": 71,
+      "iterations": 10,
+      "mean_time_us": 16.314,
+      "std_time_us": 0.485,
+      "min_time_us": 15.94,
+      "max_time_us": 17.625,
+      "platform": "cpu",
+      "size": 64
+    },
+    {
+      "method": "vsla_cpu",
+      "operation": "convolution",
+      "size1": 128,
+      "size2": 16,
+      "size3": 143,
+      "iterations": 10,
+      "mean_time_us": 41.561,
+      "std_time_us": 2.642,
+      "min_time_us": 39.964,
+      "max_time_us": 49.048,
+      "platform": "cpu",
+      "size": 128
+    },
+    {
+      "method": "vsla_cpu",
+      "operation": "convolution",
+      "size1": 256,
+      "size2": 32,
+      "size3": 287,
+      "iterations": 10,
+      "mean_time_us": 118.833,
+      "std_time_us": 21.676,
+      "min_time_us": 105.88,
+      "max_time_us": 176.123,
+      "platform": "cpu",
+      "size": 256
+    },
+    {
+      "method": "vsla_cpu",
+      "operation": "kronecker",
+      "size1": 64,
+      "size2": 16,
+      "size3": 1024,
+      "iterations": 10,
+      "mean_time_us": 53.188,
+      "std_time_us": 3.013,
+      "min_time_us": 52.116,
+      "max_time_us": 62.223,
+      "platform": "cpu",
+      "size": 64
+    },
+    {
+      "method": "vsla_cpu",
+      "operation": "kronecker",
+      "size1": 64,
+      "size2": 16,
+      "size3": 1024,
+      "iterations": 10,
+      "mean_time_us": 39.701,
+      "std_time_us": 3.7,
+      "min_time_us": 34.192,
+      "max_time_us": 45.765,
+      "platform": "cpu",
+      "size": 128
+    },
+    {
+      "method": "vsla_cpu",
+      "operation": "kronecker",
+      "size1": 64,
+      "size2": 16,
+      "size3": 1024,
+      "iterations": 10,
+      "mean_time_us": 37.388,
+      "std_time_us": 2.566,
+      "min_time_us": 35.275,
+      "max_time_us": 42.428,
+      "platform": "cpu",
+      "size": 256
+    }
+  ],
+  "gpu_results": [
+    {
+      "method": "vsla_gpu",
+      "operation": "vector_add",
+      "size1": 64,
+      "size2": 64,
+      "size3": 64,
+      "iterations": 10,
+      "mean_time_us": 4.627,
+      "std_time_us": 0.159,
+      "min_time_us": 4.482,
+      "max_time_us": 5.021,
+      "platform": "gpu",
+      "size": 64
+    },
+    {
+      "method": "vsla_gpu",
+      "operation": "vector_add",
+      "size1": 128,
+      "size2": 128,
+      "size3": 128,
+      "iterations": 10,
+      "mean_time_us": 4.3,
+      "std_time_us": 0.125,
+      "min_time_us": 4.12,
+      "max_time_us": 4.501,
+      "platform": "gpu",
+      "size": 128
+    },
+    {
+      "method": "vsla_gpu",
+      "operation": "vector_add",
+      "size1": 256,
+      "size2": 256,
+      "size3": 256,
+      "iterations": 10,
+      "mean_time_us": 4.408,
+      "std_time_us": 0.106,
+      "min_time_us": 4.248,
+      "max_time_us": 4.593,
+      "platform": "gpu",
+      "size": 256
+    },
+    {
+      "method": "vsla_gpu",
+      "operation": "matrix_multiply",
+      "size1": 64,
+      "size2": 64,
+      "size3": 64,
+      "iterations": 10,
+      "mean_time_us": 5.685,
+      "std_time_us": 0.13,
+      "min_time_us": 5.512,
+      "max_time_us": 5.924,
+      "platform": "gpu",
+      "size": 64
+    },
+    {
+      "method": "vsla_gpu",
+      "operation": "matrix_multiply",
+      "size1": 128,
+      "size2": 128,
+      "size3": 128,
+      "iterations": 10,
+      "mean_time_us": 10.305,
+      "std_time_us": 0.474,
+      "min_time_us": 9.985,
+      "max_time_us": 11.651,
+      "platform": "gpu",
+      "size": 128
+    },
+    {
+      "method": "vsla_gpu",
+      "operation": "matrix_multiply",
+      "size1": 256,
+      "size2": 256,
+      "size3": 256,
+      "iterations": 10,
+      "mean_time_us": 42.163,
+      "std_time_us": 0.199,
+      "min_time_us": 41.89,
+      "max_time_us": 42.512,
+      "platform": "gpu",
+      "size": 256
+    }
+  ],
+  "competitor_results": []
+}
