@@ -1,0 +1,44 @@
+# Include essential files
+include README.md
+include LICENSE
+include CITATION.cff
+include SECURITY.md
+include pyproject.toml
+include setup.py
+include cibuildwheel.toml
+include .clang-format
+
+# Include C library source
+recursive-include src *.c
+recursive-include include *.h
+include CMakeLists.txt
+
+# Include Python bindings
+recursive-include python *.py
+recursive-include python/src *.cpp
+
+# Include tests
+recursive-include tests *.c *.h
+
+# Include benchmarks
+recursive-include bench *.py *.c *.h
+include bench/CMakeLists.txt
+include bench/README.md
+
+# Include examples
+recursive-include examples *.c
+include examples/Makefile
+
+# Include documentation
+recursive-include docs *.tex *.md *.pdf
+include docs/Makefile
+
+# Exclude unnecessary files
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude __pycache__
+global-exclude .DS_Store
+global-exclude .git*
+global-exclude build/
+global-exclude dist/
+global-exclude *.egg-info/

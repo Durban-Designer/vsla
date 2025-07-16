@@ -1,0 +1,1 @@
+/usr/bin/cc -O3 -DNDEBUG -march=native -ffast-math CMakeFiles/bench_comparison.dir/src/bench_comparison.c.o CMakeFiles/bench_comparison.dir/src/benchmark_utils.c.o -o bench_comparison   -L/home/kenth56/vsla/bench/../build  -Wl,-rpath,/home/kenth56/vsla/bench/../build libbenchmark_utils.a -lvsla /usr/lib/x86_64-linux-gnu/libblas.so -lm -lfftw3 

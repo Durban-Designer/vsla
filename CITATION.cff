@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: "Birnbaum"
+    given-names: "Royce"
+    email: "royce.birnbaum@gmail.com"
+    orcid: "https://orcid.org/0009-0007-5432-9169"
+title: "VSLA: Variable-Shape Linear Algebra"
+version: 0.1.0
+doi: 10.5281/zenodo.XXXXXX
+date-released: 2025-07-16
+url: "https://github.com/username/vsla"
+repository-code: "https://github.com/username/vsla"
+abstract: >-
+  VSLA treats dimension as intrinsic data rather than a rigid constraint. 
+  This library provides mathematically rigorous semiring structures with 
+  provable algebraic identities, enabling principled dimension-aware 
+  computation for adaptive AI architectures, multi-resolution signal 
+  processing, and scientific computing applications.
+keywords:
+  - "variable-shape tensors"
+  - "semiring algebra"
+  - "automatic differentiation"
+  - "high-performance computing"
+  - "adaptive neural networks"
+  - "linear algebra"
+  - "tensor operations"
+license: MIT
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Birnbaum"
+      given-names: "Royce"
+      email: "royce.birnbaum@gmail.com"
+  title: "Variable-Shape Linear Algebra: Mathematical Foundations and High-Performance Implementation"
+  year: 2025
+  journal: "arXiv preprint"
+  url: "https://arxiv.org/abs/2507.XXXXX"
