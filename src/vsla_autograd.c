@@ -41,6 +41,7 @@ vsla_tape_t* vsla_tape_new(void) {
     tape->num_ops = 0;
     tape->capacity = INITIAL_TAPE_CAPACITY;
     tape->num_gradients = 0;
+    tape->grad_capacity = INITIAL_GRADIENT_CAPACITY;
     
     // Initialize gradients to NULL
     for (size_t i = 0; i < INITIAL_GRADIENT_CAPACITY; i++) {
@@ -152,26 +153,39 @@ vsla_error_t vsla_set_gradient(vsla_tape_t* tape, const vsla_tensor_t* tensor,
                                const vsla_tensor_t* gradient) {
     if (!tape || !tensor || !gradient) return VSLA_ERROR_NULL_POINTER;
     
-    // Find existing gradient or add new one
     int grad_idx = find_tensor_index(tape, tensor);
+    vsla_tensor_t* new_grad_copy = vsla_copy(gradient); // Create copy once
+    if (!new_grad_copy) {
+        return VSLA_ERROR_MEMORY;
+    }
     
     if (grad_idx >= 0) {
         // Update existing gradient
-        vsla_free(tape->gradients[grad_idx]);
-        tape->gradients[grad_idx] = vsla_copy(gradient);
-        if (!tape->gradients[grad_idx]) return VSLA_ERROR_MEMORY;
+        vsla_free(tape->gradients[grad_idx]); // Free old gradient
+        tape->gradients[grad_idx] = new_grad_copy; // Assign new copy
     } else {
         // Add new tensor-gradient pair
-        if (tape->num_gradients + 2 > INITIAL_GRADIENT_CAPACITY) {
-            // For simplicity, use fixed capacity. In production, would resize dynamically
-            return VSLA_ERROR_MEMORY;
+        if (tape->num_gradients + 2 > tape->grad_capacity) {
+            size_t new_capacity = tape->grad_capacity * 2;
+            vsla_tensor_t** new_gradients = realloc(tape->gradients,
+                                                   new_capacity * sizeof(vsla_tensor_t*));
+            if (!new_gradients) {
+                vsla_free(new_grad_copy); // Clean up new_grad_copy if realloc fails
+                return VSLA_ERROR_MEMORY;
+            }
+            
+            // Initialize new slots to NULL
+            for (size_t i = tape->grad_capacity; i < new_capacity; i++) {
+                new_gradients[i] = NULL;
+            }
+            
+            tape->gradients = new_gradients;
+            tape->grad_capacity = new_capacity;
         }
         
         // Store tensor pointer and gradient
         tape->gradients[tape->num_gradients] = (vsla_tensor_t*)tensor;
-        tape->gradients[tape->num_gradients + 1] = vsla_copy(gradient);
-        if (!tape->gradients[tape->num_gradients + 1]) return VSLA_ERROR_MEMORY;
-        
+        tape->gradients[tape->num_gradients + 1] = new_grad_copy;
         tape->num_gradients += 2;
     }
     
@@ -218,7 +232,19 @@ vsla_error_t vsla_sub_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b,
     vsla_error_t err = vsla_add(grad_a, grad_a, grad_out);
     if (err != VSLA_SUCCESS) return err;
     
-    err = vsla_sub(grad_b, grad_b, grad_out);
+    // For grad_b = grad_b - grad_out, we need to negate grad_out
+    vsla_tensor_t* neg_grad_out = vsla_copy(grad_out);
+    if (!neg_grad_out) return VSLA_ERROR_MEMORY;
+    
+    err = vsla_scale(neg_grad_out, neg_grad_out, -1.0);
+    if (err != VSLA_SUCCESS) {
+        vsla_free(neg_grad_out);
+        return err;
+    }
+    
+    err = vsla_add(grad_b, grad_b, neg_grad_out);
+    vsla_free(neg_grad_out);
+    
     return err;
 }
 
@@ -231,7 +257,7 @@ vsla_error_t vsla_scale_backward(vsla_tensor_t* grad_in, double* grad_scalar,
     vsla_tensor_t* scaled_grad = vsla_copy(grad_out);
     if (!scaled_grad) return VSLA_ERROR_MEMORY;
     
-    vsla_error_t err = vsla_scale(scaled_grad, grad_out, scalar);
+    vsla_error_t err = vsla_scale(scaled_grad, scaled_grad, scalar);
     if (err != VSLA_SUCCESS) {
         vsla_free(scaled_grad);
         return err;
@@ -273,6 +299,7 @@ vsla_error_t vsla_hadamard_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b
     return VSLA_ERROR_NOT_IMPLEMENTED;
 }
 
+
 static vsla_error_t backward_operation(vsla_tape_t* tape, const vsla_op_record_t* record) {
     vsla_tensor_t* grad_out = vsla_get_gradient(tape, record->output);
     if (!grad_out) {
@@ -287,25 +314,27 @@ static vsla_error_t backward_operation(vsla_tape_t* tape, const vsla_op_record_t
                 vsla_tensor_t* grad_b = vsla_get_gradient(tape, record->inputs[1]);
                 
                 if (!grad_a) {
-                    grad_a = vsla_zeros(record->inputs[0]->rank, 
+                    vsla_tensor_t* zero_grad = vsla_zeros(record->inputs[0]->rank, 
                                        record->inputs[0]->shape,
                                        record->inputs[0]->model,
                                        record->inputs[0]->dtype);
-                    if (!grad_a) return VSLA_ERROR_MEMORY;
-                    vsla_set_gradient(tape, record->inputs[0], grad_a);
-                    vsla_free(grad_a);
+                    if (!zero_grad) return VSLA_ERROR_MEMORY;
+                    vsla_set_gradient(tape, record->inputs[0], zero_grad);
+                    vsla_free(zero_grad);
                     grad_a = vsla_get_gradient(tape, record->inputs[0]);
+                    if (!grad_a) return VSLA_ERROR_MEMORY;
                 }
                 
                 if (!grad_b) {
-                    grad_b = vsla_zeros(record->inputs[1]->rank, 
+                    vsla_tensor_t* zero_grad = vsla_zeros(record->inputs[1]->rank, 
                                        record->inputs[1]->shape,
                                        record->inputs[1]->model,
                                        record->inputs[1]->dtype);
-                    if (!grad_b) return VSLA_ERROR_MEMORY;
-                    vsla_set_gradient(tape, record->inputs[1], grad_b);
-                    vsla_free(grad_b);
+                    if (!zero_grad) return VSLA_ERROR_MEMORY;
+                    vsla_set_gradient(tape, record->inputs[1], zero_grad);
+                    vsla_free(zero_grad);
                     grad_b = vsla_get_gradient(tape, record->inputs[1]);
+                    if (!grad_b) return VSLA_ERROR_MEMORY;
                 }
                 
                 return vsla_add_backward(grad_a, grad_b, grad_out);
@@ -318,24 +347,24 @@ static vsla_error_t backward_operation(vsla_tape_t* tape, const vsla_op_record_t
                 vsla_tensor_t* grad_b = vsla_get_gradient(tape, record->inputs[1]);
                 
                 if (!grad_a) {
-                    grad_a = vsla_zeros(record->inputs[0]->rank, 
+                    vsla_tensor_t* zero_grad = vsla_zeros(record->inputs[0]->rank, 
                                        record->inputs[0]->shape,
                                        record->inputs[0]->model,
                                        record->inputs[0]->dtype);
-                    if (!grad_a) return VSLA_ERROR_MEMORY;
-                    vsla_set_gradient(tape, record->inputs[0], grad_a);
-                    vsla_free(grad_a);
+                    if (!zero_grad) return VSLA_ERROR_MEMORY;
+                    vsla_set_gradient(tape, record->inputs[0], zero_grad);
+                    vsla_free(zero_grad);
                     grad_a = vsla_get_gradient(tape, record->inputs[0]);
                 }
                 
                 if (!grad_b) {
-                    grad_b = vsla_zeros(record->inputs[1]->rank, 
+                    vsla_tensor_t* zero_grad = vsla_zeros(record->inputs[1]->rank, 
                                        record->inputs[1]->shape,
                                        record->inputs[1]->model,
                                        record->inputs[1]->dtype);
-                    if (!grad_b) return VSLA_ERROR_MEMORY;
-                    vsla_set_gradient(tape, record->inputs[1], grad_b);
-                    vsla_free(grad_b);
+                    if (!zero_grad) return VSLA_ERROR_MEMORY;
+                    vsla_set_gradient(tape, record->inputs[1], zero_grad);
+                    vsla_free(zero_grad);
                     grad_b = vsla_get_gradient(tape, record->inputs[1]);
                 }
                 
@@ -349,14 +378,15 @@ static vsla_error_t backward_operation(vsla_tape_t* tape, const vsla_op_record_t
                 vsla_tensor_t* grad_in = vsla_get_gradient(tape, record->inputs[0]);
                 
                 if (!grad_in) {
-                    grad_in = vsla_zeros(record->inputs[0]->rank, 
+                    vsla_tensor_t* zero_grad = vsla_zeros(record->inputs[0]->rank, 
                                         record->inputs[0]->shape,
                                         record->inputs[0]->model,
                                         record->inputs[0]->dtype);
-                    if (!grad_in) return VSLA_ERROR_MEMORY;
-                    vsla_set_gradient(tape, record->inputs[0], grad_in);
-                    vsla_free(grad_in);
+                    if (!zero_grad) return VSLA_ERROR_MEMORY;
+                    vsla_set_gradient(tape, record->inputs[0], zero_grad);
+                    vsla_free(zero_grad);
                     grad_in = vsla_get_gradient(tape, record->inputs[0]);
+                    if (!grad_in) return VSLA_ERROR_MEMORY;
                 }
                 
                 return vsla_scale_backward(grad_in, NULL, grad_out, 
@@ -365,7 +395,73 @@ static vsla_error_t backward_operation(vsla_tape_t* tape, const vsla_op_record_t
             break;
             
         case VSLA_OP_CONV:
+            if (record->num_inputs == 2) {
+                vsla_tensor_t* grad_a = vsla_get_gradient(tape, record->inputs[0]);
+                vsla_tensor_t* grad_b = vsla_get_gradient(tape, record->inputs[1]);
+                
+                if (!grad_a) {
+                    vsla_tensor_t* zero_grad = vsla_zeros(record->inputs[0]->rank, 
+                                       record->inputs[0]->shape,
+                                       record->inputs[0]->model,
+                                       record->inputs[0]->dtype);
+                    if (!zero_grad) return VSLA_ERROR_MEMORY;
+                    vsla_set_gradient(tape, record->inputs[0], zero_grad);
+                    vsla_free(zero_grad);
+                    grad_a = vsla_get_gradient(tape, record->inputs[0]);
+                    if (!grad_a) return VSLA_ERROR_MEMORY;
+                }
+                
+                if (!grad_b) {
+                    vsla_tensor_t* zero_grad = vsla_zeros(record->inputs[1]->rank, 
+                                       record->inputs[1]->shape,
+                                       record->inputs[1]->model,
+                                       record->inputs[1]->dtype);
+                    if (!zero_grad) return VSLA_ERROR_MEMORY;
+                    vsla_set_gradient(tape, record->inputs[1], zero_grad);
+                    vsla_free(zero_grad);
+                    grad_b = vsla_get_gradient(tape, record->inputs[1]);
+                    if (!grad_b) return VSLA_ERROR_MEMORY;
+                }
+                
+                return vsla_conv_backward(grad_a, grad_b, grad_out,
+                                        record->inputs[0], record->inputs[1]);
+            }
+            break;
+            
         case VSLA_OP_KRON:
+            if (record->num_inputs == 2) {
+                vsla_tensor_t* grad_a = vsla_get_gradient(tape, record->inputs[0]);
+                vsla_tensor_t* grad_b = vsla_get_gradient(tape, record->inputs[1]);
+                
+                if (!grad_a) {
+                    vsla_tensor_t* zero_grad = vsla_zeros(record->inputs[0]->rank, 
+                                       record->inputs[0]->shape,
+                                       record->inputs[0]->model,
+                                       record->inputs[0]->dtype);
+                    if (!zero_grad) return VSLA_ERROR_MEMORY;
+                    vsla_set_gradient(tape, record->inputs[0], zero_grad);
+                    vsla_free(zero_grad);
+                    grad_a = vsla_get_gradient(tape, record->inputs[0]);
+                    if (!grad_a) return VSLA_ERROR_MEMORY;
+                }
+                
+                if (!grad_b) {
+                    vsla_tensor_t* zero_grad = vsla_zeros(record->inputs[1]->rank, 
+                                       record->inputs[1]->shape,
+                                       record->inputs[1]->model,
+                                       record->inputs[1]->dtype);
+                    if (!zero_grad) return VSLA_ERROR_MEMORY;
+                    vsla_set_gradient(tape, record->inputs[1], zero_grad);
+                    vsla_free(zero_grad);
+                    grad_b = vsla_get_gradient(tape, record->inputs[1]);
+                    if (!grad_b) return VSLA_ERROR_MEMORY;
+                }
+                
+                return vsla_kron_backward(grad_a, grad_b, grad_out,
+                                        record->inputs[0], record->inputs[1]);
+            }
+            break;
+            
         case VSLA_OP_HADAMARD:
         case VSLA_OP_MATMUL:
         case VSLA_OP_TRANSPOSE:

@@ -21,6 +21,8 @@
 \usepackage{algorithmic}
 \usepackage{xcolor}
 \usepackage{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric}
 
 % Define colors for boxes
 \definecolor{prelim}{rgb}{0.95,0.95,1.0}
@@ -121,6 +123,68 @@ $\mathcal{O}(\cdot)$ & Asymptotic complexity bound \\
 \end{tabular}
 \end{table}
 
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rectangle, minimum width=0.8cm, minimum height=0.6cm, font=\small},
+  zero/.style={box, fill=gray!20},
+  value/.style={box, fill=blue!20},
+  eq/.style={font=\Large}
+]
+
+% Original vectors
+\node[value] (v1) at (0,2) {1};
+\node[value] (v2) at (0.8,2) {-1};
+\node[value] (v3) at (1.6,2) {2};
+\node[above=0.2cm of v2] {$v = (1, -1, 2)$};
+
+\node[value] (w1) at (0,0.5) {3};
+\node[value] (w2) at (0.8,0.5) {0};
+\node[value] (w3) at (1.6,0.5) {-1};
+\node[value] (w4) at (2.4,0.5) {1};
+\node[value] (w5) at (3.2,0.5) {2};
+\node[above=0.2cm of w3] {$w = (3, 0, -1, 1, 2)$};
+
+% Arrow and equivalence
+\node[eq] at (4.5,1.25) {$\sim$};
+
+% Padded vectors
+\node[value] (pv1) at (6,2) {1};
+\node[value] (pv2) at (6.8,2) {-1};
+\node[value] (pv3) at (7.6,2) {2};
+\node[zero] (pv4) at (8.4,2) {0};
+\node[zero] (pv5) at (9.2,2) {0};
+\node[above=0.2cm of pv3] {$\iota_{3 \to 5}(v) = (1, -1, 2, 0, 0)$};
+
+\node[value] (pw1) at (6,0.5) {3};
+\node[value] (pw2) at (6.8,0.5) {0};
+\node[value] (pw3) at (7.6,0.5) {-1};
+\node[value] (pw4) at (8.4,0.5) {1};
+\node[value] (pw5) at (9.2,0.5) {2};
+\node[above=0.2cm of pw3] {$\iota_{5 \to 5}(w) = (3, 0, -1, 1, 2)$};
+
+% Addition result
+\node[eq] at (10.5,1.25) {$+$};
+
+\node[value] (r1) at (12,1.25) {4};
+\node[value] (r2) at (12.8,1.25) {-1};
+\node[value] (r3) at (13.6,1.25) {1};
+\node[value] (r4) at (14.4,1.25) {1};
+\node[value] (r5) at (15.2,1.25) {2};
+\node[above=0.2cm of r3] {$v + w = (4, -1, 1, 1, 2)$};
+
+% Labels
+\node[below=0.5cm of v2] {\footnotesize Dimension 3};
+\node[below=0.5cm of w3] {\footnotesize Dimension 5};
+\node[below=0.5cm of pv3] {\footnotesize Padded to 5};
+\node[below=0.5cm of pw3] {\footnotesize Already 5};
+\node[below=0.5cm of r3] {\footnotesize Result dimension 5};
+
+\end{tikzpicture}
+\caption{Zero-padding equivalence in VSLA. Two vectors of different dimensions become equivalent after padding to a common dimension, enabling automatic variable-shape operations. Blue cells contain actual values, gray cells represent trailing zeros.}
+\label{fig:zeropadding}
+\end{figure}
+
 % ================================================================
 \section{Mathematical Foundations}
 \label{sec:foundations}
@@ -204,6 +268,33 @@ when expanding the convolution index arithmetic. Thus both products have degree 
 The map
 \(\Phi\bigl([(d,v)]\bigr):=\sum_{i=0}^{d-1} v_{i+1}\,x^{i}\) is a semiring isomorphism \(D\cong\mathbb R[x]\).
 \end{theorem}
+\begin{proof}
+We verify that $\Phi$ is a well-defined semiring homomorphism, then show bijectivity.
+
+\textit{Well-definedness:} If $[(d_1,v)] = [(d_2,w)]$, then after padding to $n = \max(d_1,d_2)$, we have $\iota_{d_1 \to n}(v) = \iota_{d_2 \to n}(w)$. This means $v_i = w_i$ for $i = 1,\ldots,\min(d_1,d_2)$ and the remaining components are zero. Thus $\Phi([(d_1,v)]) = \sum_{i=0}^{d_1-1} v_{i+1} x^i = \sum_{i=0}^{d_2-1} w_{i+1} x^i = \Phi([(d_2,w)])$.
+
+\textit{Additive homomorphism:} For $a = [(d_1,v)], b = [(d_2,w)]$ with $n = \max(d_1,d_2)$:
+\begin{align}
+\Phi(a + b) &= \Phi([(n, \iota_{d_1 \to n}(v) + \iota_{d_2 \to n}(w))]) \\
+&= \sum_{i=0}^{n-1} (\iota_{d_1 \to n}(v)_{i+1} + \iota_{d_2 \to n}(w)_{i+1}) x^i \\
+&= \sum_{i=0}^{n-1} \iota_{d_1 \to n}(v)_{i+1} x^i + \sum_{i=0}^{n-1} \iota_{d_2 \to n}(w)_{i+1} x^i \\
+&= \Phi(a) + \Phi(b)
+\end{align}
+
+\textit{Multiplicative homomorphism:} For convolution $a \otimes_c b = [(d_1+d_2-1, v \ast w)]$:
+\begin{align}
+\Phi(a \otimes_c b) &= \sum_{k=0}^{d_1+d_2-2} (v \ast w)_{k+1} x^k \\
+&= \sum_{k=0}^{d_1+d_2-2} \left(\sum_{i+j=k+1} v_i w_j\right) x^k \\
+&= \sum_{i=1}^{d_1} \sum_{j=1}^{d_2} v_i w_j x^{i+j-2} \\
+&= \left(\sum_{i=0}^{d_1-1} v_{i+1} x^i\right)\left(\sum_{j=0}^{d_2-1} w_{j+1} x^j\right) \\
+&= \Phi(a) \cdot \Phi(b)
+\end{align}
+
+\textit{Surjectivity:} Every polynomial $p(x) = \sum_{i=0}^{d-1} a_i x^i \in \mathbb{R}[x]$ equals $\Phi([(d, (a_0, a_1, \ldots, a_{d-1}))])$.
+
+\textit{Injectivity:} If $\Phi([(d_1,v)]) = \Phi([(d_2,w)])$, then the polynomials have identical coefficients, so after padding both vectors have the same components, hence $[(d_1,v)] = [(d_2,w)]$.
+\qedhere
+\end{proof}
 
 \begin{theorem}[Completion]\label{thm:completion}
 Equip \(D\) with the norm \(\lVert[(d,v)]\rVert_1:=\sum_{i=1}^{d}|v_i|\).  The Cauchy completion of \(D\) is isomorphic to the power‑series ring \(\mathbb R[[x]]\).
@@ -226,6 +317,46 @@ Define
 \begin{theorem}
 \(\bigl(D,+,\otimes_K,0,1\bigr)\) is a non‑commutative semiring.
 \end{theorem}
+\begin{proof}
+We verify the semiring axioms systematically.
+
+\textit{Additive structure:} $(D,+,0)$ is already a commutative monoid by Theorem~\ref{thm:add}.
+
+\textit{Associativity of $\otimes_K$:} For $a = [(d_1,u)]$, $b = [(d_2,v)]$, $c = [(d_3,w)]$:
+\begin{align}
+(a \otimes_K b) \otimes_K c &= [(d_1 d_2, u \otimes_K v)] \otimes_K [(d_3,w)] \\
+&= [(d_1 d_2 d_3, (u \otimes_K v) \otimes_K w)]
+\end{align}
+and
+\begin{align}
+a \otimes_K (b \otimes_K c) &= [(d_1,u)] \otimes_K [(d_2 d_3, v \otimes_K w)] \\
+&= [(d_1 d_2 d_3, u \otimes_K (v \otimes_K w)]
+\end{align}
+Both expressions yield vectors in $\mathbb{R}^{d_1 d_2 d_3}$ with components $(u \otimes_K v \otimes_K w)_{i,j,k} = u_i v_j w_k$ in the lexicographic order, so they are equal.
+
+\textit{Multiplicative identity:} For $1 = [(1,[1])]$ and any $a = [(d,v)]$:
+\[1 \otimes_K a = [(1 \cdot d, [1] \otimes_K v)] = [(d, (1 \cdot v_1, 1 \cdot v_2, \ldots, 1 \cdot v_d))] = [(d,v)] = a\]
+Similarly, $a \otimes_K 1 = a$.
+
+\textit{Distributivity:} For $a = [(d_1,u)]$, $b = [(d_2,v)]$, $c = [(d_2,w)]$:
+\begin{align}
+a \otimes_K (b + c) &= [(d_1,u)] \otimes_K [(d_2, v + w)] \\
+&= [(d_1 d_2, u \otimes_K (v + w))] \\
+&= [(d_1 d_2, (u_1(v_1 + w_1), \ldots, u_1(v_{d_2} + w_{d_2}), \\
+&\qquad\qquad u_2(v_1 + w_1), \ldots, u_{d_1}(v_{d_2} + w_{d_2})))] \\
+&= [(d_1 d_2, (u \otimes_K v) + (u \otimes_K w))] \\
+&= a \otimes_K b + a \otimes_K c
+\end{align}
+Right distributivity follows similarly.
+
+\textit{Absorption by zero:} $0 \otimes_K a = [(0 \cdot d, \emptyset)] = 0$ and $a \otimes_K 0 = 0$ by the definition of Kronecker product with the empty vector.
+
+\textit{Non-commutativity:} Consider $a = [(2, (1,0))]$ and $b = [(2, (0,1))]$. Then:
+\[a \otimes_K b = [(4, (1 \cdot 0, 1 \cdot 1, 0 \cdot 0, 0 \cdot 1))] = [(4, (0,1,0,0))]\]
+\[b \otimes_K a = [(4, (0 \cdot 1, 0 \cdot 0, 1 \cdot 1, 1 \cdot 0))] = [(4, (0,0,1,0))]\]
+Since $(0,1,0,0) \neq (0,0,1,0)$, we have $a \otimes_K b \neq b \otimes_K a$.
+\qedhere
+\end{proof}
 
 \begin{proposition}\label{prop:commCase}
 $x\otimes_K y = y\otimes_K x$ iff $\deg x =1$ or $\deg y =1$ (i.e. one operand is scalar).
@@ -247,10 +378,42 @@ A \emph{shape‑semiring} is a semiring $S$ equipped with $\deg\colon S\to\mathb
 
 The convolution and Kronecker models are shape‑semirings.
 
+\begin{lemma}[Zero-Length Edge Case]\label{lem:zeroLength}
+For the zero element $0 = [(0,[])]$ and any $a \in D$:
+\begin{enumerate}[leftmargin=2em]
+\item $0 + a = a + 0 = a$ (additive identity)
+\item $0 \otimes_c a = a \otimes_c 0 = 0$ (convolution absorption)  
+\item $0 \otimes_K a = a \otimes_K 0 = 0$ (Kronecker absorption)
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+(1) By definition, $0 + a = [(0,[])] + [(d,v)] = [(\max(0,d), \iota_{0 \to d}([]) + \iota_{d \to d}(v))] = [(d, 0 + v)] = [(d,v)] = a$.
+
+(2) For convolution, $0 \otimes_c a = [(0,[])] \otimes_c [(d,v)] = 0$ by the first case in the convolution definition since $0 \cdot d = 0$.
+
+(3) For Kronecker product, $0 \otimes_K a = [(0 \cdot d, [] \otimes_K v)] = [(0,[])] = 0$ since the empty vector has zero dimension.
+\qedhere
+\end{proof}
+
 \begin{theorem}[Matrix Product]
 For an $m\times n$ shape‑matrix $A=(a_{ij})$ and an $n\times p$ shape‑matrix $B=(b_{jk})$ over a shape‑semiring,
 \[(AB)_{ik}=\sum_{j=1}^{n} a_{ij}\otimes b_{jk}\] exists and yields an $m\times p$ shape‑matrix.
 \end{theorem}
+\begin{proof}
+The sum $\sum_{j=1}^{n} a_{ij}\otimes b_{jk}$ is well-defined since addition is associative and commutative in the shape-semiring. 
+
+For the degree bound: Since $\deg(x+y) \leq \max(\deg x, \deg y)$ and $\deg(xy) = \deg x \cdot \deg y$ in a shape-semiring, we have:
+\[\deg((AB)_{ik}) = \deg\left(\sum_{j=1}^{n} a_{ij}\otimes b_{jk}\right) \leq \max_{j=1,\ldots,n} \deg(a_{ij}\otimes b_{jk}) = \max_{j=1,\ldots,n} \deg(a_{ij}) \cdot \deg(b_{jk})\]
+
+This shows that each entry of $AB$ is a well-defined element of the shape-semiring with bounded degree. The associativity of matrix multiplication follows from the distributivity and associativity of the underlying semiring operations:
+\begin{align}
+((AB)C)_{ik} &= \sum_{\ell=1}^{p} (AB)_{i\ell} \otimes c_{\ell k} = \sum_{\ell=1}^{p} \left(\sum_{j=1}^{n} a_{ij} \otimes b_{j\ell}\right) \otimes c_{\ell k} \\
+&= \sum_{\ell=1}^{p} \sum_{j=1}^{n} (a_{ij} \otimes b_{j\ell}) \otimes c_{\ell k} = \sum_{j=1}^{n} \sum_{\ell=1}^{p} a_{ij} \otimes (b_{j\ell} \otimes c_{\ell k}) \\
+&= \sum_{j=1}^{n} a_{ij} \otimes \left(\sum_{\ell=1}^{p} b_{j\ell} \otimes c_{\ell k}\right) = \sum_{j=1}^{n} a_{ij} \otimes (BC)_{jk} = (A(BC))_{ik}
+\end{align}
+where we used distributivity to factor products over sums.
+\qedhere
+\end{proof}
 
 \subsection{Rank, Spectrum and Complexity}
 \begin{theorem}[Complexity]\label{thm:complexity}

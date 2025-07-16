@@ -51,6 +51,7 @@ typedef struct {
     size_t capacity;            /**< Allocated capacity */
     vsla_tensor_t** gradients;  /**< Gradient storage */
     size_t num_gradients;       /**< Number of gradients */
+    size_t grad_capacity;       /**< Gradient array capacity */
 } vsla_tape_t;
 
 /**
@@ -149,6 +150,7 @@ vsla_error_t vsla_scale_backward(vsla_tensor_t* grad_in, double* grad_scalar,
 vsla_error_t vsla_hadamard_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b,
                                     const vsla_tensor_t* grad_out,
                                     const vsla_tensor_t* a, const vsla_tensor_t* b);
+
 
 #ifdef __cplusplus
 }

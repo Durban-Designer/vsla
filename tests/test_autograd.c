@@ -230,22 +230,8 @@ static int test_scaling_backward(void) {
     vsla_set_f64(a, &idx0, 2.0); vsla_set_f64(a, &idx1, 3.0);
     
     // Compute b = 5 * a
-    vsla_tensor_t* a_copy = vsla_copy(a);
-    if (!a_copy) {
-        vsla_free(a); vsla_free(b); vsla_tape_free(tape);
-        return 0;
-    }
-    
-    // Copy values from a_copy to b
-    for (int i = 0; i < 2; i++) {
-        double val;
-        uint64_t idx = i;
-        vsla_get_f64(a_copy, &idx, &val);
-        vsla_set_f64(b, &idx, val);
-    }
-    vsla_free(a_copy);
     double scalar = 5.0;
-    vsla_scale(b, b, scalar);
+    vsla_scale(b, a, scalar);
     
     // Record operation
     vsla_tensor_t* inputs[] = {a};
@@ -382,12 +368,11 @@ static void run_autograd_tests(void) {
     RUN_TEST(test_tape_creation);
     RUN_TEST(test_operation_recording);
     RUN_TEST(test_gradient_management);
-    // Disable problematic tests for now
-    // RUN_TEST(test_gradient_clearing);
-    // RUN_TEST(test_addition_backward);
-    // RUN_TEST(test_scaling_backward);
+    RUN_TEST(test_gradient_clearing);
+    RUN_TEST(test_addition_backward);
+    RUN_TEST(test_scaling_backward);
     RUN_TEST(test_autograd_error_handling);
-    // RUN_TEST(test_multiple_operations);
+    RUN_TEST(test_multiple_operations);
 }
 
 static const test_suite_t autograd_suite = {

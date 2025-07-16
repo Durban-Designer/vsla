@@ -1,10 +1,12 @@
-# libvsla: Variable-Shape Linear Algebra Library
+# VSLA: Variable-Shape Linear Algebra
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/your-org/libvsla)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/username/vsla)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![C99](https://img.shields.io/badge/C-99-blue.svg)](https://en.wikipedia.org/wiki/C99)
 
-A high-performance C99 library implementing Variable-Shape Linear Algebra (VSLA), where vector and matrix dimensions are treated as intrinsic data rather than rigid constraints.
+**Mathematically rigorous tensor operations that adapt to dynamic dimensions.**
+
+VSLA treats dimension as intrinsic data rather than a rigid constraint, enabling principled variable-shape computation through semiring structures with provable algebraic identities.
 
 ## 🎯 Overview
 
