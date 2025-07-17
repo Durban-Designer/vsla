@@ -1,5 +1,6 @@
 # Build directories
 build/
+build_*/
 **/build/
 cmake-build-*/
 out/
@@ -43,6 +44,10 @@ dist/
 venv/
 ENV/
 env/
+lib/
+lib64
+bin/
+pyvenv.cfg
 
 # IDE files
 .vscode/
@@ -76,6 +81,8 @@ docs/html/
 *.tmp
 *.temp
 .cache/
+test_stack_*
+debug_stack*
 
 # Coverage
 *.gcov

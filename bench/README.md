@@ -4,26 +4,35 @@ This directory contains comprehensive benchmarks for the Variable-Shape Linear A
 
 ## Overview
 
-The benchmark suite measures VSLA performance against traditional approaches across key operations:
+The benchmark suite evaluates VSLA's **hardware-agnostic programming paradigm** against traditional manual optimization approaches. Since VSLA uses vendor libraries (cuFFT, cuBLAS, etc.) internally for optimal performance, we compare programming paradigms rather than library performance.
 
-- **Vector Addition**: Variable-shape vs manual padding + BLAS
-- **Matrix-Vector Multiplication**: Model A convolution vs standard approaches  
-- **Kronecker Products**: Model B vs direct implementations
-- **FFT Convolution**: VSLA's FFT vs NumPy/SciPy implementations
+**Key Comparisons:**
+- **VSLA (auto-optimized)** vs **Manual vendor library usage**
+- **Variable-shape tensors** vs **Fixed-shape with manual padding**  
+- **Hardware abstraction** vs **Manual device management**
+- **Single unified API** vs **Multi-library integration**
 
 ## Benchmark Strategy
 
 ### Core Metrics
-- **Wall-clock time**: Primary performance measure (microseconds)
-- **Memory usage**: Peak RSS and allocation patterns
-- **Scalability**: Performance vs dimension size (64, 256, 1024, 4096, 16384)
-- **Statistical analysis**: Mean, std deviation, confidence intervals
+- **Development complexity**: Lines of code and implementation time
+- **Performance efficiency**: VSLA auto-optimization vs manual tuning
+- **Memory efficiency**: Variable-shape vs padded memory usage
+- **Maintenance cost**: Code complexity and error-prone operations
 
-### Competitors (Top 3 GPU Libraries)
-- **CuPy**: GPU-accelerated NumPy equivalent with CUDA
-- **cuBLAS**: NVIDIA's GPU-optimized BLAS library
-- **cuFFT**: NVIDIA's GPU-accelerated FFT library
-- **Legacy baselines**: OpenBLAS, NumPy/SciPy, FFTW for reference
+### Comparison Categories
+
+#### 1. Programming Paradigm
+- **VSLA**: `vsla_conv(ctx, output, signal, kernel);` (1 line)
+- **Manual**: Explicit cuFFT management, padding, device transfers (50+ lines)
+
+#### 2. Variable vs Fixed Shapes  
+- **VSLA**: Natural variable shapes with automatic optimization
+- **Traditional**: Manual padding to power-of-2 sizes, wasted memory
+
+#### 3. Hardware Abstraction
+- **VSLA**: Automatic CPU/GPU selection and memory management
+- **Manual**: Explicit CUDA calls, device management, error handling
 
 ### Benchmarked Operations
 - **Vector Addition**: Element-wise addition with variable shapes

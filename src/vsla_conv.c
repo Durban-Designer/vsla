@@ -406,6 +406,29 @@ vsla_error_t vsla_matmul_conv(vsla_tensor_t** out, vsla_tensor_t** A,
     return VSLA_SUCCESS;
 }
 
+// Helper function to flip tensor elements (for convolution gradients)
+static vsla_error_t flip_tensor_1d(vsla_tensor_t** flipped, const vsla_tensor_t* input) {
+    if (!flipped || !input || input->rank != 1) {
+        return VSLA_ERROR_INVALID_ARGUMENT;
+    }
+    
+    *flipped = vsla_new(input->rank, input->shape, input->model, input->dtype);
+    if (!*flipped) {
+        return VSLA_ERROR_MEMORY;
+    }
+    
+    size_t n = input->shape[0];
+    size_t element_size = vsla_dtype_size(input->dtype);
+    
+    for (size_t i = 0; i < n; i++) {
+        size_t src_offset = i * element_size;
+        size_t dst_offset = (n - 1 - i) * element_size;
+        memcpy((char*)(*flipped)->data + dst_offset, (char*)input->data + src_offset, element_size);
+    }
+    
+    return VSLA_SUCCESS;
+}
+
 vsla_error_t vsla_conv_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b,
                                const vsla_tensor_t* grad_out,
                                const vsla_tensor_t* a, const vsla_tensor_t* b) {
@@ -413,10 +436,46 @@ vsla_error_t vsla_conv_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b,
         return VSLA_ERROR_NULL_POINTER;
     }
     
-    // For convolution, the gradient computation involves:
+    // For 1D convolution, the gradient computation involves:
     // grad_a = conv(grad_out, flip(b))
     // grad_b = conv(flip(a), grad_out)
-    // This is a placeholder - full implementation requires tensor flipping
     
-    return VSLA_ERROR_NOT_IMPLEMENTED;
+    // Only support 1D convolution for now
+    if (a->rank != 1 || b->rank != 1 || grad_out->rank != 1) {
+        return VSLA_ERROR_NOT_IMPLEMENTED; // Multi-dimensional not supported yet
+    }
+    
+    vsla_error_t err;
+    vsla_tensor_t* b_flipped = NULL;
+    vsla_tensor_t* a_flipped = NULL;
+    
+    // Create flipped versions
+    err = flip_tensor_1d(&b_flipped, b);
+    if (err != VSLA_SUCCESS) return err;
+    
+    err = flip_tensor_1d(&a_flipped, a);
+    if (err != VSLA_SUCCESS) {
+        vsla_free(b_flipped);
+        return err;
+    }
+    
+    // Compute grad_a = conv(grad_out, flip(b))
+    err = vsla_conv(grad_a, grad_out, b_flipped);
+    if (err != VSLA_SUCCESS) {
+        vsla_free(b_flipped);
+        vsla_free(a_flipped);
+        return err;
+    }
+    
+    // Compute grad_b = conv(flip(a), grad_out)
+    err = vsla_conv(grad_b, a_flipped, grad_out);
+    if (err != VSLA_SUCCESS) {
+        vsla_free(b_flipped);
+        vsla_free(a_flipped);
+        return err;
+    }
+    
+    vsla_free(b_flipped);
+    vsla_free(a_flipped);
+    return VSLA_SUCCESS;
 }

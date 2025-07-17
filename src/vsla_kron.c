@@ -384,10 +384,74 @@ vsla_error_t vsla_kron_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b,
         return VSLA_ERROR_NULL_POINTER;
     }
     
-    // For Kronecker product backward pass:
-    // grad_a = sum over j of grad_out[i,j] * b[j] for each i
-    // grad_b = sum over i of grad_out[i,j] * a[i] for each j
-    // This is a placeholder - full implementation requires tensor reshaping and summation
+    // For Kronecker product backward pass on 1D tensors:
+    // If c = a ⊗ b, then:
+    // grad_a[i] = sum_j(grad_out[i*len_b + j] * b[j])
+    // grad_b[j] = sum_i(grad_out[i*len_b + j] * a[i])
     
-    return VSLA_ERROR_NOT_IMPLEMENTED;
+    // Only support 1D tensors for now
+    if (a->rank != 1 || b->rank != 1 || grad_out->rank != 1) {
+        return VSLA_ERROR_NOT_IMPLEMENTED; // Multi-dimensional not supported yet
+    }
+    
+    size_t len_a = a->shape[0];
+    size_t len_b = b->shape[0];
+    
+    // Verify grad_out has the expected size
+    if (grad_out->shape[0] != len_a * len_b) {
+        return VSLA_ERROR_INVALID_ARGUMENT;
+    }
+    
+    // Initialize gradients to zero (using existing grad_a and grad_b)
+    vsla_error_t err = vsla_fill(grad_a, 0.0);
+    if (err != VSLA_SUCCESS) return err;
+    
+    err = vsla_fill(grad_b, 0.0);
+    if (err != VSLA_SUCCESS) return err;
+    
+    if (a->dtype == VSLA_DTYPE_F32) {
+        float* a_data = (float*)a->data;
+        float* b_data = (float*)b->data;
+        float* grad_out_data = (float*)grad_out->data;
+        float* grad_a_data = (float*)grad_a->data;
+        float* grad_b_data = (float*)grad_b->data;
+        
+        // Compute grad_a[i] = sum_j(grad_out[i*len_b + j] * b[j])
+        for (size_t i = 0; i < len_a; i++) {
+            for (size_t j = 0; j < len_b; j++) {
+                grad_a_data[i] += grad_out_data[i * len_b + j] * b_data[j];
+            }
+        }
+        
+        // Compute grad_b[j] = sum_i(grad_out[i*len_b + j] * a[i])
+        for (size_t j = 0; j < len_b; j++) {
+            for (size_t i = 0; i < len_a; i++) {
+                grad_b_data[j] += grad_out_data[i * len_b + j] * a_data[i];
+            }
+        }
+    } else if (a->dtype == VSLA_DTYPE_F64) {
+        double* a_data = (double*)a->data;
+        double* b_data = (double*)b->data;
+        double* grad_out_data = (double*)grad_out->data;
+        double* grad_a_data = (double*)grad_a->data;
+        double* grad_b_data = (double*)grad_b->data;
+        
+        // Compute grad_a[i] = sum_j(grad_out[i*len_b + j] * b[j])
+        for (size_t i = 0; i < len_a; i++) {
+            for (size_t j = 0; j < len_b; j++) {
+                grad_a_data[i] += grad_out_data[i * len_b + j] * b_data[j];
+            }
+        }
+        
+        // Compute grad_b[j] = sum_i(grad_out[i*len_b + j] * a[i])
+        for (size_t j = 0; j < len_b; j++) {
+            for (size_t i = 0; i < len_a; i++) {
+                grad_b_data[j] += grad_out_data[i * len_b + j] * a_data[i];
+            }
+        }
+    } else {
+        return VSLA_ERROR_INVALID_ARGUMENT; // Unsupported data type
+    }
+    
+    return VSLA_SUCCESS;
 }

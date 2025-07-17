@@ -151,6 +151,34 @@ vsla_error_t vsla_hadamard_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b
                                     const vsla_tensor_t* grad_out,
                                     const vsla_tensor_t* a, const vsla_tensor_t* b);
 
+/**
+ * @brief Backward function for matrix multiplication
+ */
+vsla_error_t vsla_matmul_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b,
+                                  const vsla_tensor_t* grad_out,
+                                  const vsla_tensor_t* a, const vsla_tensor_t* b);
+
+/**
+ * @brief Backward function for transpose operation
+ */
+vsla_error_t vsla_transpose_backward(vsla_tensor_t* grad_input,
+                                     const vsla_tensor_t* grad_out,
+                                     const vsla_tensor_t* input);
+
+/**
+ * @brief Backward function for reshape operation
+ */
+vsla_error_t vsla_reshape_backward(vsla_tensor_t* grad_input,
+                                   const vsla_tensor_t* grad_out,
+                                   const vsla_tensor_t* input);
+
+/**
+ * @brief Backward function for rank padding operation
+ */
+vsla_error_t vsla_pad_rank_backward(vsla_tensor_t* grad_input,
+                                    const vsla_tensor_t* grad_out,
+                                    const vsla_tensor_t* input);
+
 
 #ifdef __cplusplus
 }

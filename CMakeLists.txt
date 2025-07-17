@@ -10,6 +10,10 @@ option(VSLA_ENABLE_TESTS "Enable testing" ON)
 option(VSLA_ENABLE_BENCHMARKS "Enable benchmarks" OFF)
 option(USE_FFTW "Use FFTW library for FFT operations" OFF)
 option(VSLA_ENABLE_CUDA "Enable CUDA GPU acceleration" OFF)
+option(VSLA_ENABLE_CUFFT "Enable cuFFT for GPU FFT operations" OFF)
+option(VSLA_ENABLE_ROCFFT "Enable rocFFT for AMD GPU FFT operations" OFF)
+option(VSLA_ENABLE_MKL "Enable Intel MKL for CPU FFT operations" OFF)
+option(VSLA_UNIFIED_API "Build unified hardware-agnostic API" ON)
 
 # C99 standard
 set(CMAKE_C_STANDARD 99)
@@ -32,6 +36,36 @@ if(USE_FFTW)
     find_package(PkgConfig)
     if(PkgConfig_FOUND)
         pkg_check_modules(FFTW fftw3)
+    endif()
+endif()
+
+# Vendor FFT libraries
+if(VSLA_ENABLE_CUFFT)
+    find_package(CUDAToolkit REQUIRED)
+    if(NOT CUDAToolkit_cufft_FOUND)
+        message(FATAL_ERROR "cuFFT not found but VSLA_ENABLE_CUFFT is ON")
+    endif()
+endif()
+
+if(VSLA_ENABLE_ROCFFT)
+    find_package(rocfft QUIET)
+    if(NOT rocfft_FOUND)
+        message(WARNING "rocFFT not found, disabling rocFFT support")
+        set(VSLA_ENABLE_ROCFFT OFF)
+    endif()
+endif()
+
+if(VSLA_ENABLE_MKL)
+    find_package(MKL QUIET)
+    if(NOT MKL_FOUND)
+        find_package(PkgConfig)
+        if(PkgConfig_FOUND)
+            pkg_check_modules(MKL mkl-dynamic-lp64)
+        endif()
+        if(NOT MKL_FOUND)
+            message(WARNING "Intel MKL not found, disabling MKL support")
+            set(VSLA_ENABLE_MKL OFF)
+        endif()
     endif()
 endif()
 
@@ -73,6 +107,26 @@ set(VSLA_SOURCES
     src/vsla_utils.c
 )
 
+# Add unified API sources if enabled
+if(VSLA_UNIFIED_API)
+    list(APPEND VSLA_SOURCES 
+        src/vsla_unified.c
+    )
+endif()
+
+# Add vendor FFT sources
+if(VSLA_ENABLE_CUFFT)
+    list(APPEND VSLA_SOURCES src/vsla_fft_cufft.c)
+endif()
+
+if(VSLA_ENABLE_ROCFFT)
+    list(APPEND VSLA_SOURCES src/vsla_fft_rocfft.c)
+endif()
+
+if(VSLA_ENABLE_MKL)
+    list(APPEND VSLA_SOURCES src/vsla_fft_mkl.c)
+endif()
+
 # Add GPU sources conditionally
 if(VSLA_ENABLE_CUDA)
     list(APPEND VSLA_SOURCES src/vsla_gpu.cu)
@@ -110,6 +164,56 @@ if(VSLA_ENABLE_CUDA)
     if(BUILD_SHARED_LIBS)
         target_compile_definitions(vsla_shared PRIVATE VSLA_ENABLE_CUDA)
         target_link_libraries(vsla_shared PRIVATE CUDA::cudart)
+    endif()
+endif()
+
+# Vendor FFT library configuration
+if(VSLA_ENABLE_CUFFT)
+    target_compile_definitions(vsla_static PRIVATE VSLA_ENABLE_CUFFT)
+    target_link_libraries(vsla_static PRIVATE CUDA::cufft)
+    
+    if(BUILD_SHARED_LIBS)
+        target_compile_definitions(vsla_shared PRIVATE VSLA_ENABLE_CUFFT)
+        target_link_libraries(vsla_shared PRIVATE CUDA::cufft)
+    endif()
+endif()
+
+if(VSLA_ENABLE_ROCFFT)
+    target_compile_definitions(vsla_static PRIVATE VSLA_ENABLE_ROCFFT)
+    target_link_libraries(vsla_static PRIVATE roc::rocfft)
+    
+    if(BUILD_SHARED_LIBS)
+        target_compile_definitions(vsla_shared PRIVATE VSLA_ENABLE_ROCFFT)
+        target_link_libraries(vsla_shared PRIVATE roc::rocfft)
+    endif()
+endif()
+
+if(VSLA_ENABLE_MKL)
+    target_compile_definitions(vsla_static PRIVATE VSLA_ENABLE_MKL)
+    if(TARGET MKL::MKL)
+        target_link_libraries(vsla_static PRIVATE MKL::MKL)
+    else()
+        target_link_libraries(vsla_static PRIVATE ${MKL_LIBRARIES})
+        target_include_directories(vsla_static PRIVATE ${MKL_INCLUDE_DIRS})
+    endif()
+    
+    if(BUILD_SHARED_LIBS)
+        target_compile_definitions(vsla_shared PRIVATE VSLA_ENABLE_MKL)
+        if(TARGET MKL::MKL)
+            target_link_libraries(vsla_shared PRIVATE MKL::MKL)
+        else()
+            target_link_libraries(vsla_shared PRIVATE ${MKL_LIBRARIES})
+            target_include_directories(vsla_shared PRIVATE ${MKL_INCLUDE_DIRS})
+        endif()
+    endif()
+endif()
+
+# Unified API configuration
+if(VSLA_UNIFIED_API)
+    target_compile_definitions(vsla_static PRIVATE VSLA_UNIFIED_API)
+    
+    if(BUILD_SHARED_LIBS)
+        target_compile_definitions(vsla_shared PRIVATE VSLA_UNIFIED_API)
     endif()
 endif()
 

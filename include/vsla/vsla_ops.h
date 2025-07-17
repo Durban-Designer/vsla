@@ -77,6 +77,17 @@ vsla_error_t vsla_hadamard(vsla_tensor_t* out, const vsla_tensor_t* a,
                            const vsla_tensor_t* b);
 
 /**
+ * @brief Matrix multiplication for 2D tensors
+ * 
+ * @param out Output tensor (pre-allocated)
+ * @param a First matrix
+ * @param b Second matrix
+ * @return VSLA_SUCCESS or error code
+ */
+vsla_error_t vsla_matmul(vsla_tensor_t* out, const vsla_tensor_t* a, 
+                         const vsla_tensor_t* b);
+
+/**
  * @brief Transpose a 2D tensor (matrix)
  * 
  * @param out Output tensor (pre-allocated)

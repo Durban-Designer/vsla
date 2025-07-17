@@ -498,6 +498,20 @@ The benchmark suite validates theoretical complexity claims:
 - **Variable Shapes**: `examples/variable_shapes.c`
 - **Model Comparison**: `examples/models.c`
 
+## 📚 Documentation
+
+### Architecture Guide
+For developers who need to understand the codebase structure:
+- **[Architecture Documentation](docs/ARCHITECTURE.md)** - Comprehensive overview of all source files, modules, and dependencies
+
+### API Reference
+- **[Header Files](include/vsla/)** - Public API definitions with inline documentation
+- **[Examples](examples/)** - Usage examples and tutorials
+
+### Research Papers
+- **[docs/vsla_paper.tex](docs/vsla_paper.tex)** - The foundational research paper
+- **[STATUS.md](STATUS.md)** - Current implementation status and progress
+
 ## 🤝 Contributing
 
 ### Development Setup

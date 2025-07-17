@@ -446,6 +446,62 @@ vsla_error_t vsla_hadamard(vsla_tensor_t* out, const vsla_tensor_t* a,
     return VSLA_SUCCESS;
 }
 
+vsla_error_t vsla_matmul(vsla_tensor_t* out, const vsla_tensor_t* a, 
+                         const vsla_tensor_t* b) {
+    if (!out || !a || !b) {
+        return VSLA_ERROR_NULL_POINTER;
+    }
+    
+    // Only support 2D matrix multiplication for now
+    if (a->rank != 2 || b->rank != 2 || out->rank != 2) {
+        return VSLA_ERROR_INVALID_ARGUMENT;
+    }
+    
+    uint64_t m = a->shape[0];    // rows in A
+    uint64_t k = a->shape[1];    // cols in A (must match rows in B)
+    uint64_t n = b->shape[1];    // cols in B
+    
+    // Check dimensions match
+    if (b->shape[0] != k) {
+        return VSLA_ERROR_DIMENSION_MISMATCH;
+    }
+    
+    // Check output dimensions
+    if (out->shape[0] != m || out->shape[1] != n) {
+        return VSLA_ERROR_DIMENSION_MISMATCH;
+    }
+    
+    // Initialize output to zero
+    vsla_error_t err = vsla_fill(out, 0.0);
+    if (err != VSLA_SUCCESS) return err;
+    
+    // Perform matrix multiplication: C[i][j] = sum(A[i][k] * B[k][j])
+    for (uint64_t i = 0; i < m; i++) {
+        for (uint64_t j = 0; j < n; j++) {
+            double sum = 0.0;
+            for (uint64_t ki = 0; ki < k; ki++) {
+                double a_val, b_val;
+                uint64_t a_indices[2] = {i, ki};
+                uint64_t b_indices[2] = {ki, j};
+                
+                err = vsla_get_f64(a, a_indices, &a_val);
+                if (err != VSLA_SUCCESS) return err;
+                
+                err = vsla_get_f64(b, b_indices, &b_val);
+                if (err != VSLA_SUCCESS) return err;
+                
+                sum += a_val * b_val;
+            }
+            
+            uint64_t out_indices[2] = {i, j};
+            err = vsla_set_f64(out, out_indices, sum);
+            if (err != VSLA_SUCCESS) return err;
+        }
+    }
+    
+    return VSLA_SUCCESS;
+}
+
 vsla_error_t vsla_transpose(vsla_tensor_t* out, const vsla_tensor_t* tensor) {
     if (!out || !tensor) {
         return VSLA_ERROR_NULL_POINTER;
