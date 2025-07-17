@@ -11,7 +11,7 @@
 #include "vsla/vsla_kron.h"
 #include "vsla/vsla_tensor.h"
 #include "vsla/vsla_core.h"
-#include "vsla/vsla_ops.h"
+#include "vsla/vsla_backend_cpu.h"
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
@@ -72,7 +72,7 @@ vsla_error_t vsla_kron_naive(vsla_tensor_t* out, const vsla_tensor_t* a,
     if (err != VSLA_SUCCESS) return err;
     
     // Zero the output tensor
-    err = vsla_fill(out, 0.0);
+    err = vsla_fill_basic(out, 0.0);
     if (err != VSLA_SUCCESS) return err;
     
     // For 1D case (most common)
@@ -188,7 +188,7 @@ vsla_error_t vsla_kron_tiled(vsla_tensor_t* out, const vsla_tensor_t* a,
     }
     
     // Zero the output tensor
-    err = vsla_fill(out, 0.0);
+    err = vsla_fill_basic(out, 0.0);
     if (err != VSLA_SUCCESS) return err;
     
     // Tiled implementation for 1D case
@@ -223,7 +223,7 @@ vsla_error_t vsla_kron_tiled(vsla_tensor_t* out, const vsla_tensor_t* a,
     return VSLA_SUCCESS;
 }
 
-vsla_error_t vsla_kron(vsla_tensor_t* out, const vsla_tensor_t* a, 
+vsla_error_t vsla_kron_basic(vsla_tensor_t* out, const vsla_tensor_t* a, 
                        const vsla_tensor_t* b) {
     vsla_error_t err = validate_kron_inputs(out, a, b);
     if (err != VSLA_SUCCESS) return err;
@@ -280,7 +280,7 @@ vsla_tensor_t* vsla_from_monoid_algebra(const double* coeffs,
     if (!tensor) return NULL;
     
     // Initialize to zero
-    if (vsla_fill(tensor, 0.0) != VSLA_SUCCESS) {
+    if (vsla_cpu_fill(tensor, 0.0) != VSLA_SUCCESS) {
         vsla_free(tensor);
         return NULL;
     }
@@ -312,7 +312,7 @@ vsla_error_t vsla_matmul_kron(vsla_tensor_t** out, vsla_tensor_t** A,
         for (size_t j = 0; j < n; j++) {
             // Initialize output[i][j] to zero
             if (out[i * n + j]) {
-                vsla_error_t err = vsla_fill(out[i * n + j], 0.0);
+                vsla_error_t err = vsla_fill_basic(out[i * n + j], 0.0);
                 if (err != VSLA_SUCCESS) return err;
             }
             
@@ -335,14 +335,14 @@ vsla_error_t vsla_matmul_kron(vsla_tensor_t** out, vsla_tensor_t** A,
                 if (!temp) return VSLA_ERROR_MEMORY;
                 
                 // Compute Kronecker product
-                vsla_error_t err = vsla_kron(temp, a_elem, b_elem);
+                vsla_error_t err = vsla_kron_basic(temp, a_elem, b_elem);
                 if (err != VSLA_SUCCESS) {
                     vsla_free(temp);
                     return err;
                 }
                 
                 // Add to output[i][j] (requires addition with padding)
-                err = vsla_add(out[i * n + j], out[i * n + j], temp);
+                err = vsla_cpu_add(out[i * n + j], out[i * n + j], temp);
                 vsla_free(temp);
                 if (err != VSLA_SUCCESS) return err;
             }
@@ -403,10 +403,10 @@ vsla_error_t vsla_kron_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b,
     }
     
     // Initialize gradients to zero (using existing grad_a and grad_b)
-    vsla_error_t err = vsla_fill(grad_a, 0.0);
+    vsla_error_t err = vsla_fill_basic(grad_a, 0.0);
     if (err != VSLA_SUCCESS) return err;
     
-    err = vsla_fill(grad_b, 0.0);
+    err = vsla_cpu_fill(grad_b, 0.0);
     if (err != VSLA_SUCCESS) return err;
     
     if (a->dtype == VSLA_DTYPE_F32) {

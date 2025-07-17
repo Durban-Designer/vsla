@@ -145,6 +145,24 @@ vsla_tensor_t* vsla_new(uint8_t rank, const uint64_t shape[],
         
         /* Zero-initialize data */
         memset(tensor->data, 0, data_size);
+        
+        /* Initialize new fields */
+        tensor->cpu_data = tensor->data;  /* For now, data and cpu_data point to same memory */
+        tensor->gpu_data = NULL;
+        tensor->data_size = data_size;
+        tensor->location = VSLA_BACKEND_CPU;
+        tensor->cpu_valid = true;
+        tensor->gpu_valid = false;
+        tensor->ctx = NULL;  /* Will be set by context when creating tensor */
+    } else {
+        /* For rank 0 tensors */
+        tensor->cpu_data = NULL;
+        tensor->gpu_data = NULL;
+        tensor->data_size = 0;
+        tensor->location = VSLA_BACKEND_CPU;
+        tensor->cpu_valid = true;
+        tensor->gpu_valid = false;
+        tensor->ctx = NULL;
     }
     
     return tensor;
@@ -156,13 +174,19 @@ void vsla_free(vsla_tensor_t* tensor) {
     free(tensor->shape);
     free(tensor->cap);
     free(tensor->stride);
+    
+    /* Free CPU data (data and cpu_data point to same memory) */
     if (tensor->data) {
         aligned_free_wrapper(tensor->data);
     }
+    
+    /* GPU data would be freed by the backend/context if it exists */
+    /* The context is responsible for freeing GPU memory */
+    
     free(tensor);
 }
 
-vsla_tensor_t* vsla_copy(const vsla_tensor_t* tensor) {
+vsla_tensor_t* vsla_copy_basic(const vsla_tensor_t* tensor) {
     if (!tensor) return NULL;
     
     vsla_tensor_t* copy = vsla_new(tensor->rank, tensor->shape, 
@@ -170,11 +194,14 @@ vsla_tensor_t* vsla_copy(const vsla_tensor_t* tensor) {
                                    (vsla_dtype_t)tensor->dtype);
     if (!copy) return NULL;
     
-    /* Copy data */
-    if (tensor->rank > 0 && tensor->data) {
+    /* Copy data - only copy CPU data for basic copy */
+    if (tensor->rank > 0 && tensor->data && tensor->cpu_valid) {
         size_t data_size = vsla_capacity(tensor) * vsla_dtype_size(tensor->dtype);
         memcpy(copy->data, tensor->data, data_size);
     }
+    
+    /* Copy inherits the context from the original */
+    copy->ctx = tensor->ctx;
     
     return copy;
 }
@@ -189,7 +216,7 @@ vsla_tensor_t* vsla_ones(uint8_t rank, const uint64_t shape[],
     vsla_tensor_t* tensor = vsla_new(rank, shape, model, dtype);
     if (!tensor) return NULL;
     
-    vsla_error_t err = vsla_fill(tensor, 1.0);
+    vsla_error_t err = vsla_fill_basic(tensor, 1.0);
     if (err != VSLA_SUCCESS) {
         vsla_free(tensor);
         return NULL;
@@ -281,7 +308,7 @@ vsla_error_t vsla_set_f64(vsla_tensor_t* tensor, const uint64_t indices[],
     return VSLA_SUCCESS;
 }
 
-vsla_error_t vsla_fill(vsla_tensor_t* tensor, double value) {
+vsla_error_t vsla_fill_basic(vsla_tensor_t* tensor, double value) {
     if (!tensor) {
         return VSLA_ERROR_NULL_POINTER;
     }
@@ -363,7 +390,7 @@ void vsla_print(const vsla_tensor_t* tensor, const char* name) {
         if (tensor->rank == 1 && tensor->shape[0] <= 10) {
             printf("  Data: [");
             for (uint64_t i = 0; i < tensor->shape[0]; i++) {
-                double val;
+                double val = 0.0;
                 uint64_t idx = i;
                 vsla_get_f64(tensor, &idx, &val);
                 printf("%.3f%s", val, i < tensor->shape[0] - 1 ? ", " : "");
@@ -395,7 +422,7 @@ vsla_tensor_t* vsla_one_element(vsla_model_t model, vsla_dtype_t dtype) {
     vsla_tensor_t* one = vsla_new(1, &shape, model, dtype);
     if (!one) return NULL;
     
-    vsla_error_t err = vsla_fill(one, 1.0);
+    vsla_error_t err = vsla_fill_basic(one, 1.0);
     if (err != VSLA_SUCCESS) {
         vsla_free(one);
         return NULL;

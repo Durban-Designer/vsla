@@ -9,6 +9,10 @@
 #define VSLA_TENSOR_H
 
 #include "vsla_core.h"
+#include <stdbool.h>
+
+/* Forward declarations */
+typedef struct vsla_context vsla_context_t;
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,7 +25,8 @@ extern "C" {
  * The tensor supports automatic zero-padding to make operations between
  * tensors of different shapes well-defined.
  */
-typedef struct {
+typedef struct vsla_tensor {
+    /* Core tensor info */
     uint8_t    rank;      /**< Number of axes (dimensions), 0-255 */
     uint8_t    model;     /**< Model: 0 = convolution, 1 = Kronecker */
     uint8_t    dtype;     /**< Data type: 0 = f64, 1 = f32 */
@@ -30,7 +35,20 @@ typedef struct {
     uint64_t  *shape;     /**< Logical extent per axis (length = rank) */
     uint64_t  *cap;       /**< Padded/allocated extent per axis */
     uint64_t  *stride;    /**< Byte strides for row-major traversal */
-    void      *data;      /**< Contiguous buffer, size = Π cap[i] * sizeof(dtype) */
+    
+    /* Memory management - backend specific */
+    void      *data;      /**< CPU data buffer (for compatibility) */
+    void      *cpu_data;  /**< CPU memory pointer */
+    void      *gpu_data;  /**< GPU memory pointer (if available) */
+    size_t     data_size; /**< Total data size in bytes */
+    
+    /* Data location and validity */
+    vsla_backend_t location;  /**< Current data location (CPU/GPU) */
+    bool       cpu_valid;     /**< CPU data is up-to-date */
+    bool       gpu_valid;     /**< GPU data is up-to-date */
+    
+    /* Context reference */
+    vsla_context_t *ctx; /**< Reference to owning context */
 } vsla_tensor_t;
 
 /**
@@ -61,7 +79,7 @@ void vsla_free(vsla_tensor_t* tensor);
  * @param tensor Tensor to copy
  * @return New tensor with copied data, or NULL on error
  */
-vsla_tensor_t* vsla_copy(const vsla_tensor_t* tensor);
+vsla_tensor_t* vsla_copy_basic(const vsla_tensor_t* tensor);
 
 /**
  * @brief Create a tensor filled with zeros
@@ -141,7 +159,7 @@ vsla_error_t vsla_set_f64(vsla_tensor_t* tensor, const uint64_t indices[],
  * @param value Value to fill with
  * @return VSLA_SUCCESS or error code
  */
-vsla_error_t vsla_fill(vsla_tensor_t* tensor, double value);
+vsla_error_t vsla_fill_basic(vsla_tensor_t* tensor, double value);
 
 /**
  * @brief Print tensor information to stdout

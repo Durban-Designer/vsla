@@ -1,22 +1,19 @@
 /**
  * @file vsla_backend_cuda.c
- * @brief NVIDIA CUDA backend implementation for VSLA
- * 
- * Provides GPU acceleration using CUDA and vendor libraries (cuFFT, cuBLAS).
- * 
+ * @brief CUDA GPU backend implementation with single-kernel operations
+ *
  * @copyright MIT License
  */
 
-#include "vsla/vsla_unified.h"
+#include "vsla/vsla_backend.h"
+#include "vsla/vsla_tensor.h"
 #include "vsla/vsla_core.h"
-#include "vsla/vsla_gpu.h"
 #include <stdlib.h>
 #include <string.h>
-#include <complex.h>
+#include <stdbool.h>
 
 #ifdef VSLA_ENABLE_CUDA
 #include <cuda_runtime.h>
-#include <cufft.h>
 
 // cuFFT error checking
 #define CUFFT_CHECK(call) do { \

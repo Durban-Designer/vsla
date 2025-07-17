@@ -11,7 +11,7 @@
 #include "vsla/vsla_autograd.h"
 #include "vsla/vsla_tensor.h"
 #include "vsla/vsla_core.h"
-#include "vsla/vsla_ops.h"
+#include "vsla/vsla_backend_cpu.h"
 #include "vsla/vsla_conv.h"
 #include "vsla/vsla_kron.h"
 #include <math.h>
@@ -154,7 +154,7 @@ vsla_error_t vsla_set_gradient(vsla_tape_t* tape, const vsla_tensor_t* tensor,
     if (!tape || !tensor || !gradient) return VSLA_ERROR_NULL_POINTER;
     
     int grad_idx = find_tensor_index(tape, tensor);
-    vsla_tensor_t* new_grad_copy = vsla_copy(gradient); // Create copy once
+    vsla_tensor_t* new_grad_copy = vsla_copy_basic(gradient); // Create copy once
     if (!new_grad_copy) {
         return VSLA_ERROR_MEMORY;
     }
@@ -217,10 +217,10 @@ vsla_error_t vsla_add_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b,
     
     // For addition: grad_a = grad_out, grad_b = grad_out
     // But need to handle broadcasting/padding correctly
-    vsla_error_t err = vsla_add(grad_a, grad_a, grad_out);
+    vsla_error_t err = vsla_cpu_add(grad_a, grad_a, grad_out);
     if (err != VSLA_SUCCESS) return err;
     
-    err = vsla_add(grad_b, grad_b, grad_out);
+    err = vsla_cpu_add(grad_b, grad_b, grad_out);
     return err;
 }
 
@@ -229,20 +229,20 @@ vsla_error_t vsla_sub_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b,
     if (!grad_a || !grad_b || !grad_out) return VSLA_ERROR_NULL_POINTER;
     
     // For subtraction: grad_a = grad_out, grad_b = -grad_out
-    vsla_error_t err = vsla_add(grad_a, grad_a, grad_out);
+    vsla_error_t err = vsla_cpu_add(grad_a, grad_a, grad_out);
     if (err != VSLA_SUCCESS) return err;
     
     // For grad_b = grad_b - grad_out, we need to negate grad_out
-    vsla_tensor_t* neg_grad_out = vsla_copy(grad_out);
+    vsla_tensor_t* neg_grad_out = vsla_copy_basic(grad_out);
     if (!neg_grad_out) return VSLA_ERROR_MEMORY;
     
-    err = vsla_scale(neg_grad_out, neg_grad_out, -1.0);
+    err = vsla_cpu_scale(neg_grad_out, neg_grad_out, -1.0);
     if (err != VSLA_SUCCESS) {
         vsla_free(neg_grad_out);
         return err;
     }
     
-    err = vsla_add(grad_b, grad_b, neg_grad_out);
+    err = vsla_cpu_add(grad_b, grad_b, neg_grad_out);
     vsla_free(neg_grad_out);
     
     return err;
@@ -254,29 +254,29 @@ vsla_error_t vsla_scale_backward(vsla_tensor_t* grad_in, double* grad_scalar,
     if (!grad_in || !grad_out || !input) return VSLA_ERROR_NULL_POINTER;
     
     // For scaling: grad_input = scalar * grad_out
-    vsla_tensor_t* scaled_grad = vsla_copy(grad_out);
+    vsla_tensor_t* scaled_grad = vsla_copy_basic(grad_out);
     if (!scaled_grad) return VSLA_ERROR_MEMORY;
     
-    vsla_error_t err = vsla_scale(scaled_grad, scaled_grad, scalar);
+    vsla_error_t err = vsla_cpu_scale(scaled_grad, scaled_grad, scalar);
     if (err != VSLA_SUCCESS) {
         vsla_free(scaled_grad);
         return err;
     }
     
-    err = vsla_add(grad_in, grad_in, scaled_grad);
+    err = vsla_cpu_add(grad_in, grad_in, scaled_grad);
     vsla_free(scaled_grad);
     
     if (grad_scalar) {
         // grad_scalar = sum(input * grad_out)
         // This is a simplified implementation
         // In practice, would need element-wise multiplication and summation
-        vsla_tensor_t* hadamard = vsla_copy(input);
+        vsla_tensor_t* hadamard = vsla_copy_basic(input);
         if (hadamard) {
             // Would implement hadamard product here
             // For now, just approximate
             double input_sum, grad_sum;
-            vsla_sum(input, &input_sum);
-            vsla_sum(grad_out, &grad_sum);
+            vsla_cpu_sum(input, &input_sum);
+            vsla_cpu_sum(grad_out, &grad_sum);
             *grad_scalar += input_sum * grad_sum / vsla_numel(input);
             vsla_free(hadamard);
         }
@@ -299,13 +299,13 @@ vsla_error_t vsla_hadamard_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b
     vsla_error_t err;
     
     // Compute grad_a = b * grad_out
-    err = vsla_hadamard(grad_a, b, grad_out);
+    err = vsla_cpu_hadamard(grad_a, b, grad_out);
     if (err != VSLA_SUCCESS) {
         return err;
     }
     
     // Compute grad_b = a * grad_out  
-    err = vsla_hadamard(grad_b, a, grad_out);
+    err = vsla_cpu_hadamard(grad_b, a, grad_out);
     if (err != VSLA_SUCCESS) {
         return err;
     }
@@ -329,22 +329,22 @@ vsla_error_t vsla_matmul_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b,
     vsla_tensor_t* a_transposed = NULL;
     
     // Create transposed versions
-    b_transposed = vsla_copy(b);
+    b_transposed = vsla_copy_basic(b);
     if (!b_transposed) return VSLA_ERROR_MEMORY;
     
-    err = vsla_transpose(b_transposed, b_transposed);
+    err = vsla_cpu_transpose(b_transposed, b_transposed);
     if (err != VSLA_SUCCESS) {
         vsla_free(b_transposed);
         return err;
     }
     
-    a_transposed = vsla_copy(a);
+    a_transposed = vsla_copy_basic(a);
     if (!a_transposed) {
         vsla_free(b_transposed);
         return VSLA_ERROR_MEMORY;
     }
     
-    err = vsla_transpose(a_transposed, a_transposed);
+    err = vsla_cpu_transpose(a_transposed, a_transposed);
     if (err != VSLA_SUCCESS) {
         vsla_free(b_transposed);
         vsla_free(a_transposed);
@@ -352,7 +352,7 @@ vsla_error_t vsla_matmul_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b,
     }
     
     // Compute grad_a = grad_out × B^T
-    err = vsla_matmul(grad_a, grad_out, b_transposed);
+    err = vsla_cpu_matmul(grad_a, grad_out, b_transposed);
     if (err != VSLA_SUCCESS) {
         vsla_free(b_transposed);
         vsla_free(a_transposed);
@@ -360,7 +360,7 @@ vsla_error_t vsla_matmul_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b,
     }
     
     // Compute grad_b = A^T × grad_out
-    err = vsla_matmul(grad_b, a_transposed, grad_out);
+    err = vsla_cpu_matmul(grad_b, a_transposed, grad_out);
     if (err != VSLA_SUCCESS) {
         vsla_free(b_transposed);
         vsla_free(a_transposed);
@@ -382,7 +382,7 @@ vsla_error_t vsla_transpose_backward(vsla_tensor_t* grad_input,
     // For transpose B = A^T, the gradient is:
     // grad_a = (grad_out)^T (transpose the output gradient)
     
-    return vsla_transpose(grad_input, grad_out);
+    return vsla_cpu_transpose(grad_input, grad_out);
 }
 
 vsla_error_t vsla_reshape_backward(vsla_tensor_t* grad_input,
@@ -396,10 +396,10 @@ vsla_error_t vsla_reshape_backward(vsla_tensor_t* grad_input,
     // grad_a = reshape(grad_out, original_shape) (reshape gradient back to original shape)
     
     // Create a copy of grad_out and reshape it
-    vsla_tensor_t* temp_grad = vsla_copy(grad_out);
+    vsla_tensor_t* temp_grad = vsla_copy_basic(grad_out);
     if (!temp_grad) return VSLA_ERROR_MEMORY;
     
-    vsla_error_t err = vsla_reshape(temp_grad, input->rank, input->shape);
+    vsla_error_t err = vsla_cpu_reshape(temp_grad, input->rank, input->shape);
     if (err != VSLA_SUCCESS) {
         vsla_free(temp_grad);
         return err;

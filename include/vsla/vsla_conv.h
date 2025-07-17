@@ -28,8 +28,8 @@ extern "C" {
  * @param b Second input tensor (must be Model A)
  * @return VSLA_SUCCESS or error code
  */
-vsla_error_t vsla_conv(vsla_tensor_t* out, const vsla_tensor_t* a, 
-                       const vsla_tensor_t* b);
+vsla_error_t vsla_conv_basic(vsla_tensor_t* out, const vsla_tensor_t* a, 
+                             const vsla_tensor_t* b);
 
 /**
  * @brief Direct convolution (no FFT)

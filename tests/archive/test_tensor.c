@@ -136,7 +136,7 @@ DECLARE_TEST(tensor_copy) {
     vsla_set_f64(orig, indices, 42.0);
     
     /* Copy tensor */
-    vsla_tensor_t* copy = vsla_copy(orig);
+    vsla_tensor_t* copy = vsla_copy_basic(orig);
     ASSERT_NOT_NULL(copy);
     
     /* Verify copy */
@@ -218,7 +218,7 @@ DECLARE_TEST(tensor_fill) {
     ASSERT_NOT_NULL(tensor);
     
     /* Fill with specific value */
-    ASSERT_EQ(vsla_fill(tensor, 3.14), VSLA_SUCCESS);
+    ASSERT_EQ(vsla_fill_basic(tensor, 3.14), VSLA_SUCCESS);
     
     /* Check all elements */
     for (uint64_t i = 0; i < shape[0]; i++) {
@@ -231,9 +231,9 @@ DECLARE_TEST(tensor_fill) {
     }
     
     /* Test invalid values */
-    ASSERT_NE(vsla_fill(tensor, NAN), VSLA_SUCCESS);
-    ASSERT_NE(vsla_fill(tensor, INFINITY), VSLA_SUCCESS);
-    ASSERT_NE(vsla_fill(NULL, 1.0), VSLA_SUCCESS);
+    ASSERT_NE(vsla_fill_basic(tensor, NAN), VSLA_SUCCESS);
+    ASSERT_NE(vsla_fill_basic(tensor, INFINITY), VSLA_SUCCESS);
+    ASSERT_NE(vsla_fill_basic(NULL, 1.0), VSLA_SUCCESS);
     
     vsla_free(tensor);
     return 1;

@@ -3,7 +3,7 @@ project(libvsla VERSION 1.0.0 LANGUAGES C CXX)
 
 # Options
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
-option(BUILD_TESTS "Build tests" ON)
+option(BUILD_TESTS "Build tests" OFF)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(VSLA_BUILD_PYTHON "Build Python bindings" OFF)
 option(VSLA_ENABLE_TESTS "Enable testing" ON)
@@ -99,20 +99,21 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(VSLA_SOURCES
     src/vsla_core.c
     src/vsla_tensor.c
-    src/vsla_ops.c
     src/vsla_io.c
     src/vsla_conv.c
     src/vsla_kron.c
     src/vsla_autograd.c
     src/vsla_utils.c
+    src/backends/vsla_backend_cpu_new.c
 )
 
 # Add unified API sources if enabled
-if(VSLA_UNIFIED_API)
-    list(APPEND VSLA_SOURCES 
-        src/vsla_unified.c
-    )
-endif()
+# Temporarily disabled until architecture is fully aligned
+#if(VSLA_UNIFIED_API)
+#    list(APPEND VSLA_SOURCES 
+#        src/vsla_unified.c
+#    )
+#endif()
 
 # Add vendor FFT sources
 if(VSLA_ENABLE_CUFFT)

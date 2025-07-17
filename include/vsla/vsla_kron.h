@@ -28,7 +28,7 @@ extern "C" {
  * @param b Second input tensor (must be Model B)
  * @return VSLA_SUCCESS or error code
  */
-vsla_error_t vsla_kron(vsla_tensor_t* out, const vsla_tensor_t* a, 
+vsla_error_t vsla_kron_basic(vsla_tensor_t* out, const vsla_tensor_t* a, 
                        const vsla_tensor_t* b);
 
 /**

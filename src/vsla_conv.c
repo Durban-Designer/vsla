@@ -12,6 +12,7 @@
 #include "vsla/vsla_tensor.h"
 #include "vsla/vsla_core.h"
 #include "vsla/vsla_ops.h"
+#include "vsla/vsla_backend_cpu.h"
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
@@ -77,7 +78,7 @@ vsla_error_t vsla_conv_direct(vsla_tensor_t* out, const vsla_tensor_t* a,
     if (err != VSLA_SUCCESS) return err;
     
     // Zero the output tensor
-    err = vsla_fill(out, 0.0);
+    err = vsla_fill_basic(out, 0.0);
     if (err != VSLA_SUCCESS) return err;
     
     // For 1D case (most common)
@@ -303,8 +304,8 @@ vsla_error_t vsla_conv_fft(vsla_tensor_t* out, const vsla_tensor_t* a,
     return VSLA_SUCCESS;
 }
 
-vsla_error_t vsla_conv(vsla_tensor_t* out, const vsla_tensor_t* a, 
-                       const vsla_tensor_t* b) {
+vsla_error_t vsla_conv_basic(vsla_tensor_t* out, const vsla_tensor_t* a, 
+                             const vsla_tensor_t* b) {
     vsla_error_t err = validate_conv_inputs(out, a, b);
     if (err != VSLA_SUCCESS) return err;
     
@@ -366,7 +367,7 @@ vsla_error_t vsla_matmul_conv(vsla_tensor_t** out, vsla_tensor_t** A,
         for (size_t j = 0; j < n; j++) {
             // Initialize output[i][j] to zero
             if (out[i * n + j]) {
-                vsla_error_t err = vsla_fill(out[i * n + j], 0.0);
+                vsla_error_t err = vsla_fill_basic(out[i * n + j], 0.0);
                 if (err != VSLA_SUCCESS) return err;
             }
             
@@ -389,14 +390,14 @@ vsla_error_t vsla_matmul_conv(vsla_tensor_t** out, vsla_tensor_t** A,
                 if (!temp) return VSLA_ERROR_MEMORY;
                 
                 // Compute convolution
-                vsla_error_t err = vsla_conv(temp, a_elem, b_elem);
+                vsla_error_t err = vsla_conv_basic(temp, a_elem, b_elem);
                 if (err != VSLA_SUCCESS) {
                     vsla_free(temp);
                     return err;
                 }
                 
                 // Add to output[i][j] (requires addition with padding)
-                err = vsla_add(out[i * n + j], out[i * n + j], temp);
+                err = vsla_cpu_add(out[i * n + j], out[i * n + j], temp);
                 vsla_free(temp);
                 if (err != VSLA_SUCCESS) return err;
             }
@@ -460,7 +461,7 @@ vsla_error_t vsla_conv_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b,
     }
     
     // Compute grad_a = conv(grad_out, flip(b))
-    err = vsla_conv(grad_a, grad_out, b_flipped);
+    err = vsla_conv_basic(grad_a, grad_out, b_flipped);
     if (err != VSLA_SUCCESS) {
         vsla_free(b_flipped);
         vsla_free(a_flipped);
@@ -468,7 +469,7 @@ vsla_error_t vsla_conv_backward(vsla_tensor_t* grad_a, vsla_tensor_t* grad_b,
     }
     
     // Compute grad_b = conv(flip(a), grad_out)
-    err = vsla_conv(grad_b, a_flipped, grad_out);
+    err = vsla_conv_basic(grad_b, a_flipped, grad_out);
     if (err != VSLA_SUCCESS) {
         vsla_free(b_flipped);
         vsla_free(a_flipped);

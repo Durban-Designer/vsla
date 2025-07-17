@@ -11,6 +11,8 @@
 #include "vsla/vsla_conv.h"
 #include "vsla/vsla_ops.h"
 #include "vsla/vsla_core.h"
+#include "vsla/vsla_backend.h"
+#include "vsla/vsla_backend_cpu.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
@@ -31,33 +33,25 @@ typedef struct {
                              vsla_dtype_t dtype, size_t size);
 } vsla_fft_backend_impl_t;
 
-// Unified tensor structure that abstracts CPU/GPU
-struct vsla_tensor {
-    // Core tensor info
-    uint8_t rank;
-    uint64_t* shape;
-    uint64_t* cap;
-    uint64_t* stride;
-    vsla_model_t model;
-    vsla_dtype_t dtype;
-    
-    // Memory management
-    void* cpu_data;              // CPU memory
-    void* gpu_data;              // GPU memory (if available)
-    size_t data_size;            // Total data size in bytes
-    vsla_backend_t location;     // Current data location
-    bool cpu_valid;              // CPU data is up-to-date
-    bool gpu_valid;              // GPU data is up-to-date
-    
-    // Context reference
-    struct vsla_context* ctx;
-};
+// Note: vsla_tensor structure is now defined in vsla_tensor.h
+
+// Performance statistics structure
+typedef struct {
+    size_t operations_count;
+    double total_time_ms;
+    size_t memory_allocated;
+    size_t memory_peak;
+    size_t cpu_operations;
+    size_t gpu_operations;
+    size_t total_operations;
+} vsla_stats_t;
 
 // VSLA runtime context
 struct vsla_context {
     // Configuration
     vsla_config_t config;
-    vsla_backend_t active_backend;
+    vsla_backend_t active_backend_type;
+    vsla_backend_interface_t* active_backend;
     
     // Hardware info
     bool cuda_available;
@@ -143,11 +137,29 @@ vsla_context_t* vsla_init(const vsla_config_t* config) {
     ctx->oneapi_available = detect_oneapi();
     
     // Select backend
-    ctx->active_backend = select_best_backend(&ctx->config);
+    ctx->active_backend_type = select_best_backend(&ctx->config);
+
+    // Initialize backend function pointers
+    if (ctx->active_backend_type == VSLA_BACKEND_CPU) {
+        ctx->active_backend = (vsla_backend_interface_t*)malloc(sizeof(vsla_backend_interface_t));
+        ctx->active_backend->add = vsla_cpu_add;
+        ctx->active_backend->sub = vsla_cpu_sub;
+        ctx->active_backend->scale = vsla_cpu_scale;
+        ctx->active_backend->hadamard = vsla_cpu_hadamard;
+        ctx->active_backend->matmul = vsla_cpu_matmul;
+        ctx->active_backend->transpose = vsla_cpu_transpose;
+        ctx->active_backend->reshape = vsla_cpu_reshape;
+        ctx->active_backend->sum = vsla_cpu_sum;
+        ctx->active_backend->norm = vsla_cpu_norm;
+        ctx->active_backend->max = vsla_cpu_max;
+        ctx->active_backend->min = vsla_cpu_min;
+    } else {
+        // TODO: Initialize other backends
+    }
     
     // Initialize GPU context if available
 #ifdef VSLA_ENABLE_CUDA
-    if (ctx->active_backend == VSLA_BACKEND_CUDA) {
+    if (ctx->active_backend_type == VSLA_BACKEND_CUDA) {
         ctx->gpu_ctx = vsla_gpu_init(ctx->config.device_id);
         if (ctx->gpu_ctx) {
             size_t free_mb, total_mb;
@@ -433,87 +445,93 @@ vsla_error_t vsla_add(vsla_context_t* ctx,
                       const vsla_tensor_t* a,
                       const vsla_tensor_t* b) {
     if (!ctx || !out || !a || !b) return VSLA_ERROR_INVALID_ARGUMENT;
-    
-    // Determine where to execute
-    bool use_gpu = ctx->active_backend == VSLA_BACKEND_CUDA &&
-                   out->data_size >= ctx->memory_threshold;
-    
-    if (use_gpu) {
-#ifdef VSLA_ENABLE_CUDA
-        // Ensure all tensors are on GPU
-        vsla_tensor_t* mut_a = (vsla_tensor_t*)a;
-        vsla_tensor_t* mut_b = (vsla_tensor_t*)b;
-        
-        vsla_error_t err;
-        err = ensure_gpu_valid(out);
-        if (err != VSLA_SUCCESS) use_gpu = false;
-        err = ensure_gpu_valid(mut_a);
-        if (err != VSLA_SUCCESS) use_gpu = false;
-        err = ensure_gpu_valid(mut_b);
-        if (err != VSLA_SUCCESS) use_gpu = false;
-        
-        if (use_gpu) {
-            // Create temporary GPU tensor wrappers
-            vsla_gpu_tensor_t gpu_out = {
-                .rank = out->rank, .dtype = out->dtype,
-                .shape = out->shape, .cap = out->cap,
-                .gpu_data = out->gpu_data
-            };
-            vsla_gpu_tensor_t gpu_a = {
-                .rank = a->rank, .dtype = a->dtype,
-                .shape = a->shape, .cap = a->cap,
-                .gpu_data = mut_a->gpu_data
-            };
-            vsla_gpu_tensor_t gpu_b = {
-                .rank = b->rank, .dtype = b->dtype,
-                .shape = b->shape, .cap = b->cap,
-                .gpu_data = mut_b->gpu_data
-            };
-            
-            err = vsla_gpu_add(&gpu_out, &gpu_a, &gpu_b, ctx->gpu_ctx);
-            if (err == VSLA_SUCCESS) {
-                out->gpu_valid = true;
-                out->cpu_valid = false;
-                ctx->stats.gpu_operations++;
-                ctx->stats.gpu_time_ms += 0.01;  // TODO: Actual timing
-                return VSLA_SUCCESS;
-            }
-        }
-#endif
-    }
-    
-    // Fall back to CPU
-    ensure_cpu_valid((vsla_tensor_t*)a);
-    ensure_cpu_valid((vsla_tensor_t*)b);
-    ensure_cpu_valid(out);
-    
-    // Create CPU tensor wrappers
-    vsla_tensor_t cpu_out = {
-        .rank = out->rank, .model = out->model, .dtype = out->dtype,
-        .shape = out->shape, .cap = out->cap, .stride = out->stride,
-        .data = out->cpu_data
-    };
-    vsla_tensor_t cpu_a = {
-        .rank = a->rank, .model = a->model, .dtype = a->dtype,
-        .shape = a->shape, .cap = a->cap, .stride = a->stride,
-        .data = ((vsla_tensor_t*)a)->cpu_data
-    };
-    vsla_tensor_t cpu_b = {
-        .rank = b->rank, .model = b->model, .dtype = b->dtype,
-        .shape = b->shape, .cap = b->cap, .stride = b->stride,
-        .data = ((vsla_tensor_t*)b)->cpu_data
-    };
-    
-    vsla_error_t err = vsla_add_op(&cpu_out, &cpu_a, &cpu_b);
+    return ctx->active_backend->add(out, a, b);
+}
+
+vsla_error_t vsla_sub(vsla_context_t* ctx,
+                      vsla_tensor_t* out,
+                      const vsla_tensor_t* a,
+                      const vsla_tensor_t* b) {
+    if (!ctx || !out || !a || !b) return VSLA_ERROR_INVALID_ARGUMENT;
+    return ctx->active_backend->sub(out, a, b);
+}
+
+vsla_error_t vsla_scale(vsla_context_t* ctx,
+                        vsla_tensor_t* out,
+                        const vsla_tensor_t* in,
+                        double scalar) {
+    if (!ctx || !out || !in) return VSLA_ERROR_INVALID_ARGUMENT;
+    return ctx->active_backend->scale(out, in, scalar);
+}
+
+vsla_error_t vsla_hadamard(vsla_context_t* ctx,
+                           vsla_tensor_t* out,
+                           const vsla_tensor_t* a,
+                           const vsla_tensor_t* b) {
+    if (!ctx || !out || !a || !b) return VSLA_ERROR_INVALID_ARGUMENT;
+    return ctx->active_backend->hadamard(out, a, b);
+}
+
+vsla_error_t vsla_matmul(vsla_context_t* ctx,
+                         vsla_tensor_t* out,
+                         const vsla_tensor_t* a,
+                         const vsla_tensor_t* b) {
+    if (!ctx || !out || !a || !b) return VSLA_ERROR_INVALID_ARGUMENT;
+    return ctx->active_backend->matmul(out, a, b);
+}
+
+vsla_error_t vsla_transpose(vsla_context_t* ctx,
+                            vsla_tensor_t* out,
+                            const vsla_tensor_t* in) {
+    if (!ctx || !out || !in) return VSLA_ERROR_INVALID_ARGUMENT;
+    return ctx->active_backend->transpose(out, in);
+}
+
+vsla_error_t vsla_reshape(vsla_context_t* ctx,
+                          vsla_tensor_t* tensor,
+                          uint8_t new_rank,
+                          const uint64_t* new_shape) {
+    if (!ctx || !tensor || !new_shape) return VSLA_ERROR_INVALID_ARGUMENT;
+    return ctx->active_backend->reshape(tensor, new_rank, new_shape);
+}
+
+vsla_error_t vsla_sum(vsla_context_t* ctx,
+                      const vsla_tensor_t* tensor,
+                      double* result) {
+    if (!ctx || !tensor || !result) return VSLA_ERROR_INVALID_ARGUMENT;
+    return ctx->active_backend->sum(tensor, result);
+}
+
+vsla_error_t vsla_mean(vsla_context_t* ctx,
+                       const vsla_tensor_t* tensor,
+                       double* result) {
+    if (!ctx || !tensor || !result) return VSLA_ERROR_INVALID_ARGUMENT;
+    vsla_error_t err = ctx->active_backend->sum(tensor, result);
     if (err == VSLA_SUCCESS) {
-        out->cpu_valid = true;
-        out->gpu_valid = false;
-        ctx->stats.cpu_operations++;
-        ctx->stats.cpu_time_ms += 0.01;  // TODO: Actual timing
+        *result /= vsla_numel(tensor);
     }
-    
-    ctx->stats.total_operations++;
     return err;
+}
+
+vsla_error_t vsla_max(vsla_context_t* ctx,
+                      const vsla_tensor_t* tensor,
+                      double* result) {
+    if (!ctx || !tensor || !result) return VSLA_ERROR_INVALID_ARGUMENT;
+    return ctx->active_backend->max(tensor, result);
+}
+
+vsla_error_t vsla_min(vsla_context_t* ctx,
+                      const vsla_tensor_t* tensor,
+                      double* result) {
+    if (!ctx || !tensor || !result) return VSLA_ERROR_INVALID_ARGUMENT;
+    return ctx->active_backend->min(tensor, result);
+}
+
+vsla_error_t vsla_norm(vsla_context_t* ctx,
+                       const vsla_tensor_t* tensor,
+                       double* result) {
+    if (!ctx || !tensor || !result) return VSLA_ERROR_INVALID_ARGUMENT;
+    return ctx->active_backend->norm(tensor, result);
 }
 
 vsla_error_t vsla_conv(vsla_context_t* ctx,
