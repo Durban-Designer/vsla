@@ -1,0 +1,276 @@
+{
+  "metadata": {
+    "timestamp": "2025-07-17T17:24:54.617192",
+    "system": {
+      "cpu": {
+        "name": "AMD Ryzen 9 9950X3D 16-Core Processor",
+        "threads": 32,
+        "cores": 16
+      },
+      "memory": {
+        "total_gb": 46
+      },
+      "gpu": {
+        "name": "NVIDIA GeForce RTX 5090",
+        "memory_mb": 32607,
+        "driver_version": "570.133.20",
+        "compute_capability": "12.0",
+        "available": true
+      }
+    },
+    "software": {
+      "python_version": "3.12.3 (main, Jun 18 2025, 17:59:45) [GCC 13.3.0]",
+      "vsla_version": "1.0.0"
+    }
+  },
+  "config": {
+    "sizes": [
+      128,
+      256,
+      512,
+      1024
+    ],
+    "iterations": 50,
+    "warmup": 5,
+    "output_dir": "./reports",
+    "enable_gpu": true,
+    "enable_competitors": true,
+    "enable_cpu": true,
+    "precision": "float32",
+    "reproducible": true
+  },
+  "cpu_results": [
+    {
+      "error": "Failed to build CPU benchmark",
+      "size": 128,
+      "operation": "vector_add"
+    },
+    {
+      "error": "Failed to build CPU benchmark",
+      "size": 256,
+      "operation": "vector_add"
+    },
+    {
+      "error": "Failed to build CPU benchmark",
+      "size": 512,
+      "operation": "vector_add"
+    },
+    {
+      "error": "Failed to build CPU benchmark",
+      "size": 1024,
+      "operation": "vector_add"
+    },
+    {
+      "error": "Failed to build CPU benchmark",
+      "size": 128,
+      "operation": "convolution"
+    },
+    {
+      "error": "Failed to build CPU benchmark",
+      "size": 256,
+      "operation": "convolution"
+    },
+    {
+      "error": "Failed to build CPU benchmark",
+      "size": 512,
+      "operation": "convolution"
+    },
+    {
+      "error": "Failed to build CPU benchmark",
+      "size": 1024,
+      "operation": "convolution"
+    },
+    {
+      "error": "Failed to build CPU benchmark",
+      "size": 128,
+      "operation": "kronecker"
+    },
+    {
+      "error": "Failed to build CPU benchmark",
+      "size": 256,
+      "operation": "kronecker"
+    },
+    {
+      "error": "Failed to build CPU benchmark",
+      "size": 512,
+      "operation": "kronecker"
+    },
+    {
+      "error": "Failed to build CPU benchmark",
+      "size": 1024,
+      "operation": "kronecker"
+    }
+  ],
+  "gpu_results": [
+    {
+      "error": "Failed to build GPU benchmark",
+      "size": 128,
+      "operation": "vector_add"
+    },
+    {
+      "error": "Failed to build GPU benchmark",
+      "size": 256,
+      "operation": "vector_add"
+    },
+    {
+      "error": "Failed to build GPU benchmark",
+      "size": 512,
+      "operation": "vector_add"
+    },
+    {
+      "error": "Failed to build GPU benchmark",
+      "size": 1024,
+      "operation": "vector_add"
+    },
+    {
+      "error": "Failed to build GPU benchmark",
+      "size": 128,
+      "operation": "matrix_multiply"
+    },
+    {
+      "error": "Failed to build GPU benchmark",
+      "size": 256,
+      "operation": "matrix_multiply"
+    },
+    {
+      "error": "Failed to build GPU benchmark",
+      "size": 512,
+      "operation": "matrix_multiply"
+    },
+    {
+      "error": "Failed to build GPU benchmark",
+      "size": 1024,
+      "operation": "matrix_multiply"
+    },
+    {
+      "error": "Failed to build GPU benchmark",
+      "size": 128,
+      "operation": "convolution"
+    },
+    {
+      "error": "Failed to build GPU benchmark",
+      "size": 256,
+      "operation": "convolution"
+    },
+    {
+      "error": "Failed to build GPU benchmark",
+      "size": 512,
+      "operation": "convolution"
+    },
+    {
+      "error": "Failed to build GPU benchmark",
+      "size": 1024,
+      "operation": "convolution"
+    }
+  ],
+  "competitor_results": [
+    {
+      "error": "cuBLAS benchmark not built",
+      "size": 128,
+      "operation": "vector_add"
+    },
+    {
+      "error": "cuBLAS benchmark not built",
+      "size": 256,
+      "operation": "vector_add"
+    },
+    {
+      "error": "cuBLAS benchmark not built",
+      "size": 512,
+      "operation": "vector_add"
+    },
+    {
+      "error": "cuBLAS benchmark not built",
+      "size": 1024,
+      "operation": "vector_add"
+    },
+    {
+      "error": "cuBLAS benchmark not built",
+      "size": 128,
+      "operation": "matrix_multiply"
+    },
+    {
+      "error": "cuBLAS benchmark not built",
+      "size": 256,
+      "operation": "matrix_multiply"
+    },
+    {
+      "error": "cuBLAS benchmark not built",
+      "size": 512,
+      "operation": "matrix_multiply"
+    },
+    {
+      "error": "cuBLAS benchmark not built",
+      "size": 1024,
+      "operation": "matrix_multiply"
+    },
+    {
+      "error": "CuPy not available",
+      "competitor": "cupy",
+      "size": 128,
+      "operation": "vector_add"
+    },
+    {
+      "error": "CuPy not available",
+      "competitor": "cupy",
+      "size": 256,
+      "operation": "vector_add"
+    },
+    {
+      "error": "CuPy not available",
+      "competitor": "cupy",
+      "size": 512,
+      "operation": "vector_add"
+    },
+    {
+      "error": "CuPy not available",
+      "competitor": "cupy",
+      "size": 1024,
+      "operation": "vector_add"
+    },
+    {
+      "error": "CuPy not available",
+      "competitor": "cupy",
+      "size": 128,
+      "operation": "matrix_multiply"
+    },
+    {
+      "error": "CuPy not available",
+      "competitor": "cupy",
+      "size": 256,
+      "operation": "matrix_multiply"
+    },
+    {
+      "error": "CuPy not available",
+      "competitor": "cupy",
+      "size": 512,
+      "operation": "matrix_multiply"
+    },
+    {
+      "error": "CuPy not available",
+      "competitor": "cupy",
+      "size": 1024,
+      "operation": "matrix_multiply"
+    },
+    {
+      "error": "cuFFT benchmark not built",
+      "size": 128,
+      "operation": "convolution"
+    },
+    {
+      "error": "cuFFT benchmark not built",
+      "size": 256,
+      "operation": "convolution"
+    },
+    {
+      "error": "cuFFT benchmark not built",
+      "size": 512,
+      "operation": "convolution"
+    },
+    {
+      "error": "cuFFT benchmark not built",
+      "size": 1024,
+      "operation": "convolution"
+    }
+  ]
+}

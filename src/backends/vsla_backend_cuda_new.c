@@ -8,6 +8,7 @@
 #include "vsla/vsla_backend.h"
 #include "vsla/vsla_tensor.h"
 #include "vsla/vsla_core.h"
+#include "vsla_backend_cuda_kernels.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
@@ -108,28 +109,23 @@ static vsla_error_t cuda_synchronize(void) {
 
 /* Stub implementations - TODO: Implement actual CUDA kernels */
 static vsla_error_t cuda_add(vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b) {
-    (void)out; (void)a; (void)b;
-    return VSLA_ERROR_NOT_IMPLEMENTED;
+    return vsla_cuda_kernel_add(out, a, b);
 }
 
 static vsla_error_t cuda_sub(vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b) {
-    (void)out; (void)a; (void)b;
-    return VSLA_ERROR_NOT_IMPLEMENTED;
+    return vsla_cuda_kernel_sub(out, a, b);
 }
 
 static vsla_error_t cuda_scale(vsla_tensor_t* out, const vsla_tensor_t* in, double scalar) {
-    (void)out; (void)in; (void)scalar;
-    return VSLA_ERROR_NOT_IMPLEMENTED;
+    return vsla_cuda_kernel_scale(out, in, scalar);
 }
 
 static vsla_error_t cuda_hadamard(vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b) {
-    (void)out; (void)a; (void)b;
-    return VSLA_ERROR_NOT_IMPLEMENTED;
+    return vsla_cuda_kernel_hadamard(out, a, b);
 }
 
 static vsla_error_t cuda_fill(vsla_tensor_t* tensor, double value) {
-    (void)tensor; (void)value;
-    return VSLA_ERROR_NOT_IMPLEMENTED;
+    return vsla_cuda_kernel_fill(tensor, value);
 }
 
 static vsla_error_t cuda_matmul(vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b) {
@@ -153,8 +149,7 @@ static vsla_error_t cuda_broadcast(vsla_tensor_t* out, const vsla_tensor_t* in) 
 }
 
 static vsla_error_t cuda_sum(const vsla_tensor_t* tensor, double* result) {
-    (void)tensor; (void)result;
-    return VSLA_ERROR_NOT_IMPLEMENTED;
+    return vsla_cuda_kernel_sum(tensor, result);
 }
 
 static vsla_error_t cuda_mean(const vsla_tensor_t* tensor, double* result) {

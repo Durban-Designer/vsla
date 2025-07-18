@@ -71,7 +71,6 @@ docs/html/
 *.aux
 *.log
 *.out
-*.pdf
 *.toc
 *.bbl
 *.blg

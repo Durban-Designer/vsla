@@ -105,6 +105,7 @@ set(VSLA_SOURCES
     src/vsla_autograd.c
     src/vsla_utils.c
     src/backends/vsla_backend_cpu_new.c
+    src/backends/vsla_backend_cuda_new.c
 )
 
 # Add unified API sources if enabled
@@ -130,6 +131,7 @@ endif()
 
 # Add GPU sources conditionally
 if(VSLA_ENABLE_CUDA)
+    list(APPEND VSLA_SOURCES src/backends/vsla_backend_cuda_kernels.cu)
     list(APPEND VSLA_SOURCES src/vsla_gpu.cu)
 else()
     list(APPEND VSLA_SOURCES src/vsla_gpu.c)
@@ -225,9 +227,9 @@ if(BUILD_TESTS)
 endif()
 
 # Examples
-if(BUILD_EXAMPLES AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/examples/CMakeLists.txt)
-    add_subdirectory(examples)
-endif()
+#if(BUILD_EXAMPLES AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/examples/CMakeLists.txt)
+#    add_subdirectory(examples)
+#endif()
 
 # Python bindings
 if(VSLA_BUILD_PYTHON)
