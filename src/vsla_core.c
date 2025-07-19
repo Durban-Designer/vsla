@@ -6,7 +6,9 @@
  */
 
 #include "vsla/vsla_core.h"
+#include "vsla/vsla_tensor_internal.h"
 #include <string.h>
+#include <stdlib.h>
 
 const char* vsla_error_string(vsla_error_t error) {
     switch (error) {
@@ -77,4 +79,126 @@ uint64_t vsla_next_pow2(uint64_t n) {
 
 int vsla_is_pow2(uint64_t n) {
     return n > 0 && (n & (n - 1)) == 0;
+}
+
+vsla_error_t vsla_calculate_strides(vsla_tensor_t* tensor) {
+    if (!tensor || !tensor->cap) {
+        return VSLA_ERROR_NULL_POINTER;
+    }
+    
+    if (tensor->rank == 0) {
+        return VSLA_SUCCESS; /* No strides for scalar */
+    }
+    
+    size_t elem_size = vsla_dtype_size(tensor->dtype);
+    if (elem_size == 0) {
+        return VSLA_ERROR_INVALID_DTYPE;
+    }
+    
+    /* Calculate strides in reverse order (C-style layout) */
+    tensor->stride[tensor->rank - 1] = elem_size;
+    for (int i = tensor->rank - 2; i >= 0; i--) {
+        tensor->stride[i] = tensor->stride[i + 1] * tensor->cap[i + 1];
+    }
+    
+    return VSLA_SUCCESS;
+}
+
+vsla_error_t vsla_validate_tensor(const vsla_tensor_t* tensor) {
+    if (!tensor) {
+        return VSLA_ERROR_NULL_POINTER;
+    }
+    
+    if (tensor->rank > 0) {
+        if (!tensor->shape || !tensor->cap || !tensor->stride) {
+            return VSLA_ERROR_INVALID_STATE;
+        }
+    }
+    
+    if (tensor->dtype != VSLA_DTYPE_F32 && tensor->dtype != VSLA_DTYPE_F64) {
+        return VSLA_ERROR_INVALID_DTYPE;
+    }
+    
+    if (tensor->model != VSLA_MODEL_A && tensor->model != VSLA_MODEL_B) {
+        return VSLA_ERROR_INVALID_MODEL;
+    }
+    
+    return VSLA_SUCCESS;
+}
+
+vsla_error_t vsla_check_compatibility(const vsla_tensor_t* a, const vsla_tensor_t* b) {
+    vsla_error_t err = vsla_validate_tensor(a);
+    if (err != VSLA_SUCCESS) return err;
+    
+    err = vsla_validate_tensor(b);
+    if (err != VSLA_SUCCESS) return err;
+    
+    if (a->model != b->model) {
+        return VSLA_ERROR_INCOMPATIBLE_MODELS;
+    }
+    
+    if (a->dtype != b->dtype) {
+        return VSLA_ERROR_INVALID_DTYPE;
+    }
+    
+    return VSLA_SUCCESS;
+}
+
+size_t vsla_calc_linear_index(const vsla_tensor_t* tensor, const uint64_t indices[]) {
+    if (!tensor || !indices || tensor->rank == 0) {
+        return 0;
+    }
+    
+    size_t linear_index = 0;
+    for (uint8_t i = 0; i < tensor->rank; i++) {
+        linear_index += indices[i] * tensor->stride[i];
+    }
+    
+    return linear_index;
+}
+
+bool vsla_indices_valid(const vsla_tensor_t* tensor, const uint64_t indices[]) {
+    if (!tensor || !indices) {
+        return false;
+    }
+    
+    for (uint8_t i = 0; i < tensor->rank; i++) {
+        if (indices[i] >= tensor->shape[i]) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+vsla_error_t vsla_copy_metadata(vsla_tensor_t* dst, const vsla_tensor_t* src) {
+    if (!dst || !src) {
+        return VSLA_ERROR_NULL_POINTER;
+    }
+    
+    dst->rank = src->rank;
+    dst->model = src->model;
+    dst->dtype = src->dtype;
+    dst->flags = src->flags;
+    
+    if (src->rank > 0) {
+        /* Allocate arrays */
+        dst->shape = (uint64_t*)malloc(src->rank * sizeof(uint64_t));
+        dst->cap = (uint64_t*)malloc(src->rank * sizeof(uint64_t));
+        dst->stride = (uint64_t*)malloc(src->rank * sizeof(uint64_t));
+        
+        if (!dst->shape || !dst->cap || !dst->stride) {
+            free(dst->shape);
+            free(dst->cap);
+            free(dst->stride);
+            return VSLA_ERROR_MEMORY;
+        }
+        
+        /* Copy arrays */
+        memcpy(dst->shape, src->shape, src->rank * sizeof(uint64_t));
+        memcpy(dst->cap, src->cap, src->rank * sizeof(uint64_t));
+        memcpy(dst->stride, src->stride, src->rank * sizeof(uint64_t));
+    }
+    
+    return VSLA_SUCCESS;
 }

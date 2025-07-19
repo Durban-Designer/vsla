@@ -2,7 +2,7 @@
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/username/vsla)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![C99](https://img.shields.io/badge/C-99-blue.svg)](https://en.wikipedia.org/wiki/C99)
+[![C17](https://img.shields.io/badge/C-17-blue.svg)](https://en.wikipedia.org/wiki/C17_(C_standard_revision))
 
 **Production-ready tensor operations that adapt to dynamic dimensions with mathematical rigor.**
 
@@ -43,19 +43,13 @@ vsla/
 ## 🏗️ Architecture
 
 ### Core Tensor Structure
-```c
-typedef struct {
-    uint8_t    rank;      // Number of dimensions (0-255)
-    uint8_t    model;     // 0 = Model A (convolution), 1 = Model B (Kronecker)
-    uint8_t    dtype;     // 0 = f64, 1 = f32
-    uint8_t    flags;     // Reserved for future use
+VSLA uses an opaque handle (`vsla_tensor_t`) to represent tensors, hiding the internal implementation details to ensure ABI stability. This allows the library to evolve without breaking user applications.
 
-    uint64_t  *shape;     // Logical extent per axis
-    uint64_t  *cap;       // Allocated capacity per axis (power-of-2)
-    uint64_t  *stride;    // Byte strides for row-major access
-    void      *data;      // 64-byte aligned data buffer
-} vsla_tensor_t;
-```
+### Backend-Driven Architecture
+The library features a backend-driven architecture that allows users to select the optimal compute backend at runtime. Currently supported backends include:
+- **CPU:** A highly optimized CPU backend.
+- **CUDA:** A backend for NVIDIA GPUs, leveraging CUDA for parallel computation.
+- **ROCm & oneAPI:** Stubs for future support for AMD and Intel GPUs.
 
 ### Mathematical Foundation
 Based on the research paper "Variable-Shape Linear Algebra: An Introduction", VSLA constructs equivalence classes of vectors modulo trailing-zero padding:
@@ -69,7 +63,7 @@ Based on the research paper "Variable-Shape Linear Algebra: An Introduction", VS
 ### Prerequisites
 
 **System Requirements:**
-- C99-compatible compiler (GCC 7+, Clang 9+, MSVC 2019+)
+- C17-compatible compiler (GCC 8+, Clang 10+, MSVC 2019+)
 - CMake 3.10 or higher
 - POSIX-compliant system (Linux, macOS, Windows with MSYS2/WSL)
 
@@ -151,38 +145,46 @@ cmake .. && make -j$(nproc)
 #include <vsla/vsla.h>
 
 int main() {
-    // Initialize library (optional)
-    vsla_init();
+    // Initialize VSLA context with configuration
+    vsla_config_t config = {
+        .backend = VSLA_BACKEND_AUTO,  // Automatically select best backend
+        .device_id = 0,
+        .memory_limit = 0,  // No limit
+        .optimization_hint = VSLA_HINT_NONE,
+        .enable_profiling = false,
+        .verbose = false
+    };
+    vsla_context_t* ctx = vsla_init(&config);
     
     // Create tensors with different shapes
     uint64_t shape1[] = {3};
     uint64_t shape2[] = {5};
     
-    vsla_tensor_t* a = vsla_new(1, shape1, VSLA_MODEL_A, VSLA_DTYPE_F64);
-    vsla_tensor_t* b = vsla_new(1, shape2, VSLA_MODEL_A, VSLA_DTYPE_F64);
+    vsla_tensor_t* a = vsla_tensor_create(ctx, 1, shape1, VSLA_MODEL_A, VSLA_DTYPE_F64);
+    vsla_tensor_t* b = vsla_tensor_create(ctx, 1, shape2, VSLA_MODEL_A, VSLA_DTYPE_F64);
     
     // Fill with data
     for (uint64_t i = 0; i < shape1[0]; i++) {
         uint64_t idx = i;
-        vsla_set_f64(a, &idx, (double)(i + 1));
+        vsla_set_f64(ctx, a, &idx, (double)(i + 1));
     }
     for (uint64_t i = 0; i < shape2[0]; i++) {
         uint64_t idx = i;
-        vsla_set_f64(b, &idx, (double)(i + 1));
+        vsla_set_f64(ctx, b, &idx, (double)(i + 1));
     }
     
     // Create output tensor for addition (automatically padded)
     uint64_t out_shape[] = {5}; // max(3, 5) = 5
-    vsla_tensor_t* result = vsla_zeros(1, out_shape, VSLA_MODEL_A, VSLA_DTYPE_F64);
+    vsla_tensor_t* result = vsla_tensor_zeros(ctx, 1, out_shape, VSLA_MODEL_A, VSLA_DTYPE_F64);
     
     // Perform variable-shape addition
-    vsla_add(result, a, b);  // [1,2,3,0,0] + [1,2,3,4,5] = [2,4,6,4,5]
+    vsla_add(ctx, result, a, b);  // [1,2,3,0,0] + [1,2,3,4,5] = [2,4,6,4,5]
     
     // Clean up
-    vsla_free(a);
-    vsla_free(b);
-    vsla_free(result);
-    vsla_cleanup();
+    vsla_tensor_free(a);
+    vsla_tensor_free(b);
+    vsla_tensor_free(result);
+    vsla_cleanup(ctx);
     
     return 0;
 }
@@ -238,9 +240,19 @@ vsla_error_t vsla_scale(vsla_tensor_t* out, const vsla_tensor_t* tensor, double 
 // Shape manipulation
 vsla_error_t vsla_pad_rank(vsla_tensor_t* tensor, uint8_t new_rank, const uint64_t target_cap[]);
 
-// Norms and reductions
-vsla_error_t vsla_norm(const vsla_tensor_t* tensor, double* norm);
-vsla_error_t vsla_sum(const vsla_tensor_t* tensor, double* sum);
+### Backend Discovery and Negotiation
+```c
+// Get the number of available backends
+int vsla_get_num_backends(void);
+
+// Get information about a backend
+vsla_error_t vsla_get_backend_info(int backend_index, const char** name_out, uint32_t* capabilities_out);
+
+// Initialize a backend
+vsla_error_t vsla_init_backend(int backend_index, vsla_backend_instance_t** instance_out);
+
+// Release a backend
+vsla_error_t vsla_release_backend(vsla_backend_instance_t* instance);
 ```
 
 ## 🧪 Testing

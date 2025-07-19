@@ -3,7 +3,7 @@ project(libvsla VERSION 1.0.0 LANGUAGES C CXX)
 
 # Options
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
-option(BUILD_TESTS "Build tests" OFF)
+option(BUILD_TESTS "Build tests" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(VSLA_BUILD_PYTHON "Build Python bindings" OFF)
 option(VSLA_ENABLE_TESTS "Enable testing" ON)
@@ -15,8 +15,8 @@ option(VSLA_ENABLE_ROCFFT "Enable rocFFT for AMD GPU FFT operations" OFF)
 option(VSLA_ENABLE_MKL "Enable Intel MKL for CPU FFT operations" OFF)
 option(VSLA_UNIFIED_API "Build unified hardware-agnostic API" ON)
 
-# C99 standard
-set(CMAKE_C_STANDARD 99)
+# C17 standard
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
@@ -95,24 +95,20 @@ endif()
 # Include directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# Source files
+# Source files - minimal set for testing
 set(VSLA_SOURCES
     src/vsla_core.c
     src/vsla_tensor.c
-    src/vsla_io.c
-    src/vsla_conv.c
-    src/vsla_kron.c
-    src/vsla_autograd.c
     src/vsla_utils.c
-    src/backends/vsla_backend_cpu_new.c
-    src/backends/vsla_backend_cuda_new.c
+    src/vsla_unified_minimal.c
+    src/backends/vsla_backend_cpu.c
 )
 
 # Add unified API sources if enabled
 # Temporarily disabled until architecture is fully aligned
 #if(VSLA_UNIFIED_API)
 #    list(APPEND VSLA_SOURCES 
-#        src/vsla_unified.c
+#        src/vsla_unified_minimal.c
 #    )
 #endif()
 
@@ -131,10 +127,8 @@ endif()
 
 # Add GPU sources conditionally
 if(VSLA_ENABLE_CUDA)
-    list(APPEND VSLA_SOURCES src/backends/vsla_backend_cuda_kernels.cu)
-    list(APPEND VSLA_SOURCES src/vsla_gpu.cu)
-else()
-    list(APPEND VSLA_SOURCES src/vsla_gpu.c)
+    list(APPEND VSLA_SOURCES src/backends/cuda/vsla_backend_cuda_kernels.cu)
+    list(APPEND VSLA_SOURCES src/backends/cuda/vsla_gpu.cu)
 endif()
 
 # Create library targets

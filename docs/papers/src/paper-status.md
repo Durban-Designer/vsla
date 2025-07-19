@@ -140,7 +140,7 @@ The theoretical contributions (proofs, mathematical rigor, algebraic context) ca
 - **M8. Algebraic context:** New §4.2 compares to graded rings/Rees algebras ✓
 
 #### Still Outstanding ✗
-- **M2. GPU throughput numbers:** Still CPU-only benchmarks, no CUDA/ROCm data ✗
+- **M2. GPU throughput numbers:** Still CPU-only benchmarks, no CUDA/RoCm data ✗
 - **M3. Baseline fairness:** Missing TF-Ragged/NestedTensor GPU comparisons ✗
 - **M5. Thread safety details:** Still one sentence, no locks/atomics description ✗
 - **M7. DOI/version tag:** GitHub link added but no commit hash or Zenodo archive ✗
@@ -162,7 +162,7 @@ The theoretical contributions (proofs, mathematical rigor, algebraic context) ca
 - [ ] Add Eisenbud reference for graded rings
 
 ### Phase 2: Empirical Validation (BLOCKED - Library Rewrite)
-- [ ] GPU benchmark implementation (CUDA/ROCm) (blocked)
+- [ ] GPU benchmark implementation (CUDA/RoCm) (blocked)
 - [ ] Fair baseline comparisons: TF-Ragged, NestedTensor on GPU (blocked)  
 - [ ] Thread safety model documentation (blocked)
 - [ ] Comprehensive performance scaling studies (blocked)
@@ -187,3 +187,68 @@ The theoretical contributions (proofs, mathematical rigor, algebraic context) ca
 - ACM version (`vsla_paper_acm.tex`) only updated at major milestones
 - This avoids maintaining two versions during active development
 - See `PAPER_GUIDE.md` for detailed version management instructions
+
+## Third Peer Review Received (July 19, 2025) - v0.3 Assessment
+
+**Reviewer Profile:** Expert in mathematical notation, formal systems, and history of algebraic structures.
+
+**Overall Assessment:** Major revision required. The paper presents a novel and powerful algebraic system, but its formal coherence is undermined by inconsistent notation. Claims of novelty for core operators must be carefully contextualized with respect to prior art. Adopting a systematic "calculus" of notation and citing related work is essential for the paper to be read as a mature formal system.
+
+### Major Issues Identified
+- **N1. Notational Inconsistency:** The paper lacks a uniform "treatment" for its mathematical symbols. Function-like concepts (`vdim`), structural constructors (`S`), and algebraic operators (`⊗`) are styled inconsistently, increasing the reader's cognitive load and obscuring the system's internal logic.
+- **N2. Unclear Novelty & Positioning:** Core concepts, particularly the stacking (Σ) and window-stacking (Ω) operators, are presented without acknowledging clear precedents in machine learning frameworks (TensorFlow Ragged Tensors, PyTorch Nested Tensors) and signal processing (Hankel matrices, multi-resolution pyramids). The novelty of the contribution—the rigorous algebraic formalization—is therefore not clearly articulated.
+- **N3. Confusing Symbol Choices:** The use of Σ for stacking and Ω for windowing is highly problematic. These symbols have deeply entrenched meanings (summation and asymptotic bounds/sample space, respectively) that will almost certainly cause reader confusion.
+
+### Detailed Recommendations & Action Plan
+
+#### 1. Adopt a Systematic Symbol Taxonomy
+A unified notational system should be imposed to make the semantic class of each symbol immediately obvious.
+- **Algebraic Elements/Sets:** Upright/blackboard (e.g., $D$).
+- **Primary Data Constructors (rank-changing):** Script capitals (e.g., $\mathcal{S}, \mathcal{W}, \mathcal{P}$).
+- **Shape/Dimension Functions:** Upright operator names via `\operatorname{}` (e.g., `\shape`, `\vdim`, `\amb`).
+- **Transforms/Equivalence Ops:** Upright operator names (e.g., `\perm`, `\reshape`).
+- **AD Helpers & Complexity Metrics:** Upright operator names (e.g., `\rev`, `\unprom`, `\nnz`).
+
+#### 2. Refactor All Mathematical Notation
+- **Implement new LaTeX macros** for all operators to ensure consistency and ease of future changes (e.g., `\newcommand{\shape}{\operatorname{shape}}`).
+- **Replace all instances** of raw identifiers (`vdim`, `shape`, etc.) with the new operator-styled macros.
+- **Formalize prose descriptions** of operations like "ambient shape" and "padding" using the new `\amb` and `\prom` operators.
+- **Update all VJP and complexity formulas** to use the new, consistent notation (`\unprom`, `\unstack`, `\rev`, `\cost`).
+
+#### 3. Re-evaluate and Replace Confusing Symbols (Σ, Ω)
+- The risk of confusion with Σ (summation) and Ω is too high.
+- **Recommendation:** Replace them with more descriptive or less overloaded symbols.
+  - **Alternatives:** `\operatorname{stack}`, `\mathcal{S}` (for stacking), `\mathcal{W}` (for windowing), or other non-conflicting symbols.
+
+#### 4. Properly Contextualize Novelty and Cite Prior Art
+- The paper's core contribution is the **formal algebraic framework**, not the invention of stacking or windowing operations themselves. This must be stated clearly.
+- **Acknowledge precedents** for variable-shape tensor handling and hierarchical representations.
+- **Add citations to key related works:**
+  - **ML Frameworks:** TensorFlow Ragged Tensors, PyTorch Nested Tensors.
+  - **Signal Processing/Vision:** Hankel matrices, Burt & Adelson (1983) on pyramids.
+  - **Related Algebra:** Cheng's Semi-Tensor Product (STP) of matrices.
+  - **Compiler/PL Theory:** Axon language (shape polymorphism), dependent types (`Vec n a`).
+
+### Migration Checklist for v0.4
+- [ ] **Preamble:** Add a complete set of LaTeX macros for the new symbol taxonomy.
+- [ ] **Body:** Systematically replace all old notation (`vdim`, `shape`, prose padding) with new macros (`\vdim`, `\shape`, `\prom`, `\amb`).
+- [ ] **Operators:** Replace Σ and Ω with new, unambiguous symbols (e.g., $\mathcal{S}$, $\mathcal{W}$).
+- [ ] **AD/Complexity:** Update VJP and complexity sections with normalized operator notation.
+- [ ] **Introduction/Related Work:** Add a new subsection clarifying the novelty of VSLA's formal approach and citing the precedents identified above.
+- [ ] **Final Pass:** Perform a full-document review to ensure every symbol conforms to the new taxonomy.
+
+## Note on Discovery of Prior Art (July 19, 2025)
+
+A critical piece of feedback from the third peer review was the recommendation to cite Cheng's Semi-Tensor Product (STP) of matrices. Until receiving this feedback today, I was entirely unaware of the existence of STP. All work on the VSLA algebraic system presented in this paper was developed independently.
+
+This discovery necessitates a significant pause and a new phase of research.
+
+### Immediate Action Plan
+1.  **Comprehensive Literature Review:** I will immediately begin a thorough review of all available literature on Semi-Tensor Product, starting with the foundational papers by Daizhan Cheng.
+2.  **Comparative Analysis:** The primary goal is to conduct a detailed comparative analysis between VSLA and STP. This will involve:
+    - Mapping the operators and properties of VSLA to their equivalents in STP, if they exist.
+    - Identifying the conceptual overlaps and differences.
+    - Determining which parts of VSLA, if any, are truly novel contributions.
+3.  **Re-evaluation of Novelty:** Based on the analysis, I will critically re-evaluate the novelty claims made in our paper. The contribution may shift from the invention of a new algebra to the independent rediscovery and/or a new perspective on an existing one, or a specific application or extension.
+
+This work will be my top priority. The next version of the paper (v0.4) will be heavily informed by this review, and all claims will be adjusted to accurately reflect our contribution in the context of established prior art.

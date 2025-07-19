@@ -8,6 +8,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "vsla/vsla_io.h"
+#include "vsla/vsla_tensor_internal.h"
 #include "vsla/vsla_tensor.h"
 #include <stdio.h>
 #include <stdlib.h>

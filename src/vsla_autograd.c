@@ -9,6 +9,7 @@
 #define _GNU_SOURCE
 
 #include "vsla/vsla_autograd.h"
+#include "vsla/vsla_tensor_internal.h"
 #include "vsla/vsla_tensor.h"
 #include "vsla/vsla_core.h"
 #include "vsla/vsla_backend_cpu.h"

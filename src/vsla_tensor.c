@@ -8,12 +8,17 @@
 #define _POSIX_C_SOURCE 200112L
 
 #include "vsla/vsla_tensor.h"
+#include "vsla/vsla_tensor_internal.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
 #include <errno.h>
 #include <limits.h>
+
+/* Forward declarations */
+void vsla_free(vsla_tensor_t* tensor);
+vsla_error_t vsla_fill_basic(vsla_tensor_t* tensor, double value);
 
 #ifdef _WIN32
 #include <malloc.h>
@@ -264,7 +269,7 @@ void* vsla_get_ptr(const vsla_tensor_t* tensor, const uint64_t indices[]) {
     return (char*)tensor->data + offset;
 }
 
-vsla_error_t vsla_get_f64(const vsla_tensor_t* tensor, const uint64_t indices[], 
+static vsla_error_t vsla_get_f64_internal(const vsla_tensor_t* tensor, const uint64_t indices[], 
                           double* value) {
     if (!tensor || !indices || !value) {
         return VSLA_ERROR_NULL_POINTER;
@@ -286,7 +291,7 @@ vsla_error_t vsla_get_f64(const vsla_tensor_t* tensor, const uint64_t indices[],
     return VSLA_SUCCESS;
 }
 
-vsla_error_t vsla_set_f64(vsla_tensor_t* tensor, const uint64_t indices[], 
+static vsla_error_t vsla_set_f64_internal(vsla_tensor_t* tensor, const uint64_t indices[], 
                           double value) {
     if (!tensor || !indices) {
         return VSLA_ERROR_NULL_POINTER;
@@ -301,6 +306,50 @@ vsla_error_t vsla_set_f64(vsla_tensor_t* tensor, const uint64_t indices[],
         *(double*)ptr = value;
     } else if (tensor->dtype == VSLA_DTYPE_F32) {
         *(float*)ptr = (float)value;
+    } else {
+        return VSLA_ERROR_INVALID_DTYPE;
+    }
+    
+    return VSLA_SUCCESS;
+}
+
+static vsla_error_t vsla_get_f32_internal(const vsla_tensor_t* tensor, const uint64_t indices[], 
+                          float* value) {
+    if (!tensor || !indices || !value) {
+        return VSLA_ERROR_NULL_POINTER;
+    }
+    
+    void* ptr = vsla_get_ptr(tensor, indices);
+    if (!ptr) {
+        return VSLA_ERROR_INVALID_ARGUMENT;
+    }
+    
+    if (tensor->dtype == VSLA_DTYPE_F32) {
+        *value = *(float*)ptr;
+    } else if (tensor->dtype == VSLA_DTYPE_F64) {
+        *value = (float)(*(double*)ptr);
+    } else {
+        return VSLA_ERROR_INVALID_DTYPE;
+    }
+    
+    return VSLA_SUCCESS;
+}
+
+static vsla_error_t vsla_set_f32_internal(vsla_tensor_t* tensor, const uint64_t indices[], 
+                          float value) {
+    if (!tensor || !indices) {
+        return VSLA_ERROR_NULL_POINTER;
+    }
+    
+    void* ptr = vsla_get_ptr(tensor, indices);
+    if (!ptr) {
+        return VSLA_ERROR_INVALID_ARGUMENT;
+    }
+    
+    if (tensor->dtype == VSLA_DTYPE_F32) {
+        *(float*)ptr = value;
+    } else if (tensor->dtype == VSLA_DTYPE_F64) {
+        *(double*)ptr = (double)value;
     } else {
         return VSLA_ERROR_INVALID_DTYPE;
     }
@@ -337,7 +386,7 @@ vsla_error_t vsla_fill_basic(vsla_tensor_t* tensor, double value) {
     
     while (!done) {
         /* Set value at current indices */
-        vsla_error_t err = vsla_set_f64(tensor, indices, value);
+        vsla_error_t err = vsla_set_f64_internal(tensor, indices, value);
         if (err != VSLA_SUCCESS) {
             result = err;
             break;
@@ -392,7 +441,7 @@ void vsla_print(const vsla_tensor_t* tensor, const char* name) {
             for (uint64_t i = 0; i < tensor->shape[0]; i++) {
                 double val = 0.0;
                 uint64_t idx = i;
-                vsla_get_f64(tensor, &idx, &val);
+                vsla_get_f64_internal(tensor, &idx, &val);
                 printf("%.3f%s", val, i < tensor->shape[0] - 1 ? ", " : "");
             }
             printf("]\n");
@@ -413,6 +462,55 @@ int vsla_shape_equal(const vsla_tensor_t* a, const vsla_tensor_t* b) {
     return 1;
 }
 
+/* Additional unified interface helper functions */
+uint8_t vsla_get_rank(const vsla_tensor_t* tensor) {
+    return tensor ? tensor->rank : 0;
+}
+
+vsla_error_t vsla_get_shape(const vsla_tensor_t* tensor, uint64_t* shape) {
+    if (!tensor || !shape) return VSLA_ERROR_NULL_POINTER;
+    
+    if (tensor->rank > 0 && tensor->shape) {
+        memcpy(shape, tensor->shape, tensor->rank * sizeof(uint64_t));
+    }
+    
+    return VSLA_SUCCESS;
+}
+
+vsla_model_t vsla_get_model(const vsla_tensor_t* tensor) {
+    return tensor ? (vsla_model_t)tensor->model : VSLA_MODEL_A;
+}
+
+vsla_dtype_t vsla_get_dtype(const vsla_tensor_t* tensor) {
+    return tensor ? (vsla_dtype_t)tensor->dtype : VSLA_DTYPE_F64;
+}
+
+vsla_backend_t vsla_get_location(const vsla_tensor_t* tensor) {
+    return tensor ? tensor->location : VSLA_BACKEND_CPU;
+}
+
+/* Basic wrapper functions for backward compatibility */
+vsla_error_t vsla_get_f64_basic(const vsla_tensor_t* tensor, const uint64_t indices[], double* value) {
+    return vsla_get_f64_internal(tensor, indices, value);
+}
+
+vsla_error_t vsla_set_f64_basic(vsla_tensor_t* tensor, const uint64_t indices[], double value) {
+    return vsla_set_f64_internal(tensor, indices, value);
+}
+
+vsla_error_t vsla_get_f32_basic(const vsla_tensor_t* tensor, const uint64_t indices[], float* value) {
+    return vsla_get_f32_internal(tensor, indices, value);
+}
+
+vsla_error_t vsla_set_f32_basic(vsla_tensor_t* tensor, const uint64_t indices[], float value) {
+    return vsla_set_f32_internal(tensor, indices, value);
+}
+
+/* Tensor free wrapper for unified interface */
+void vsla_tensor_free(vsla_tensor_t* tensor) {
+    vsla_free(tensor);
+}
+
 vsla_tensor_t* vsla_zero_element(vsla_model_t model, vsla_dtype_t dtype) {
     return vsla_new(0, NULL, model, dtype);
 }
@@ -429,4 +527,12 @@ vsla_tensor_t* vsla_one_element(vsla_model_t model, vsla_dtype_t dtype) {
     }
     
     return one;
+}
+
+vsla_tensor_t* vsla_zero_element_basic(vsla_model_t model, vsla_dtype_t dtype) {
+    return vsla_zero_element(model, dtype);
+}
+
+vsla_tensor_t* vsla_one_element_basic(vsla_model_t model, vsla_dtype_t dtype) {
+    return vsla_one_element(model, dtype);
 }

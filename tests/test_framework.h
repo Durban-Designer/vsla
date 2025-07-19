@@ -8,6 +8,10 @@
 #ifndef TEST_FRAMEWORK_H
 #define TEST_FRAMEWORK_H
 
+#include "vsla/vsla_backend.h"
+
+vsla_backend_interface_t* get_backend_by_name(const char* name);
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
