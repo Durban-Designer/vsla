@@ -1,0 +1,53 @@
+% ================================================================
+%  VSLA Operations
+% ================================================================\section{Variable‑Shape Linear Algebra}
+\label{sec:vsla}
+\subsection{Shape‑Semirings and Shape‑Matrices}
+\begin{definition}
+A \emph{shape‑semiring} is a semiring $S$ equipped with $\vdim\colon S\to\mathbb N$ such that $\vdim(x+y)\le\max\{\vdim x,\vdim y\}$ and $\vdim(xy)=\vdim x\,\vdim y$.
+\end{definition}
+
+The convolution and Kronecker models are shape‑semirings.
+
+\begin{lemma}[Zero-Length Edge Case]\label{lem:zeroLength}
+For the zero element $0 = [(0,[])]$ and any $a \in D$:
+\begin{enumerate}[leftmargin=2em]
+\item $0 + a = a + 0 = a$ (additive identity)
+\item $0 \otimes_c a = a \otimes_c 0 = 0$ (convolution absorption)  
+\item $0 \otimes_K a = a \otimes_K 0 = 0$ (Kronecker absorption)
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+(1) By definition, $0 + a = [(0,[])] + [(d,v)] = [(\max(0,d), \iota_{0 \to d}([]) + \iota_{d \to d}(v))] = [(d, 0 + v)] = [(d,v)] = a$.
+
+(2) For convolution, $0 \otimes_c a = [(0,[])] \otimes_c [(d,v)] = 0$ by the first case in the convolution definition since $0 \cdot d = 0$.
+
+(3) For Kronecker product, $0 \otimes_K a = [(0 \cdot d, [] \otimes_K v)] = [(0,[])] = 0$ since the empty vector has zero dimension.
+\end{proof}
+
+\begin{theorem}[Matrix Product]
+For an $m\times n$ shape‑matrix $A=(a_{ij})$ and an $n\times p$ shape‑matrix $B=(b_{jk})$ over a shape‑semiring,
+\[(AB)_{ik}=\sum_{j=1}^{n} a_{ij}\otimes b_{jk}\] exists and yields an $m\times p$ shape‑matrix.
+\end{theorem}
+\begin{proof}
+The sum $\sum_{j=1}^{n} a_{ij}\otimes b_{jk}$ is well-defined since addition is associative and commutative in the shape-semiring. 
+
+For the degree bound: Since $\vdim(x+y) \leq \max(\vdim x, \vdim y)$ and $\vdim(xy) = \vdim x \cdot \vdim y$ in a shape-semiring, we have:
+\[\vdim((AB)_{ik}) = \vdim\left(\sum_{j=1}^{n} a_{ij}\otimes b_{jk}\right) \leq \max_{j=1,\ldots,n} \vdim(a_{ij}\otimes b_{jk}) = \max_{j=1,\ldots,n} \vdim(a_{ij}) \cdot \vdim(b_{jk})\]
+
+This shows that each entry of $AB$ is a well-defined element of the shape-semiring with bounded degree. The associativity of matrix multiplication follows from the distributivity and associativity of the underlying semiring operations:
+\begin{align}
+((AB)C)_{ik} &= \sum_{\ell=1}^{p} (AB)_{i\ell} \otimes c_{\ell k} = \sum_{\ell=1}^{p} \left(\sum_{j=1}^{n} a_{ij} \otimes b_{j\ell}\right) \otimes c_{\ell k} \\
+&= \sum_{\ell=1}^{p} \sum_{j=1}^{n} (a_{ij} \otimes b_{j\ell}) \otimes c_{\ell k} = \sum_{j=1}^{n} \sum_{\ell=1}^{p} a_{ij} \otimes (b_{j\ell} \otimes c_{\ell k}) \\
+&= \sum_{j=1}^{n} a_{ij} \otimes \left(\sum_{\ell=1}^{p} b_{j\ell} \otimes c_{\ell k}\right) = \sum_{j=1}^{n} a_{ij} \otimes (BC)_{jk} = (A(BC))_{ik}
+\end{align}
+\end{proof}
+
+\subsection{Rank, Spectrum and Complexity}
+\begin{theorem}[Complexity]\label{thm:complexity}
+Let $d_{\max}=\max_{i,j}\vdim a_{ij}$.  Then
+\begin{itemize}[leftmargin=1.5em]
+  \item Model A: matrix‑vector multiply costs $\mathcal O\bigl(mn\,d_{\max}\log d_{\max}\bigr)$ via FFT.
+  \item Model B: the same task costs $\mathcal O\bigl(mn\,d_{\max}^{2}\bigr)$.
+\end{itemize}
+\end{theorem}

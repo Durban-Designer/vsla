@@ -1,0 +1,168 @@
+% ================================================================
+%  Mathematical Foundations
+% ================================================================
+\section{Mathematical Preliminaries}
+\label{sec:prelim}
+
+\begin{tcolorbox}[colback=prelim,colframe=blue!50!black,title=Key Definitions]
+\begin{description}[leftmargin=2em]
+\item[Dimension-aware vector:] An equivalence class $[(d,v)]$ where $d \in \mathbb{N}$ is the logical dimension and $v \in \mathbb{R}^d$ is the data vector.
+\item[Zero-padding equivalence:] $(d_1,v) \sim (d_2,w)$ iff their extensions to $\max(d_1,d_2)$ dimensions are equal.
+\item[Shape-semiring:] A semiring $S$ with dimension function $\vdim: S \to \mathbb{N}$ satisfying $\vdim(x+y) \leq \max(\vdim x, \vdim y)$ and for Model A (convolution), $\vdim(xy) = \vdim x + \vdim y - 1$, while for Model B (Kronecker), $\vdim(xy) = \vdim x \cdot \vdim y$.
+\item[Variable-shape operation:] An operation that automatically promotes operands to compatible shapes before computation.
+\end{description}
+\end{tcolorbox}
+
+\vspace{1em}
+
+\begin{table}[h]
+\centering
+\caption{Notation Table}
+\begin{tabular}{cl}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$D$ & Set of dimension-aware vectors \\
+$[(d,v)]$ & Equivalence class of vector $v \in \mathbb{R}^d$ \\
+$\vdim x$ & Logical dimension of element $x$ (also: degree) \\
+$\iota_{m \to n}$ & Zero-padding map from $\mathbb{R}^m$ to $\mathbb{R}^n$ \\
+$\oplus \otimes_c$ & Addition and convolution in Model A \\
+$\oplus \otimes_K$ & Addition and Kronecker product in Model B \\
+$d_{\max}$ & Maximum dimension across matrix entries \\
+$\mathcal{O}(\cdot)$ & Asymptotic complexity bound \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rectangle, minimum width=0.8cm, minimum height=0.6cm, font=\small},
+  zero/.style={box, pattern=north east lines, pattern color=gray!80},
+  value/.style={box, fill=white},
+  eq/.style={font=\Large}
+]
+
+% Original vectors
+\node[value] (v1) at (0,2) {1};
+\node[value] (v2) at (0.8,2) {-1};
+\node[value] (v3) at (1.6,2) {2};
+\node[above=0.2cm of v2] {$v$};
+
+\node[value] (w1) at (0,0.5) {3};
+\node[value] (w2) at (0.8,0.5) {0};
+\node[value] (w3) at (1.6,0.5) {-1};
+\node[value] (w4) at (2.4,0.5) {1};
+\node[value] (w5) at (3.2,0.5) {2};
+\node[above=0.2cm of w3] {$w$};
+
+% Arrow and equivalence
+\node[eq] at (4.5,1.25) {$\sim$};
+
+% Padded vectors
+\node[value] (pv1) at (6,2) {1};
+\node[value] (pv2) at (6.8,2) {-1};
+\node[value] (pv3) at (7.6,2) {2};
+\node[zero] (pv4) at (8.4,2) {0};
+\node[zero] (pv5) at (9.2,2) {0};
+\node[above=0.2cm of pv3] {$\iota_{3 \to 5}(v)$};
+
+\node[value] (pw1) at (6,0.5) {3};
+\node[value] (pw2) at (6.8,0.5) {0};
+\node[value] (pw3) at (7.6,0.5) {-1};
+\node[value] (pw4) at (8.4,0.5) {1};
+\node[value] (pw5) at (9.2,0.5) {2};
+\node[above=0.2cm of pw3] {$\iota_{5 \to 5}(w)$};
+
+% Addition result
+\node[eq] at (10.5,1.25) {$+$};
+
+\node[value] (r1) at (12,1.25) {4};
+\node[value] (r2) at (12.8,1.25) {-1};
+\node[value] (r3) at (13.6,1.25) {1};
+\node[value] (r4) at (14.4,1.25) {1};
+\node[value] (r5) at (15.2,1.25) {2};
+\node[above=0.2cm of r3] {$v + w$};
+
+% Labels
+\node[below=0.5cm of v2] {\footnotesize Dimension 3};
+\node[below=0.5cm of w3] {\footnotesize Dimension 5};
+\node[below=0.5cm of pv3] {\footnotesize Padded to 5};
+\node[below=0.5cm of pw3] {\footnotesize Already 5};
+\node[below=0.5cm of r3] {\footnotesize Result dimension 5};
+
+\end{tikzpicture}
+\caption{Zero-padding equivalence in VSLA. Two vectors of different dimensions become equivalent after padding to a common dimension, enabling automatic variable-shape operations. The values of the vector components are shown inside each cell. White cells contain actual values, and hatched cells represent trailing zeros.}
+\label{fig:zeropadding}
+\end{figure}
+
+% ================================================================
+\section{Mathematical Foundations}
+\label{sec:foundations}
+\subsection{The Dimension‑Aware Space}
+\begin{definition}[Dimension‑Aware Vectors]\label{def:DAspace}
+Define the graded set
+\[
+  D_e\;:=\;\bigsqcup_{d\ge0}\,\{d\}\times\mathbb R^{d},
+\]
+where \(\mathbb R^{0}:=\{\,[]\}\) denotes the empty vector.
+\end{definition}
+
+\begin{definition}[Zero‑Padding Equivalence]\label{def:padding}
+For \(m\le n\) let \(\iota_{m\rightarrow n}\colon\mathbb R^{m}\to\mathbb R^{n}\) append \(n-m\) trailing zeros.  Put
+\[
+  (d_1,v)\sim(d_2,w)
+  \iff \iota_{d_1\rightarrow n}(v)=\iota_{d_2\rightarrow n}(w),\quad n:=\max(d_1,d_2).
+\]
+\end{definition}
+
+\begin{proposition}\label{prop:equiv}
+The relation \(\sim\) is an equivalence relation, yielding the set \(D:=D_e/\!\sim\) of \emph{dimension‑aware vectors}.
+\end{proposition}
+\begin{proof}
+Reflexivity and symmetry are immediate from Definition\;\ref{def:padding}.  For transitivity pad to \(n:=\max(d_1,d_2,d_3)\).\end{proof}
+
+\subsection{Additive Structure}
+\begin{theorem}\label{thm:add}
+\(\bigl(D,+,0\bigr)\) is a commutative monoid where
+\[
+  \bigl[(d_1,v)\bigr]+\bigl[(d_2,w)\bigr]
+  :=\bigl[(n,\,\iota_{d_1\rightarrow n}(v)+\iota_{d_2\rightarrow n}(w))\bigr],
+  \quad n:=\max(d_1,d_2),\qquad
+  0:=\bigl[(0,[])\bigr].
+\]
+\end{theorem}
+\begin{proof}
+Well‑definedness follows from Proposition\;\ref{prop:equiv}. Associativity and commutativity inherit from \(\mathbb R^n\).\end{proof}
+
+\subsection{Shape and Promotion Operators}
+
+\begin{definition}[Shape Operator]
+For a VSLA tensor $x \in \mathbb{T}_r$, define the \emph{shape operator}
+\[
+\shape(x) = (n_1, \ldots, n_r) \in \mathbb{N}^r
+\]
+where $(n_1, \ldots, n_r)$ are the dimensions of any representative $(d, v) \in x$ with $d = (n_1, \ldots, n_r)$.
+\end{definition}
+
+\begin{definition}[Ambient Shape Operator]
+For a collection of tensors $A^{(1)}, \ldots, A^{(k)} \in \mathbb{T}_r$, define
+\[
+\amb(A^{(1)}, \ldots, A^{(k)}) := \left(\max_i \shape(A^{(i)})_1, \ldots, \max_i \shape(A^{(i)})_r\right).
+\]
+\end{definition}
+
+\begin{definition}[Promotion Operator]
+For a tensor $x \in \mathbb{T}_r$ and target shape $\mathbf{n} = (n_1, \ldots, n_r)$, define
+\[
+\prom_{\mathbf{n}}(x) := [(n_1 \times \cdots \times n_r, \iota_{\shape(x) \rightarrow \mathbf{n}}(v))]
+\]
+where $v$ is any representative vector of $x$ and $\iota$ is the canonical zero-padding embedding.
+\end{definition}
+
+\begin{definition}[Minimal Representative Operator]
+For a tensor $x \in \mathbb{T}_r$, define
+\[
+\minrep(x) := \text{unique representative } (d,v) \in x \text{ with no trailing zero slices}.
+\]
+\end{definition}

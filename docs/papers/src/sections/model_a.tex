@@ -1,0 +1,114 @@
+% ================================================================
+%  Model A: The Convolution Semiring
+% ================================================================
+\section{Model A: The Convolution Semiring}
+\label{sec:modelA}
+\subsection{Convolution Product}
+\begin{definition}
+For \(v\in\mathbb R^{d_1}\) and \(w\in\mathbb R^{d_2}\) define the discrete convolution
+\[
+  (v\ast w)_k \;:=\;\sum_{i+j=k+1} v_i\,w_j,\qquad k=0,\dots,d_1+d_2-2.
+\]
+Put
+\[
+  \bigl[(d_1,v)\bigr]\otimes_c\bigl[(d_2,w)\bigr]
+  :=\begin{cases}
+       0, & d_1d_2=0, \\
+       \bigl[(d_1+d_2-1,\,v\ast w)\bigr], & \text{otherwise.}
+     \end{cases}
+\]
+\end{definition}
+
+
+\begin{theorem}\label{thm:convSemiring}
+\(\bigl(D,+,\otimes_c,0,1\bigr)\) is a commutative semiring with \(1:=\bigl[(1,[1])\bigr]\).
+\end{theorem}
+\begin{proof}
+We verify the semiring axioms:
+
+\textit{Associativity of $\otimes_c$:}
+For $a, b, c \in D$ with representatives $[(d_1,u)], [(d_2,v)], [(d_3,w)]$, we need $(a \otimes_c b) \otimes_c c = a \otimes_c (b \otimes_c c)$. By definition, $(u \ast v) \ast w$ and $u \ast (v \ast w)$ both equal
+\[
+\sum_{i+j+k=n+2} u_i v_j w_k
+\]
+when expanding the convolution index arithmetic. Thus both products have degree $d_1 + d_2 + d_3 - 2$ and identical coefficients.
+
+\textit{Commutativity of $\otimes_c$:}
+The convolution $(u \ast v)_k = \sum_{i+j=k+1} u_i v_j = \sum_{i+j=k+1} v_j u_i = (v \ast u)_k$ by symmetry of the index condition.
+
+\textit{Distributivity:}
+For $a, b, c \in D$, we have $a \otimes_c (b + c) = a \otimes_c b + a \otimes_c c$ since convolution distributes over pointwise addition: $u \ast (v + w) = u \ast v + u \ast w$ coefficientwise.
+
+\textit{Identity elements:}
+The zero element $0 = [(0,[])]$ satisfies $0 \otimes_c a = 0$ by the first case in the definition. The one element $1 = [(1,[1])]$ satisfies $(1 \ast v)_k = v_k$ for all $k$, making it the multiplicative identity.
+\end{proof}
+
+\begin{theorem}[Polynomial Isomorphism]\label{thm:polyIso}
+The map \(\Phi\bigl([(d,v)]\bigr):=\sum_{i=0}^{d-1} v_{i+1}\,x^{i}\) is a semiring isomorphism \(D\cong\mathbb R[x]\).
+\end{theorem}
+\begin{proof}
+We verify that $\Phi$ is a well-defined semiring homomorphism, then show bijectivity.
+
+\textit{Well-definedness:}
+If $[(d_1,v)] = [(d_2,w)]$, then after padding to $n = \max(d_1,d_2)$, we have $\iota_{d_1 \to n}(v) = \iota_{d_2 \to n}(w)$. This means $v_i = w_i$ for $i = 1,\ldots,\min(d_1,d_2)$ and the remaining components are zero. Thus $\Phi([(d_1,v)]) = \sum_{i=0}^{d_1-1} v_{i+1} x^i = \sum_{i=0}^{d_2-1} w_{i+1} x^i = \Phi([(d_2,w)])$.
+
+\textit{Additive homomorphism:}
+For $a = [(d_1,v)], b = [(d_2,w)]$ with $n = \max(d_1,d_2)$:
+\begin{align}
+\Phi(a + b) &= \Phi([(n, \iota_{d_1 \to n}(v) + \iota_{d_2 \to n}(w))]) \\
+&= \sum_{i=0}^{n-1} (\iota_{d_1 \to n}(v)_{i+1} + \iota_{d_2 \to n}(w)_{i+1}) x^i \\
+&= \sum_{i=0}^{n-1} \iota_{d_1 \to n}(v)_{i+1} x^i + \sum_{i=0}^{n-1} \iota_{d_2 \to n}(w)_{i+1} x^i \\
+&= \Phi(a) + \Phi(b)
+\end{align}
+
+\textit{Multiplicative homomorphism:}
+For convolution $a \otimes_c b = [(d_1+d_2-1, v \ast w)] $:
+\begin{align}
+\Phi(a \otimes_c b) &= \sum_{k=0}^{d_1+d_2-2} (v \ast w)_{k+1} x^k \\
+&= \sum_{k=0}^{d_1+d_2-2} \left(\sum_{i+j=k+1} v_i w_j\right) x^k \\
+&= \sum_{i=1}^{d_1} \sum_{j=1}^{d_2} v_i w_j x^{i+j-2} \\
+&= \left(\sum_{i=0}^{d_1-1} v_{i+1} x^i\right)\left(\sum_{j=0}^{d_2-1} w_{j+1} x^j\right) \\
+&= \Phi(a) \cdot \Phi(b)
+\end{align}
+
+\textit{Surjectivity:}
+Every polynomial $p(x) = \sum_{i=0}^{d-1} a_i x^i \in \mathbb{R}[x]$ equals $\Phi([(d, (a_0, a_1, \ldots, a_{d-1}))])$.
+
+\textit{Injectivity:}
+If $\Phi([(d_1,v)]) = \Phi([(d_2,w)])$, then the polynomials have identical coefficients, so after padding both vectors have the same components, hence $[(d_1,v)] = [(d_2,w)]$.
+\end{proof}
+
+\subsection{Relation to Graded Rings and Rees Algebras}
+The convolution semiring \((D, +, \otimes_c)\) has deep connections to established algebraic structures, particularly graded rings and the Rees algebra.
+
+\textbf{Graded Ring Structure:}
+The polynomial isomorphism \(\Phi: D \cong \mathbb{R}[x]\) (Theorem~\ref{thm:polyIso}) reveals that the convolution semiring is isomorphic to the polynomial ring \(\mathbb{R}[x]\), which is a classic example of a graded ring. A ring \(R\) is graded if it can be written as a direct sum \(R = \bigoplus_{n \ge 0} R_n\) such that \(R_m R_n \subseteq R_{m+n}\). For \(\mathbb{R}[x]\), the graded components are the subspaces of homogeneous polynomials of degree \(n\), i.e., \(R_n = \text{span}(x^n)\). The VSLA "degree" corresponds directly to the polynomial degree, and the convolution operation corresponds to polynomial multiplication, which respects the grading.
+
+\textbf{Rees Algebra:}
+The Rees algebra (or blow-up algebra) associated with an ideal \(I\) of a ring \(R\) is defined as \(R(I) = \bigoplus_{n \ge 0} I^n t^n \subseteq R[t]\). While not a direct equivalent, the VSLA framework shares the spirit of the Rees algebra by tracking "powers" of some fundamental structure. In VSLA, the "ideal" can be thought of as the space of all possible vector extensions, and the "degree" of a VSLA element tracks how "large" an extension is needed. The key difference is that VSLA is built on a semiring and focuses on computational aspects of variable-length data, whereas the Rees algebra is a tool in commutative algebra for studying the structure of ideals.
+
+By framing VSLA in this context, we see that it is not an ad-hoc construction but rather a computationally-oriented realization of well-understood algebraic objects, tailored to the specific challenges of variable-shape data in high-performance computing.
+
+\begin{theorem}[Completion]\label{thm:completion}
+Equip \(D\) with the norm \(\lVert[(d,v)]\rVert_1:=\sum_{i=1}^{d}|v_i|\). The Cauchy completion of \((D, \lVert \cdot \rVert_1)\) is isometrically isomorphic to the Banach space \(\ell^1(\mathbb{N}_0)\) of absolutely summable sequences, which is a subspace of the formal power series ring \(\mathbb R[[x]]\).
+\end{theorem}
+\begin{proof}
+We provide a full proof sketch with topological clarification.
+
+\textit{1. The Normed Space:}
+The map \(\lVert \cdot \rVert_1: D \to \mathbb{R}_{\ge 0}\) is a well-defined norm. The isomorphism \(\Phi: D \to \mathbb{R}[x]\) from Theorem~\ref{thm:polyIso} allows us to view \(D\) as the space of polynomials. For a polynomial \(p(x) = \sum_{i=0}^{d-1} a_i x^i\), the norm is \(\lVert p \rVert_1 = \sum_{i=0}^{d-1} |a_i|\). This is the standard \(\ell^1\)-norm on the coefficients.
+
+\textit{2. Cauchy Sequences:}
+Let \((f_n)_{n \in \mathbb{N}}\) be a Cauchy sequence in \(D\). Via \(\Phi\), this corresponds to a Cauchy sequence of polynomials \((p_n)_{n \in \mathbb{N}}\) in \((\mathbb{R}[x], \lVert \cdot \rVert_1)\). For any \(\epsilon > 0\), there exists \(N\) such that for \(n,m > N\), \(\lVert p_n - p_m \rVert_1 < \epsilon\).
+Let \(p_n(x) = \sum_{i=0}^{\vdim(p_n)} a_{n,i} x^i\). The norm condition implies that for each fixed coefficient index \(i\), the sequence of real numbers \((a_{n,i})_{n \in \mathbb{N}}\) is a Cauchy sequence in \(\mathbb{R}\). This is because \(|a_{n,i} - a_{m,i}| \le \sum_j |a_{n,j} - a_{m,j}| = \lVert p_n - p_m \rVert_1 < \epsilon\).
+
+\textit{3. The Limit Object:}
+Since \(\mathbb{R}\) is complete, each sequence \((a_{n,i})_n\) converges to a limit \(a_i \in \mathbb{R}\). We define the limit object in the completion as the formal power series \(p(x) = \sum_{i=0}^{\infty} a_i x^i\).
+
+\textit{4. The Completion Space:}
+We must show that this limit object \(p(x)\) is in the space \(\ell^1(\mathbb{N}_0)\), i.e., \(\sum_{i=0}^{\infty} |a_i| < \infty\).
+Since \((p_n)\_n\) is a Cauchy sequence, it is bounded: there exists \(M > 0\) such that \(\lVert p_n \rVert_1 \le M\) for all \(n\). For any finite \(K\), \(\sum_{i=0}^K |a_{n,i}| \le M\). Taking the limit as \(n \to \infty\), we get \(\sum_{i=0}^K |a_i| \le M\). Since this holds for all \(K\), the series \(\sum_{i=0}^{\infty} |a_i|\) converges absolutely with \(\sum_{i=0}^{\infty} |a_i| \le M < \infty\), confirming that \(p(x)\) is in \(\ell^1(\mathbb{N}_0)\).
+
+\textit{5. Isomorphism:}
+The completion of \((\mathbb{R}[x], \lVert \cdot \rVert_1)\) is the Banach space \(\ell^1(\mathbb{N}_0)\). The map \(\Phi\) extends to an isometric isomorphism from the completion of \(D\) to \(\ell^1(\mathbb{N}_0)\). This space is a well-known Banach algebra under convolution, and it is a proper sub-ring of the full formal power series ring \(\mathbb R[[x]]\) (which is the completion under a different, non-normable topology).
+\end{proof}

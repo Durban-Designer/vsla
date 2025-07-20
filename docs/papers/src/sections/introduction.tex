@@ -1,0 +1,34 @@
+% ================================================================
+%  Introduction
+% ================================================================
+\section{Context and Motivation}
+\subsection{The Dimension Problem}
+Traditional linear algebra fixes dimensions \(m,n\) \emph{a priori}.  Contemporary challenges—adaptive neural networks, multi‑resolution signal analysis, dynamic meshes—demand structures whose shapes evolve in real time. This fundamental mismatch between static mathematical frameworks and dynamic computational needs creates significant barriers to progress in emerging fields.
+
+\vspace{0.5em}
+\textbf{Running Example:} Consider training a convolutional neural network where filter widths adapt dynamically based on input complexity. A standard $3 \times 3$ convolution kernel $K_1 = [1, -1, 2]$ might expand to $K_2 = [1, -1, 2, 0, 1]$ for high-resolution features. Traditional frameworks require manual padding: $K_1' = [1, -1, 2, 0, 0]$ before operations, losing semantic information and incurring unnecessary computation on artificial zeros.
+
+The core mathematical challenge lies in reconciling algebraic rigor with computational flexibility. While prior work such as the Semi-Tensor Product (STP) of matrices \cite{Cheng2001} provided a powerful mechanism for multiplying dimension-mismatched matrices via Kronecker-based lifting, VSLA arises from a different motivation: defining a rigorous algebraic system for variable-dimension objects themselves. VSLA's equivalence-class abstraction avoids materializing padded zeros and supplies dual semiring models oriented toward convolutional (polynomial) and Kronecker (tensor growth) behaviors.
+
+\subsection{Limitations of Current Approaches}
+\label{sec:limitations}
+
+Existing frameworks fail to provide both mathematical rigor and computational flexibility:
+
+\begin{itemize}[leftmargin=1.5em]
+\item \textbf{TensorFlow Ragged Tensors:} Handle variable-length sequences but lack rigorous algebraic structure and semiring properties.
+\item \textbf{PyTorch NestedTensors:} Provide dynamic shapes but without mathematical guarantees or efficient sparse representations.
+\item \textbf{Manual zero-padding:} Obscures mathematical structure, wastes computation, and lacks provable algebraic identities.
+\end{itemize}
+
+\subsection{The VSLA Solution}
+VSLA incorporates the shape directly into every algebraic object through mathematically rigorous equivalence classes.  Operations such as addition or convolution implicitly coerce operands to a common dimension while preserving sparsity and algebraic properties. In our example, $K_1 \oplus K_2 = [2, -2, 4, 0, 1]$ automatically, with provable semiring laws and efficient sparse computation.
+
+\textbf{Core Innovation:} Rather than forcing all tensors into fixed dimensions, VSLA treats dimension as intrinsic data through equivalence classes $(d,v) \sim (d',v')$ when their zero-padded extensions match. This enables automatic shape promotion: $(3,[1,-1,2]) + (5,[3,0,-1,1,2]) = (5,[4,-1,1,1,2])$ without explicit padding operations.
+
+\textbf{Mathematical Rigor:} VSLA operations form semiring structures enabling algebraic manipulation while preserving computational efficiency. Two instantiations provide different computational trade-offs: convolution semiring ($\mathcal{O}(mn d_{\max} \log d_{\max})$) and Kronecker semiring ($\mathcal{O}(mn d_{\max}^2)$).
+
+\textbf{Practical Impact:} Variable-shape computation eliminates memory waste from artificial padding, enables adaptive neural architectures, and provides mathematical foundations for emerging applications in multi-sensor fusion, quantum simulation, and edge computing.
+
+\subsection{Roadmap}
+This paper proceeds as follows: \S\ref{sec:prelim} establishes mathematical preliminaries; \S\ref{sec:foundations}–\S\ref{sec:modelB} develop two semiring models with complete proofs; \S\ref{sec:stacking} introduces the stacking operator and tensor pyramid constructions; \S\ref{sec:vsla}–\S\ref{sec:implementation} bridge theory to implementation; \S\ref{sec:advanced_ops} extends to advanced sparse simulation operations; \S\ref{sec:evaluation}–\S\ref{sec:related} provide empirical validation and context.

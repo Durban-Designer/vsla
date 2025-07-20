@@ -1,0 +1,87 @@
+% ====================================================================
+%  Preamble for Variable‑Shape Linear Algebra Paper
+% ====================================================================
+
+% --------------------------------------------------------------------
+%  Packages and global layout tweaks
+% --------------------------------------------------------------------
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{amsthm}
+\usepackage{titlesec}
+\usepackage{needspace}
+% \usepackage{microtype}  % Disabled due to font expansion issue
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,patterns}
+\usepackage{url}
+
+% Define colors for boxes
+\definecolor{prelim}{rgb}{0.95,0.95,1.0}
+\definecolor{api}{rgb}{0.95,1.0,0.95}
+\definecolor{memory}{rgb}{1.0,0.95,0.95}
+\raggedbottom                    % suppress large vertical glue
+\allowdisplaybreaks[2]           % gentle math page‑breaks
+
+% --------------------------------------------------------------------
+%  Theorem‑like environments
+% --------------------------------------------------------------------
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+
+% QED symbol configuration
+\renewcommand{\qedsymbol}{$\square$}
+\renewcommand{\proofname}{\textit{Proof}}
+
+% --------------------------------------------------------------------
+%  Custom Commands
+% --------------------------------------------------------------------
+
+% Sets / domains
+\newcommand{\D}{D}
+
+% Shape & dimension operators
+\newcommand{\shape}{\operatorname{shape}}
+\newcommand{\vdim}{\operatorname{vdim}}
+\newcommand{\rankop}{\operatorname{rank}}
+\newcommand{\amb}{\operatorname{amb}}
+\newcommand{\prom}{\operatorname{prom}}
+\newcommand{\minrep}{\operatorname{minrep}}
+
+% Structural constructors
+\newcommand{\Stack}{\mathcal{S}}
+\newcommand{\Wstack}{\mathcal{W}}
+\newcommand{\Pyr}{\mathcal{P}}
+
+% Transforms / reindexing
+\newcommand{\perm}{\operatorname{perm}}
+\newcommand{\reshape}{\operatorname{reshape}}
+\newcommand{\scatter}{\operatorname{scatter}}
+\newcommand{\gather}{\operatorname{gather}}
+\newcommand{\unstack}{\operatorname{unstack}}
+\newcommand{\unprom}{\operatorname{unprom}}
+
+% AD helpers
+\newcommand{\rev}{\operatorname{rev}}
+
+% Sparsity / complexity
+\newcommand{\nnz}{\operatorname{nnz}}
+\newcommand{\cost}{\operatorname{cost}}
+
+% Dimension law operators
+\newcommand{\dimlaw}{\operatorname{dimlaw}}
+
+% Legacy macros
+\newcommand{\keywords}[1]{\textbf{Keywords:} #1}
+\newcommand{\msc}[1]{\textbf{MSC:} #1}

@@ -1,0 +1,49 @@
+% ================================================================
+%  Related Work
+% ================================================================
+\section{Related Work}  
+\label{sec:related}
+
+This section situates VSLA within the landscape of existing approaches to handling variable-shape data and algebraic computation. We first compare VSLA to engineering-focused frameworks in modern deep learning, then to formal algebraic systems like the Semi-Tensor Product.
+
+\subsection{Frameworks for Variable-Shape Data}
+
+Modern deep learning libraries have developed several ad-hoc solutions for non-uniform data, but they lack the formal algebraic guarantees of VSLA. Table~\ref{tab:comparison} provides a high-level comparison.
+
+\begin{table}[h!]
+\centering
+\caption{Comparison of Approaches to Variable-Shape Data}
+\label{tab:comparison}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l|llll}
+\toprule
+\textbf{Approach} & \textbf{Dimension Handling} & \textbf{Algebraic Guarantees} & \textbf{Sparse Efficiency} & \textbf{Gradient Safety} \\
+\midrule
+\textbf{VSLA (ours)} & Equivalence Classes & Semiring, Monoidal Cat. & Sparse-by-design & Shape-safe VJPs \\
+\textbf{STP \cite{Cheng2011}} & Kronecker Lifting & Semigroup, Ring & Implicitly Dense & Not standard \\
+\textbf{TF/PyTorch \cite{TF2024,PyTorch2023}} & Ragged/Nested Buffers & None (Library Ops) & Masking/Segment IDs & Ad-hoc kernels \\
+\textbf{GraphBLAS \cite{GraphBLAS2019}} & Fixed Dimensions & Semiring & Explicit Zeros (COO/CSR) & N/A \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\textbf{Ragged Tensor Frameworks:} TensorFlow's RaggedTensors \cite{TF2024} and PyTorch's NestedTensors \cite{PyTorch2023} are primarily engineering solutions. They use data structures like \texttt{value\_rowids} or nested buffers to store variable-length sequences. While effective for specific tasks like NLP batching, they are not a formal algebraic system. Operations are defined as library functions, not as instances of a coherent mathematical structure like a semiring. This means they lack the provable properties, optimizations, and correctness guarantees inherent to VSLA.
+
+\textbf{JAX \cite{JAX2020}:} JAX handles variable shapes via \texttt{vmap} and other transformations, but it still requires manual padding and management of dimension-related logic from the user. It does not provide a native abstraction for variable-dimension objects.
+
+\subsection{Algebraic Approaches to Computation}
+
+\textbf{GraphBLAS \cite{GraphBLAS2019}:} This library provides a powerful, semiring-based approach to sparse linear algebra, primarily for graph algorithms. However, it is fundamentally based on fixed-dimension matrices. VSLA can be seen as extending the semiring concept to the variable-dimension domain.
+
+\subsection{Relation to Semi-Tensor Product (STP)}
+The Semi-Tensor Product (STP) of matrices, introduced by Cheng \cite{Cheng2001}, represents the most closely related prior art. STP was developed to generalize the conventional matrix product to handle dimension-mismatched matrices, and has been successfully applied to Boolean networks, game theory, and control systems \cite{Cheng2011}. While both VSLA and STP address dimension mismatch, they are fundamentally different in their motivation, mechanism, and algebraic structure.
+
+\begin{itemize}
+    \item \textbf{Motivation and Philosophy:} STP is \textit{product-centric}, designed to generalize the matrix product `A * B`. VSLA is \textit{object-centric}, designed to define a rigorous algebra for variable-dimension objects themselves, starting with the definition of an equivalence class.
+    \item \textbf{Mechanism:} STP handles dimension mismatch via \textit{constructive lifting}, using the Kronecker product to expand matrices to a common dimension. VSLA uses \textit{abstract coercion} based on equivalence classes, operating on minimal, sparse-by-design representatives without materializing padded forms.
+    \item \textbf{Algebraic Foundation:} VSLA is founded on \textit{dual semiring models} from the outset (Convolution/Polynomial and Kronecker), providing two distinct algebraic toolkits. The algebraic properties of STP are a consequence of its product definition.
+    \item \textbf{Operator Set:} VSLA introduces higher-level compositional operators, such as the Stacking Operator ($\Sigma$) and Windowing Operator ($\Omega$), which have no direct equivalent in the STP literature and are designed for building hierarchical data structures.
+\end{itemize}
+
+In summary, VSLA is not a derivative of STP but an independently developed, complementary algebraic system. It provides a formal foundation for the type of ragged tensor operations found in modern ML frameworks, with a strong emphasis on sparsity and compositional, hierarchical data structures.

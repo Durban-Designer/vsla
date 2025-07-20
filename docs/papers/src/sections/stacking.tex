@@ -1,0 +1,225 @@
+% ================================================================
+%  Stacking Operator and Tensor Pyramids
+% ================================================================
+\section{Stacking Operator and Tensor Pyramids}
+\label{sec:stacking}
+
+This section introduces a major theoretical extension to VSLA: the \emph{stacking operator} $\Stack$ that builds higher-rank tensors from collections of lower-rank tensors, and the \emph{window-stacking operator} $\Wstack$ for constructing tensor pyramids from streaming data.
+
+\subsection{The Stacking Operator $\Stack$}
+
+\begin{definition}[Stacking Operator]
+\label{def:stacking}
+For $k \geq 1$, define the stacking operator
+\[
+\Stack_k : (\mathbb{T}_r)^k \longrightarrow \mathbb{T}_{r+1}
+\]
+that maps $k$ rank-$r$ tensors to a single rank-$(r+1)$ tensor by concatenation along a fresh leading axis.
+\end{definition}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rectangle, minimum width=1.5cm, minimum height=0.8cm, font=\small},
+  zero/.style={box, fill=gray!20},
+  value/.style={box, fill=gray!20},
+  eq/.style={font=\Large}
+]
+
+% Input tensors with different shapes
+\node[draw, thick, gray!90, fill=gray!70, text=white, minimum width=1.5cm, minimum height=0.8cm] (t1) at (0,2) {$A^{(1)}$};
+\node[below=0.1cm of t1, gray!90] {$2 \times 3$};
+
+\node[draw, thick, gray!90, fill=gray!70, text=white, minimum width=2cm, minimum height=0.8cm] (t2) at (0,0.5) {$A^{(2)}$};
+\node[below=0.1cm of t2, gray!90] {$2 \times 4$};
+
+\node[draw, thick, gray!90, fill=gray!70, text=white, minimum width=1cm, minimum height=0.8cm] (t3) at (0,-1) {$A^{(3)}$};
+\node[below=0.1cm of t3, gray!90] {$2 \times 2$};
+
+% Arrow
+\draw[->, thick] (2.5,0.5) -- (4.5,0.5);
+\node[above] at (3.5,0.5) {$\Stack_3$};
+
+% Ambient shape calculation
+\node[align=center] at (6.5,3) {\textbf{1. Compute ambient shape:} $\mathbf{n} = (\max\{2,2,2\}, \max\{3,4,2\}) = (2,4)$};
+
+% Padded tensors
+\node[draw, thick, orange!90, fill=orange!70, text=white, minimum width=2cm, minimum height=0.8cm] (p1) at (6.5,1.5) {$A^{(1)}$ padded};
+\node[below=0.1cm of p1, orange!80] {$2 \times 4$};
+
+\node[draw, thick, orange!90, fill=orange!70, text=white, minimum width=2cm, minimum height=0.8cm] (p2) at (6.5,0.5) {$A^{(2)}$ (no pad)};
+\node[below=0.1cm of p2, orange!80] {$2 \times 4$};
+
+\node[draw, thick, orange!90, fill=orange!70, text=white, minimum width=2cm, minimum height=0.8cm] (p3) at (6.5,-0.5) {$A^{(3)}$ padded};
+\node[below=0.1cm of p3, orange!80] {$2 \times 4$};
+
+% Final stacked tensor
+\draw[->, thick] (8.5,0.5) -- (10.5,0.5);
+\node[above] at (9.5,0.5) {\textbf{2. Stack}};
+
+\node[draw, thick, red!90, fill=red!70, text=white, minimum width=2cm, minimum height=2.4cm] (result) at (12,0.5) {
+\begin{tabular}{c}
+$A^{(1)}$ \\
+\hline
+$A^{(2)}$ \\
+\hline
+$A^{(3)}$
+\end{tabular}
+};
+\node[below=0.1cm of result, red!90] {$3 \times 2 \times 4$};
+\node[above=0.1cm of result, red!90] {\textbf{Result}};
+
+% Add labels for zero-padding
+\node[align=center, gray!70] at (4,-2.5) {\footnotesize Zero-padding applied\\
+to reach ambient shape};
+\draw[gray!70, dashed, thick] (t1) -- (4,-1.8);
+\draw[gray!70, dashed, thick] (t3) -- (4,-1.8);
+
+\end{tikzpicture}
+\caption{Stacking operator $\Stack_3$ applied to three variable-shape matrices. The operator computes the ambient shape (element-wise maximum dimensions), applies zero-padding equivalence to achieve uniform shapes, then concatenates along a new leading axis to form a higher-rank tensor.}
+\label{fig:stacking}
+\end{figure}
+
+The construction proceeds as follows. Given representatives
+\[
+A^{(1)}, \ldots, A^{(k)} \in \mathbb{K}^{n_1^{(i)} \times \cdots \times n_r^{(i)}},
+\]
+compute the ambient shape and promote each tensor:
+\[
+\amb(A^{(1)}, \ldots, A^{(k)}) := \left(\max_i n_1^{(i)}, \ldots, \max_i n_r^{(i)}\right),
+\]
+\[
+\hat{A}^{(i)} := \prom_{\amb}(A^{(i)}).
+\]
+Then the stacking operator is defined as:
+\[
+\Stack_k(A^{(1)}, \ldots, A^{(k)})_{i,\mathbf{j}} = \hat{A}^{(i)}_{\mathbf{j}}.
+\]
+
+For $k = 0$, define $\Stack_0 \coloneqq 0_{\mathbb{T}_{r+1}}$ (the neutral element).
+
+\begin{example}[2D Matrix Stacking]
+Consider stacking two matrices: $A^{(1)} = \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix}$ and $A^{(2)} = \begin{bmatrix} 5 & 6 & 7 \\ 8 & 9 & 10 \end{bmatrix}$.
+
+The ambient shape is $(2, 3)$. After padding $A^{(1)}$ to $(2, 3)$:
+\[
+\Stack_2(A^{(1)}, A^{(2)}) = \begin{bmatrix}
+\begin{bmatrix} 1 & 2 & 0 \\ 3 & 4 & 0 \end{bmatrix} \[0.5em]
+\begin{bmatrix} 5 & 6 & 7 \\ 8 & 9 & 10 \end{bmatrix}
+\end{bmatrix}
+\]
+yielding a $2 \times 2 \times 3$ tensor.
+\end{example}
+
+\begin{theorem}[Algebraic Properties of Stacking]
+\label{thm:stacking-properties}
+The stacking operator satisfies:
+\begin{enumerate}
+\item \textbf{Associativity (nested levels):} $\Stack_m(\Stack_{k_1}(\mathbf{A}_1), \dots, \Stack_{k_m}(\mathbf{A}_m))$ is equivalent to $\Stack_{k_1+\dots+k_m}(\mathbf{A}_1, \dots, \mathbf{A}_m)$ after a canonical reshape.
+\item \textbf{Neutral-zero absorption:} Injecting VSLA zeros anywhere in the argument list leaves the equivalence class unchanged.
+\item \textbf{Distributivity over $+$ and $\odot$}: For semiring operations, stacking distributes over element-wise operations after promotion to common ambient shape.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(1) \emph{Associativity:} We provide a more rigorous proof. Let $\mathbf{A}_i = (A^{(i)}_1, \dots, A^{(i)}_{k_i})$ be $m$ lists of rank-$r$ tensors. Let $K = \sum_{i=1}^m k_i$. 
+
+The left-hand side is $L = \Stack_m(\Stack_{k_1}(\mathbf{A}_1), \dots, \Stack_{k_m}(\mathbf{A}_m))$. Let $\mathbf{n}_i$ be the ambient shape for each inner stack $\Stack_{k_i}(\mathbf{A}_i)$, and let $\mathbf{N}$ be the ambient shape for the outer stack. Then $\mathbf{N}_j = \max_{i=1\dots m} (\mathbf{n}_i)_j$. The resulting tensor $L$ has rank $r+2$ and shape $(m, \mathbf{N})$.
+
+The right-hand side is $R = \Stack_K(\mathbf{A}_1, \dots, \mathbf{A}_m)$. Let the ambient shape for this combined stack be $\mathbf{N}'$. By definition, $\mathbf{N}'_j = \max_{i,j} \vdim(A^{(i)}_j) = \max_i (\max_j \vdim(A^{(i)}_j)) = \max_i (\mathbf{n}_i)_j = \mathbf{N}_j$. So the ambient shapes are identical.
+
+The elements of $L$ are given by $(L)_{i,j,...} = (\Stack_{k_i}(\mathbf{A}_i))_{j,...}$ padded to shape $\mathbf{N}$. The elements of $R$ are given by $(R)_{l,...}$ where $l$ indexes the concatenated list of all $A$ tensors. There is a canonical mapping from the double index $(i,j)$ to the single index $l$ that preserves the order of the tensors. Since the padding is to the same ambient shape $\mathbf{N}$, the resulting tensors are identical up to a reshape of the leading axes from $(m, k_1, \dots, k_m)$ to a single flattened axis of size $K$.
+
+(2) \emph{Neutral-zero absorption:} Zero representatives in VSLA have the form $[(d, \mathbf{0})]$ where $\mathbf{0}$ is the zero vector. In the stacked output, these contribute blocks of zeros which preserve the zero-padding equivalence relation by definition.
+
+(3) \emph{Distributivity:} Given tensors $A^{(i)}$ and $B^{(i)}$ and operation $\circ \in \{+, \odot\}$, we have $\Stack_k(A^{(1)} \circ B^{(1)}, \ldots) = \Stack_k(A^{(1)}, \ldots) \circ \Stack_k(B^{(1)}, \ldots)$ after promoting all operands to the common ambient shape, since $\circ$ operates element-wise within blocks.
+\end{proof}
+
+\begin{proposition}[Monoidal Category Structure]
+The triple $(\mathbb{T}_r, +, \Stack)$ forms a \emph{strict monoidal category} where $\Stack$ is the tensor product on objects of type ``list of rank-$r$ tensors''.
+\end{proposition}
+
+\begin{proof}
+A strict monoidal category consists of:
+\begin{enumerate}
+    \item A category $\mathcal{C}$.
+    \item A bifunctor $\otimes: \mathcal{C} \times \mathcal{C} \to \mathcal{C}$, called the tensor product.
+    \item An identity object $I \in \mathcal{C}$.
+    \item The tensor product is strictly associative: $(A \otimes B) \otimes C = A \otimes (B \otimes C)$.
+    \item The identity object is a strict identity for the tensor product: $I \otimes A = A$ and $A \otimes I = A$.
+\end{enumerate}
+
+We define a category $\mathcal{C}_{VSLA}$ where:
+\begin{itemize}
+    \item \textbf{Objects:} Finite lists of rank-$r$ VSLA tensors, i.e., elements of $(\mathbb{T}_r)^k$ for any $k \ge 0$. An object is denoted $\mathbf{A} = (A_1, \dots, A_k)$.
+    \item \textbf{Morphisms:} Identity maps (we focus on the categorical structure of objects and tensor product).
+\end{itemize}
+
+The monoidal product $\otimes$ is list concatenation:
+\[
+    \mathbf{A} \otimes \mathbf{B} = (A_1, \dots, A_k) \otimes (B_1, \dots, B_m) := (A_1, \dots, A_k, B_1, \dots, B_m).
+\]
+The identity object $I$ is the empty list $() \in (\mathbb{T}_r)^0$.
+
+Verification of strict monoidal axioms:
+\begin{itemize}
+    \item \textbf{Associativity:} List concatenation is strictly associative. For lists $\mathbf{A}$, $\mathbf{B}$, and $\mathbf{C}$, both $(\mathbf{A} \otimes \mathbf{B}) \otimes \mathbf{C}$ and $\mathbf{A} \otimes (\mathbf{B} \otimes \mathbf{C})$ yield the same concatenated list.
+    \item \textbf{Identity Laws:} The empty list acts as strict identity: $I \otimes \mathbf{A} = () \otimes \mathbf{A} = \mathbf{A}$ and $\mathbf{A} \otimes I = \mathbf{A} \otimes () = \mathbf{A}$.
+\end{itemize}
+
+Thus $(\mathcal{C}_{VSLA}, \otimes, I)$ is a strict monoidal category. The stacking operator $\Stack$ acts as a functor from this category to single VSLA tensors, with the property $\Stack_m(\Stack_k(\mathbf{A}), \Stack_k(\mathbf{B})) \cong \Stack_{mk}(\mathbf{A}, \mathbf{B})$ demonstrating compositional structure.
+\end{proof}
+
+\textbf{Practical Interpretation:} The strict monoidal category structure guarantees that stacking operations compose predictably and associatively. This means that $\Stack_2(\Stack_2(A,B),C) = \Stack_3(A,B,C)$ up to canonical isomorphism, enabling reliable nested tensor constructions in streaming applications and recursive data structures.
+
+\subsection{Window-Stacking and Tensor Pyramids}
+
+\begin{definition}[Window-Stacking Operator]
+Let $w \in \mathbb{N}^+$ be a fixed \emph{window length}. For a stream $(X^{(0)}, X^{(1)}, \ldots) \subset \mathbb{T}_r$, define
+\[
+\Wstack_w\bigl(X^{(t)}\bigr)_s = \Stack_w\bigl(X^{(sw)}, \ldots, X^{(sw+w-1)}\bigr) \in \mathbb{T}_{r+1}, \quad s = 0, 1, \ldots
+\]
+This slides a window of length $w$ with step $w$ (non-overlapping) and stacks the contents.
+\end{definition}
+
+\begin{definition}[Tensor Pyramids]
+Compose $\Wstack$ repeatedly with window sizes $w_1, w_2, \ldots, w_d$:
+\[
+X^{(0)} \xrightarrow{\Wstack_{w_1}} \mathbb{T}_{r+1} \xrightarrow{\Wstack_{w_2}} \mathbb{T}_{r+2} \cdots \xrightarrow{\Wstack_{w_d}} \mathbb{T}_{r+d}
+\]
+Each level aggregates lower-level tensors into the next rank, giving a \emph{$d$-level tensor pyramid}.
+\end{definition}
+
+\textbf{Connection to Classical Pyramids:} VSLA tensor pyramids generalize classical pyramid structures from signal processing and computer vision. Like Gaussian pyramids that progressively blur and downsample images, or Laplacian pyramids that capture multi-scale edge information, tensor pyramids create hierarchical representations. However, unlike these fixed-resolution approaches, VSLA tensor pyramids handle variable-shape data at each level through the zero-padding equivalence relation, enabling adaptive multi-resolution processing without predetermined scale factors or uniform downsampling ratios.
+
+\begin{example}[Signal Processing Pyramid]
+Consider a 1D signal stream with window sizes $w_1 = 4, w_2 = 3$:
+\begin{align}
+\text{Level 0:} &\quad [x_0, x_1, x_2, x_3, x_4, x_5, x_6, \ldots] \\
+\text{Level 1:} &\quad \begin{bmatrix} x_0 \\ x_1 \\ x_2 \\ x_3 \end{bmatrix}, \begin{bmatrix} x_4 \\ x_5 \\ x_6 \\ x_7 \end{bmatrix}, \ldots \\
+\text{Level 2:} &\quad \begin{bmatrix} \begin{bmatrix} x_0 \\ x_1 \\ x_2 \\ x_3 \end{bmatrix} & \begin{bmatrix} x_4 \\ x_5 \\ x_6 \\ x_7 \end{bmatrix} & \begin{bmatrix} x_8 \\ x_9 \\ x_{10} \\ x_{11} \end{bmatrix} \end{bmatrix}
+\end{align}
+\end{example}
+
+\subsection{Complexity Analysis}
+
+\begin{proposition}[Stacking Complexity]
+Given $k$ rank-$r$ operands with total element count $N$:
+\begin{itemize}
+\item $\Stack_k$ (stack): $\Theta(N)$ if shapes are equal; $\Theta(N + k \cdot \Delta)$ where $\Delta$ represents zeros copied during padding.
+\item $\Omega_w$ (sliding stream): Amortized $\Theta(N)$ over the stream with $\Theta(w)$ queue memory.
+\end{itemize}
+\end{proposition}
+
+The key insight is that in the VSLA model, $N$ counts only \emph{materialized} (non-zero) elements, making stacking efficient for sparse data.
+
+\subsection{Applications}
+
+The stacking operator enables several important applications:
+
+\begin{itemize}
+\item \textbf{Batch Processing:} Stack variable-length sequences into batch tensors without manual padding.
+\item \textbf{Multi-Resolution Analysis:} Build tensor pyramids for hierarchical feature extraction in computer vision.
+\item \textbf{Streaming Data:} Process time-series data with automatic aggregation at multiple temporal scales.
+\item \textbf{Neural Architecture Search:} Dynamically stack layers of different sizes during architecture evolution.
+\end{itemize}

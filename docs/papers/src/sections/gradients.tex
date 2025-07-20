@@ -1,0 +1,83 @@
+% ================================================================
+%  Gradient Support and Integration
+% ================================================================
+\section{Gradient Support and Integration}  
+\label{sec:gradients}
+
+\subsection{Formalization of VJPs for VSLA Operations}
+Automatic differentiation in VSLA requires defining custom Vector-Jacobian Products (VJPs) that respect the variable-shape nature of the tensors. For an operation \(f: D^n \to D^m\), the goal is to compute the action of the transposed Jacobian on a cotangent vector without explicitly forming the Jacobian matrix.
+
+Let \(y = f(x_1, \dots, x_n)\) and let \(\bar{y}\) be the cotangent vector (gradient) with respect to \(y\). The VJP for each input \(x_i\) is \(\bar{x}_i = J_i^T \bar{y}\), where \(J_i\) is the Jacobian of \(f\) with respect to \(x_i\).
+
+\textbf{VJP for VSLA Addition:} Let \(y = x_1 + x_2\). The operation involves padding to an ambient shape \(d_{amb} = \max(\vdim(x_1), \vdim(x_2))\). The forward operation is \(y = \iota_{d_1 \to d_{amb}}(x_1) + \iota_{d_2 \to d_{amb}}(x_2)\). The Jacobian is composed of padding and un-padding operations. The VJP is therefore:
+\[
+\bar{x}_1 = \unprom_{d_1}(\bar{y}), \quad \bar{x}_2 = \unprom_{d_2}(\bar{y})
+\]
+This corresponds to slicing the incoming gradient \(\bar{y}\) to match the original shapes of \(x_1\) and \(x_2\).
+
+\textbf{VJP for VSLA Convolution (Model A):} Let \(y = x_1 \otimes_c x_2\). This is equivalent to polynomial multiplication \(Y(z) = X_1(z)X_2(z)\). The gradients are given by convolution with the reversed other operand:
+\[
+\bar{x}_1 = \bar{y} \otimes_c \rev(x_2), \quad \bar{x}_2 = \rev(x_1) \otimes_c \bar{y}
+\]
+where \(\rev(x)\) denotes the coefficient vector in reverse order. The shapes of the resulting gradients must be handled carefully to match the original input shapes.
+
+\textbf{VJP for Stacking Operator:} Let \(Y = \Stack_k(x_1, \dots, x_k)\). The forward operation pads each \(x_i\) to an ambient shape \(\mathbf{n}\) and concatenates them. The VJP is the reverse operation: it unstacks the incoming gradient \(\bar{Y}\) and un-pads each resulting slice to match the original input shapes.
+\[
+\bar{x}_i = \unprom_{\vdim(x_i)}( (\bar{Y})_i )
+\]
+where \((\bar{Y})_i\) is the $i$-th slice of the gradient tensor along the stacking dimension.
+
+\begin{theorem}[VJP Correctness for Minimal-Storage Layout]
+The VJP formulas above are correct regardless of whether tensors are stored in post-padding or minimal-representative layout.
+\end{theorem}
+\begin{proof}
+The key insight is that VJP correctness depends only on the mathematical equivalence relation, not the physical storage layout.
+
+\textit{Forward Operation Independence:} In VSLA, the stacking operator $\Stack_k$ is defined on equivalence classes $[x_i] \in D$, not on specific representatives. Whether $x_i$ is stored as a minimal vector of dimension $\vdim(x_i)$ or as a post-padded vector of dimension $\mathbf{n}$, the mathematical result $Y = \Stack_k([x_1], \ldots, [x_k])$ is identical by definition of equivalence classes.
+
+\textit{Gradient Propagation:} During backward pass, the gradient $\bar{Y}$ has the same mathematical shape as $Y$ regardless of how the forward inputs were stored. The unstack operation $(\bar{Y})_i$ extracts the $i$-th slice, yielding a tensor of ambient shape $\mathbf{n}$.
+
+\textit{Unpromotion Operation:} The $\unprom_{\shape(x_i)}$ operation is a projection that extracts the components corresponding to the original shape. This projection is mathematically well-defined and gives the correct gradient regardless of storage:
+\begin{itemize}
+\item \textbf{Minimal storage case:} If $x_i$ was stored as dimension $\shape(x_i)$, then $\unprom_{\shape(x_i)}((\bar{Y})_i)$ extracts exactly the relevant gradient components.
+\item \textbf{Post-padding case:} If $x_i$ was stored as dimension $\mathbf{n}$ with trailing zeros, then $\unprom_{\shape(x_i)}((\bar{Y})_i)$ still extracts the same relevant gradient components, since the trailing components of $(\bar{Y})_i$ correspond to derivatives with respect to padding zeros, which contribute zero to the total derivative.
+\end{itemize}
+
+\textit{Chain Rule Verification:} For any differentiable function $f(Y)$, the chain rule gives:
+\[
+\frac{\partial f}{\partial x_i} = \frac{\partial f}{\partial Y} \frac{\partial Y}{\partial x_i} = \bar{Y} \cdot J_i
+\]
+where $J_i$ is the Jacobian of $\Stack_k$ with respect to $x_i$. The Jacobian $J_i$ has the block structure $J_i = [\text{pad}_{\mathbf{n}}, 0, \ldots, 0]$ regardless of input storage layout, since mathematical padding is the same operation whether applied to minimal or pre-padded representations.
+
+Therefore, $\bar{x}_i = J_i^T \bar{Y} = \unprom_{\vdim(x_i)}((\bar{Y})_i)$ is correct for both storage layouts.
+\end{proof}
+
+\subsection{Framework Integration}
+\textbf{Automatic Differentiation:} VSLA operations are differentiable with custom vector-Jacobian products (VJPs):
+
+\begin{tcolorbox}[colback=api,colframe=green!50!black,title=PyTorch Integration Example]
+\begin{verbatim}
+class VSLAAdd(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, x, y):
+        ctx.save_for_backward(x, y)
+        return vsla_add(x, y)  # automatic shape promotion
+    
+    @staticmethod  
+def backward(ctx, grad_output):
+        x, y = ctx.saved_tensors
+        # Gradients respect original shapes
+        grad_x = grad_output[:x.shape[0], :x.shape[1]]  
+        grad_y = grad_output[:y.shape[0], :y.shape[1]]
+        return grad_x, grad_y
+
+# Usage in neural networks
+x = VSLATensor([1, 2, 3])      # shape (3,)
+y = VSLATensor([4, 5, 6, 7])   # shape (4,) 
+z = VSLAAdd.apply(x, y)        # shape (4,), z = [5,7,9,7]
+loss = z.sum()
+loss.backward()  # gradients flow correctly
+\end{verbatim}
+\end{tcolorbox}
+
+\textbf{JAX Custom Call Integration:} Similar integration possible via \texttt{jax.custom\_call} with XLA primitives for GPU acceleration.
