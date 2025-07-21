@@ -12,8 +12,8 @@ VSLA's fundamental design principles — treating dimension as intrinsic data an
 
 \begin{itemize}
     \item \textbf{Implicit Sparsity Handling:} Unlike existing frameworks that necessitate manual padding, VSLA operations (e.g., addition, convolution) automatically coerce operands to compatible shapes while rigorously preserving sparsity. This means that implicit trailing zeros are never materialized or explicitly computed, leading to significant computational savings.
-    \item \textbf{Memory Efficiency for Sparse Data:} VSLA tensors store only the "minimal representative" of each equivalence class, effectively avoiding the storage of explicit trailing zeros, as described in our memory model (Section \ref{sec:memory}). For a tensor with a large logical shape but sparse data, the storage is reduced to only the non-zero elements, resulting in substantial memory footprint reductions (e.g., 62-68\% reduction compared to zero-padding in our benchmarks, see Table 3).
-    \item \textbf{Optimized Algorithms:} The formalization of VSLA with semiring structures allows for the development of tailored, efficient algorithms. For instance, FFT-accelerated convolution in Model A maintains $\mathcal{O}(mnd_{\max}\log d_{\max})$ efficiency even with heterogeneous shapes (Theorem \ref{thm:complexity}), demonstrating a concrete advantage over naive $\mathcal{O}(mnd_{\max}^{2})$ approaches for sparse convolution-heavy simulations.
+    \item \textbf{Memory Efficiency for Sparse Data:} VSLA tensors store only the "minimal representative" of each equivalence class, effectively avoiding the storage of explicit trailing zeros, as described in our memory model (Section \ref{sec:memory}). For a tensor with a large logical shape but sparse data, the storage complexity is bounded by the sum of minimal representatives rather than the ambient shape.
+    \item \textbf{Optimized Algorithms:} The formalization of VSLA with semiring structures allows for the development of tailored, efficient algorithms. For instance, FFT-accelerated convolution in Model A maintains $\mbox{$\mathcal{O}(mnd_{\max}\log d_{\max})$}$ efficiency even with heterogeneous shapes (Theorem \ref{thm:complexity}), demonstrating a concrete advantage over naive $\mbox{$\mathcal{O}(mnd_{\max}^{2})$}$ approaches for sparse convolution-heavy simulations.
 \end{itemize}
 
 This intrinsic efficiency makes VSLA particularly well-suited for diverse simulation scenarios where data often exhibits dynamic shapes or high sparsity, such as adaptive mesh refinement, agent-based models, or particle simulations where elements might appear or disappear.
@@ -27,7 +27,7 @@ VSLA's mathematical framework naturally extends to support sophisticated tensor 
 \textbf{Dimension-Preserving Transforms:} A class of transforms that maintain the total number of materialized elements while changing logical organization. These include:
 
 \begin{itemize}
-\item \textbf{Permutation Operations:} Reordering tensor axes corresponds to permutations in the symmetric group $S_k$ acting on $k$-dimensional tensors. For VSLA tensors, permutations operate primarily on shape metadata rather than dense data, achieving $\mathcal{O}(\log d)$ complexity instead of the $\mathcal{O}(d^k)$ required for dense tensors.
+\item \textbf{Permutation Operations:} Reordering tensor axes corresponds to permutations in the symmetric group $S_r$ acting on the $r$ dimensions of rank-$r$ tensors. For VSLA tensors, permutations operate primarily on shape metadata rather than dense data, achieving $\mbox{$\mathcal{O}(\log d)$}$ complexity instead of the $\mbox{$\mathcal{O}(d^k)$}$ required for dense tensors.
 
 \item \textbf{Reshape Transformations:} Converting between equivalent tensor shapes (e.g., $(m \times n) \leftrightarrow (mn \times 1)$) while preserving element count. The mathematical constraint $\prod_i d_i = \prod_j d'_j$ ensures well-defined reshaping operations that maintain equivalence class membership.
 \end{itemize}
@@ -40,6 +40,19 @@ VSLA's mathematical framework naturally extends to support sophisticated tensor 
 \item \textbf{Adaptive Indexing:} Unlike fixed-size indexing that must account for padding, VSLA indexing operates on semantic dimensions. This enables mathematically natural expressions like "extract all non-zero elements with indices satisfying predicate $P$" without artificial boundary conditions.
 \end{itemize}
 
-\textbf{Conservation Properties:} Many scientific simulations require conservation of physical quantities (mass, energy, momentum). VSLA transforms can be designed to preserve these invariants through the mathematical structure of the underlying semirings. For instance, in fluid dynamics simulations, the sum $\sum_i v_i$ (representing total mass) is preserved under any sequence of VSLA operations that maintain equivalence class membership.
+\begin{lemma}[Additive Invariance under Promotion/Unpromotion]
+\label{lem:additive-invariance}
+For any VSLA element $v \in D$ and target dimension $n \geq \vdim(v)$, the sum of coefficients is preserved:
+\[
+\sum_{i=1}^{\vdim(v)} v_i = \sum_{i=1}^{n} \prom_n(v)_i = \sum_{i=1}^{\vdim(v)} \unprom_{\vdim(v)}(\prom_n(v))_i
+\]
+\end{lemma}
+\begin{proof}
+By definition, $\prom_n(v) = (v_1, \ldots, v_{\vdim(v)}, 0, \ldots, 0)$ where the padding zeros contribute zero to the sum. Unpromotion extracts the first $\vdim(v)$ components, recovering the original coefficients.
+\end{proof}
 
-\textbf{Complexity Advantages:} Traditional sparse tensor libraries achieve sparsity through complex indexing schemes that often lead to $\mathcal{O}(\nnz \log \nnz)$ operations where $\nnz$ denotes non-zero elements. VSLA's equivalence class approach enables $\mathcal{O}(\nnz)$ operations for many transforms by operating directly on minimal representatives, avoiding the overhead of sparse indexing entirely.
+\textbf{Remark:} Note that multiplicative invariants (e.g., L¹-norm after convolution) do not hold in general and are not required for the semiring proofs.
+
+\textbf{Conservation Properties:} Many scientific simulations require conservation of physical quantities (mass, energy, momentum). VSLA operations preserve additive invariants by Lemma~\ref{lem:additive-invariance}: since all operations respect the zero-padding equivalence relation, the sum of coefficients within any equivalence class remains invariant. This property follows directly from the semiring homomorphism structure of VSLA operations, mirroring conservation principles in finite volume schemes \cite{LeVeque2002} and discrete conservation laws in numerical analysis.
+
+\textbf{Theoretical Complexity Advantages:} VSLA's equivalence class approach operates directly on minimal representatives, which provides a theoretical foundation for efficient sparse operations by avoiding explicit zero storage and associated indexing overhead typical of compressed sparse formats \cite{Saad2003}. This differs from traditional sparse matrix approaches (CSR, COO) \cite{BulucGilbert2008} and the GraphBLAS standard \cite{GraphBLAS2021} by embedding sparsity in the algebraic structure rather than requiring explicit sparse data formats.

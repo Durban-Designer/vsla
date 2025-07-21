@@ -26,8 +26,9 @@ $D$ & Set of dimension-aware vectors \\
 $[(d,v)]$ & Equivalence class of vector $v \in \mathbb{R}^d$ \\
 $\vdim x$ & Logical dimension of element $x$ (also: degree) \\
 $\iota_{m \to n}$ & Zero-padding map from $\mathbb{R}^m$ to $\mathbb{R}^n$ \\
-$\oplus \otimes_c$ & Addition and convolution in Model A \\
-$\oplus \otimes_K$ & Addition and Kronecker product in Model B \\
+$\oplus, \otimes_c$ & Addition and convolution in Model A \\
+$\oplus, \otimes_K$ & Addition and Kronecker product in Model B \\
+$\Stack_k$ & Stacking operator for $k$ tensors \\
 $d_{\max}$ & Maximum dimension across matrix entries \\
 $\mathcal{O}(\cdot)$ & Asymptotic complexity bound \\
 \bottomrule
@@ -105,7 +106,7 @@ Define the graded set
 \[
   D_e\;:=\;\bigsqcup_{d\ge0}\,\{d\}\times\mathbb R^{d},
 \]
-where \(\mathbb R^{0}:=\{\,[]\}\) denotes the empty vector.
+where \(\mathbb R^{0}:=\{\,[]\}\) denotes the empty vector. Throughout this paper, we use $\vdim(\cdot)$ and "degree" interchangeably to refer to the dimensional extent of elements.
 \end{definition}
 
 \begin{definition}[Zero‑Padding Equivalence]\label{def:padding}
@@ -117,7 +118,7 @@ For \(m\le n\) let \(\iota_{m\rightarrow n}\colon\mathbb R^{m}\to\mathbb R^{n}\)
 \end{definition}
 
 \begin{proposition}\label{prop:equiv}
-The relation \(\sim\) is an equivalence relation, yielding the set \(D:=D_e/\!\sim\) of \emph{dimension‑aware vectors}.
+The relation \(\sim\) is an equivalence relation, yielding the set \(D:=D_e/\!\sim\) of \emph{dimension‑aware vectors}. This construction relates to classical quotient structures in commutative algebra \cite{AtiyahMacdonald1969,Eisenbud1995}, though adapted for computational rather than geometric applications.
 \end{proposition}
 \begin{proof}
 Reflexivity and symmetry are immediate from Definition\;\ref{def:padding}.  For transitivity pad to \(n:=\max(d_1,d_2,d_3)\).\end{proof}

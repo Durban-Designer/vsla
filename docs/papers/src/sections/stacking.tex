@@ -104,7 +104,7 @@ Consider stacking two matrices: $A^{(1)} = \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{b
 The ambient shape is $(2, 3)$. After padding $A^{(1)}$ to $(2, 3)$:
 \[
 \Stack_2(A^{(1)}, A^{(2)}) = \begin{bmatrix}
-\begin{bmatrix} 1 & 2 & 0 \\ 3 & 4 & 0 \end{bmatrix} \[0.5em]
+\begin{bmatrix} 1 & 2 & 0 \\ 3 & 4 & 0 \end{bmatrix} \\[0.5em]
 \begin{bmatrix} 5 & 6 & 7 \\ 8 & 9 & 10 \end{bmatrix}
 \end{bmatrix}
 \]
@@ -126,7 +126,7 @@ The stacking operator satisfies:
 
 The left-hand side is $L = \Stack_m(\Stack_{k_1}(\mathbf{A}_1), \dots, \Stack_{k_m}(\mathbf{A}_m))$. Let $\mathbf{n}_i$ be the ambient shape for each inner stack $\Stack_{k_i}(\mathbf{A}_i)$, and let $\mathbf{N}$ be the ambient shape for the outer stack. Then $\mathbf{N}_j = \max_{i=1\dots m} (\mathbf{n}_i)_j$. The resulting tensor $L$ has rank $r+2$ and shape $(m, \mathbf{N})$.
 
-The right-hand side is $R = \Stack_K(\mathbf{A}_1, \dots, \mathbf{A}_m)$. Let the ambient shape for this combined stack be $\mathbf{N}'$. By definition, $\mathbf{N}'_j = \max_{i,j} \vdim(A^{(i)}_j) = \max_i (\max_j \vdim(A^{(i)}_j)) = \max_i (\mathbf{n}_i)_j = \mathbf{N}_j$. So the ambient shapes are identical.
+The right-hand side is $R = \Stack_K(\mathbf{A}_1, \dots, \mathbf{A}_m)$. Let $\mathbf{N}'$ be the ambient shape for this combined stack. By definition, the ambient shape $\mathbf{N}'$ for the combined stack is computed element-wise as $\mathbf{N}'_j = \max_{i,j} \vdim(A^{(i)}_j)$. This is equivalent to $\max_i (\max_j \vdim(A^{(i)}_j))$, which by definition of $\mathbf{n}_i$ becomes $\max_i (\mathbf{n}_i)_j$. Thus, $\mathbf{N}_j = \mathbf{N}'_j$. So the ambient shapes are identical.
 
 The elements of $L$ are given by $(L)_{i,j,...} = (\Stack_{k_i}(\mathbf{A}_i))_{j,...}$ padded to shape $\mathbf{N}$. The elements of $R$ are given by $(R)_{l,...}$ where $l$ indexes the concatenated list of all $A$ tensors. There is a canonical mapping from the double index $(i,j)$ to the single index $l$ that preserves the order of the tensors. Since the padding is to the same ambient shape $\mathbf{N}$, the resulting tensors are identical up to a reshape of the leading axes from $(m, k_1, \dots, k_m)$ to a single flattened axis of size $K$.
 
@@ -167,10 +167,10 @@ Verification of strict monoidal axioms:
     \item \textbf{Identity Laws:} The empty list acts as strict identity: $I \otimes \mathbf{A} = () \otimes \mathbf{A} = \mathbf{A}$ and $\mathbf{A} \otimes I = \mathbf{A} \otimes () = \mathbf{A}$.
 \end{itemize}
 
-Thus $(\mathcal{C}_{VSLA}, \otimes, I)$ is a strict monoidal category. The stacking operator $\Stack$ acts as a functor from this category to single VSLA tensors, with the property $\Stack_m(\Stack_k(\mathbf{A}), \Stack_k(\mathbf{B})) \cong \Stack_{mk}(\mathbf{A}, \mathbf{B})$ demonstrating compositional structure.
+Thus $(\mathcal{C}_{VSLA}, \otimes, I)$ is a strict monoidal category. The stacking operator $\Stack$ acts as a functor from this category to single VSLA tensors. For lists $\mathbf{A} = (A_1, \ldots, A_{k_1})$ and $\mathbf{B} = (B_1, \ldots, B_{k_2})$, the stacking operator satisfies $\Stack_2(\Stack_{k_1}(\mathbf{A}), \Stack_{k_2}(\mathbf{B})) \cong \Stack_{k_1+k_2}(A_1, \ldots, A_{k_1}, B_1, \ldots, B_{k_2})$, demonstrating compositional structure consistent with list concatenation.
 \end{proof}
 
-\textbf{Practical Interpretation:} The strict monoidal category structure guarantees that stacking operations compose predictably and associatively. This means that $\Stack_2(\Stack_2(A,B),C) = \Stack_3(A,B,C)$ up to canonical isomorphism, enabling reliable nested tensor constructions in streaming applications and recursive data structures.
+\textbf{Practical Interpretation:} The strict monoidal category structure guarantees that stacking operations compose predictably and associatively. This means that $\Stack_2(\Stack_2(A,B),C) = \Stack_3(A,B,C)$ up to canonical isomorphism, enabling reliable nested tensor constructions in streaming applications and recursive data structures. This mathematical guarantee translates to concrete computational benefits: (1) \textit{Compiler optimizations} can safely reorder and fuse stacking operations without semantic changes, enabling efficient code generation; (2) \textit{Program verification} tools can reason about stacking transformations using equational theories, providing formal correctness guarantees; (3) \textit{Resource allocation} becomes predictable since the associativity ensures that different evaluation orders of nested stacks produce identical memory layouts and computational complexity, allowing runtime systems to make optimization decisions based on data locality rather than worrying about correctness.
 
 \subsection{Window-Stacking and Tensor Pyramids}
 
@@ -190,7 +190,7 @@ X^{(0)} \xrightarrow{\Wstack_{w_1}} \mathbb{T}_{r+1} \xrightarrow{\Wstack_{w_2}}
 Each level aggregates lower-level tensors into the next rank, giving a \emph{$d$-level tensor pyramid}.
 \end{definition}
 
-\textbf{Connection to Classical Pyramids:} VSLA tensor pyramids generalize classical pyramid structures from signal processing and computer vision. Like Gaussian pyramids that progressively blur and downsample images, or Laplacian pyramids that capture multi-scale edge information, tensor pyramids create hierarchical representations. However, unlike these fixed-resolution approaches, VSLA tensor pyramids handle variable-shape data at each level through the zero-padding equivalence relation, enabling adaptive multi-resolution processing without predetermined scale factors or uniform downsampling ratios.
+\textbf{Connection to Classical Pyramids:} VSLA tensor pyramids generalize classical pyramid structures from signal processing and computer vision. Like Gaussian pyramids that progressively blur and downsample images, or Laplacian pyramids that capture multi-scale edge information \cite{BurtAdelson1983}, tensor pyramids create hierarchical representations. The mathematical foundation extends wavelets and multiresolution analysis \cite{Mallat99} to the variable-shape setting. However, unlike these fixed-resolution approaches, VSLA tensor pyramids handle variable-shape data at each level through the zero-padding equivalence relation, enabling adaptive multi-resolution processing without predetermined scale factors or uniform downsampling ratios.
 
 \begin{example}[Signal Processing Pyramid]
 Consider a 1D signal stream with window sizes $w_1 = 4, w_2 = 3$:
@@ -206,7 +206,7 @@ Consider a 1D signal stream with window sizes $w_1 = 4, w_2 = 3$:
 \begin{proposition}[Stacking Complexity]
 Given $k$ rank-$r$ operands with total element count $N$:
 \begin{itemize}
-\item $\Stack_k$ (stack): $\Theta(N)$ if shapes are equal; $\Theta(N + k \cdot \Delta)$ where $\Delta$ represents zeros copied during padding.
+\item $\Stack_k$ (stack): $\Theta(N)$ if shapes are equal; $\Theta(N + k \cdot \Delta)$ where $\Delta \leq d_{\max} - \min_i(\vdim(A_i))$ represents zeros copied during padding.
 \item $\Omega_w$ (sliding stream): Amortized $\Theta(N)$ over the stream with $\Theta(w)$ queue memory.
 \end{itemize}
 \end{proposition}

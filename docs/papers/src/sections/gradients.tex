@@ -5,7 +5,7 @@
 \label{sec:gradients}
 
 \subsection{Formalization of VJPs for VSLA Operations}
-Automatic differentiation in VSLA requires defining custom Vector-Jacobian Products (VJPs) that respect the variable-shape nature of the tensors. For an operation \(f: D^n \to D^m\), the goal is to compute the action of the transposed Jacobian on a cotangent vector without explicitly forming the Jacobian matrix.
+Automatic differentiation in VSLA requires defining custom Vector-Jacobian Products (VJPs) that respect the variable-shape nature of the tensors. Building on established AD theory \cite{GriewankWalther2008,Pearlmutter1994}, we extend reverse-mode differentiation to handle shape-changing operations. For an operation \(f: D^n \to D^m\), the goal is to compute the action of the transposed Jacobian on a cotangent vector without explicitly forming the Jacobian matrix.
 
 Let \(y = f(x_1, \dots, x_n)\) and let \(\bar{y}\) be the cotangent vector (gradient) with respect to \(y\). The VJP for each input \(x_i\) is \(\bar{x}_i = J_i^T \bar{y}\), where \(J_i\) is the Jacobian of \(f\) with respect to \(x_i\).
 
@@ -13,13 +13,19 @@ Let \(y = f(x_1, \dots, x_n)\) and let \(\bar{y}\) be the cotangent vector (grad
 \[
 \bar{x}_1 = \unprom_{d_1}(\bar{y}), \quad \bar{x}_2 = \unprom_{d_2}(\bar{y})
 \]
-This corresponds to slicing the incoming gradient \(\bar{y}\) to match the original shapes of \(x_1\) and \(x_2\).
+The \(\unprom_{d}(\cdot)\) operator extracts the first $d$ components from a vector, effectively slicing the incoming gradient \(\bar{y}\) back to the original non-padded dimensions of the inputs. In the VJP context, this unpromotion operation is critical because VSLA operations may internally promote tensors to ambient shapes for computation, but gradients must flow back to the original variable shapes. The operator ensures that gradients flow correctly without artificial contributions from padded zeros that were introduced only for computational convenience.
 
 \textbf{VJP for VSLA Convolution (Model A):} Let \(y = x_1 \otimes_c x_2\). This is equivalent to polynomial multiplication \(Y(z) = X_1(z)X_2(z)\). The gradients are given by convolution with the reversed other operand:
 \[
 \bar{x}_1 = \bar{y} \otimes_c \rev(x_2), \quad \bar{x}_2 = \rev(x_1) \otimes_c \bar{y}
 \]
 where \(\rev(x)\) denotes the coefficient vector in reverse order. The shapes of the resulting gradients must be handled carefully to match the original input shapes.
+
+\textbf{VJP for VSLA Kronecker Product (Model B):} Let \(y = x_1 \otimes_K x_2\). The forward operation creates the Kronecker product \(y_{ij} = (x_1)_i \cdot (x_2)_j\) with ambient dimension padding. The gradients are computed via partial Kronecker expansions and reshape operations:
+\[
+\bar{x}_1 = \sum_{j=1}^{\vdim(x_2)} \bar{y}_{i,j} \cdot (x_2)_j, \quad \bar{x}_2 = \sum_{i=1}^{\vdim(x_1)} \bar{y}_{i,j} \cdot (x_1)_i
+\]
+The gradient computation requires unraveling the Kronecker structure: \(\bar{x}_1\) receives the row-wise sum of \(\bar{y}\) weighted by \(x_2\), while \(\bar{x}_2\) receives the column-wise sum weighted by \(x_1\). Proper handling of ambient shapes ensures gradient dimensions match original inputs.
 
 \textbf{VJP for Stacking Operator:} Let \(Y = \Stack_k(x_1, \dots, x_k)\). The forward operation pads each \(x_i\) to an ambient shape \(\mathbf{n}\) and concatenates them. The VJP is the reverse operation: it unstacks the incoming gradient \(\bar{Y}\) and un-pads each resulting slice to match the original input shapes.
 \[

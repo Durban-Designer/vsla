@@ -3,6 +3,9 @@
 % ================================================================
 \section{Model A: The Convolution Semiring}
 \label{sec:modelA}
+
+\noindent \textbf{Notation:} Throughout this section, we use $\vdim(x)$ and ``degree'' interchangeably when referring to the dimensional extent of VSLA elements, particularly in the context of the polynomial isomorphism (Theorem~\ref{thm:polyIso}) and graded ring discussion that follows.
+
 \subsection{Convolution Product}
 \begin{definition}
 For \(v\in\mathbb R^{d_1}\) and \(w\in\mathbb R^{d_2}\) define the discrete convolution
@@ -50,7 +53,11 @@ The map \(\Phi\bigl([(d,v)]\bigr):=\sum_{i=0}^{d-1} v_{i+1}\,x^{i}\) is a semiri
 We verify that $\Phi$ is a well-defined semiring homomorphism, then show bijectivity.
 
 \textit{Well-definedness:}
-If $[(d_1,v)] = [(d_2,w)]$, then after padding to $n = \max(d_1,d_2)$, we have $\iota_{d_1 \to n}(v) = \iota_{d_2 \to n}(w)$. This means $v_i = w_i$ for $i = 1,\ldots,\min(d_1,d_2)$ and the remaining components are zero. Thus $\Phi([(d_1,v)]) = \sum_{i=0}^{d_1-1} v_{i+1} x^i = \sum_{i=0}^{d_2-1} w_{i+1} x^i = \Phi([(d_2,w)])$.
+If $[(d_1,v)] = [(d_2,w)]$, then after padding to $n = \max(d_1,d_2)$, we have $\iota_{d_1 \to n}(v) = \iota_{d_2 \to n}(w)$. This means $v_i = w_i$ for $i = 1,\ldots,\min(d_1,d_2)$ and the remaining components are zero. 
+
+\textit{Indexing Note:} We use 1-based indexing for vector components ($v_i$ with $i \geq 1$) and 0-based indexing for polynomial powers ($x^j$ with $j \geq 0$). The mapping $\Phi([(d,v)]) = \sum_{i=0}^{d-1} v_{i+1} x^i$ bridges these conventions: the $i$-th polynomial coefficient comes from the $(i+1)$-th vector component.
+
+Thus $\Phi([(d_1,v)]) = \sum_{i=0}^{d_1-1} v_{i+1} x^i = \sum_{i=0}^{d_2-1} w_{i+1} x^i = \Phi([(d_2,w)])$.
 
 \textit{Additive homomorphism:}
 For $a = [(d_1,v)], b = [(d_2,w)]$ with $n = \max(d_1,d_2)$:
@@ -90,10 +97,10 @@ The Rees algebra (or blow-up algebra) associated with an ideal \(I\) of a ring \
 By framing VSLA in this context, we see that it is not an ad-hoc construction but rather a computationally-oriented realization of well-understood algebraic objects, tailored to the specific challenges of variable-shape data in high-performance computing.
 
 \begin{theorem}[Completion]\label{thm:completion}
-Equip \(D\) with the norm \(\lVert[(d,v)]\rVert_1:=\sum_{i=1}^{d}|v_i|\). The Cauchy completion of \((D, \lVert \cdot \rVert_1)\) is isometrically isomorphic to the Banach space \(\ell^1(\mathbb{N}_0)\) of absolutely summable sequences, which is a subspace of the formal power series ring \(\mathbb R[[x]]\).
+Equip \(D\) with the norm \(\lVert[(d,v)]\rVert_1:=\sum_{i=1}^{d}|v_i|\). The Cauchy completion of \((D, \lVert \cdot \rVert_1)\) is isometrically isomorphic to the Banach space \(\ell^1(\mathbb{N}_0)\) of absolutely summable sequences, which is a subspace of the formal power series ring \(\mathbb R[[x]]\). This extends classical results on polynomial ring completions \cite{Rudin1991,VonZurGathenGerhard2013} to the variable-dimension setting.
 \end{theorem}
 \begin{proof}
-We provide a full proof sketch with topological clarification.
+We provide a complete proof with topological clarification.
 
 \textit{1. The Normed Space:}
 The map \(\lVert \cdot \rVert_1: D \to \mathbb{R}_{\ge 0}\) is a well-defined norm. The isomorphism \(\Phi: D \to \mathbb{R}[x]\) from Theorem~\ref{thm:polyIso} allows us to view \(D\) as the space of polynomials. For a polynomial \(p(x) = \sum_{i=0}^{d-1} a_i x^i\), the norm is \(\lVert p \rVert_1 = \sum_{i=0}^{d-1} |a_i|\). This is the standard \(\ell^1\)-norm on the coefficients.
@@ -110,5 +117,9 @@ We must show that this limit object \(p(x)\) is in the space \(\ell^1(\mathbb{N}
 Since \((p_n)\_n\) is a Cauchy sequence, it is bounded: there exists \(M > 0\) such that \(\lVert p_n \rVert_1 \le M\) for all \(n\). For any finite \(K\), \(\sum_{i=0}^K |a_{n,i}| \le M\). Taking the limit as \(n \to \infty\), we get \(\sum_{i=0}^K |a_i| \le M\). Since this holds for all \(K\), the series \(\sum_{i=0}^{\infty} |a_i|\) converges absolutely with \(\sum_{i=0}^{\infty} |a_i| \le M < \infty\), confirming that \(p(x)\) is in \(\ell^1(\mathbb{N}_0)\).
 
 \textit{5. Isomorphism:}
-The completion of \((\mathbb{R}[x], \lVert \cdot \rVert_1)\) is the Banach space \(\ell^1(\mathbb{N}_0)\). The map \(\Phi\) extends to an isometric isomorphism from the completion of \(D\) to \(\ell^1(\mathbb{N}_0)\). This space is a well-known Banach algebra under convolution, and it is a proper sub-ring of the full formal power series ring \(\mathbb R[[x]]\) (which is the completion under a different, non-normable topology).
+The completion of \((\mathbb{R}[x], \lVert \cdot \rVert_1)\) is the Banach space \(\ell^1(\mathbb{N}_0)\). The map \(\Phi\) extends to an isometric isomorphism from the completion of \(D\) to \(\ell^1(\mathbb{N}_0)\). This space is a well-known Banach algebra under convolution, and it forms a proper subalgebra of \((\mathbb R[[x]], +, \cdot)\) under the coefficientwise convergence topology (whereas \(\mathbb R[[x]]\) with its natural topology is complete under a different, non-normable topology).
 \end{proof}
+
+\begin{lemma}[Commutativity Comparison]
+Model A is a commutative semiring; Model B is non-commutative except when one operand is scalar.
+\end{lemma}

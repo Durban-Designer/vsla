@@ -56,7 +56,9 @@ Since $(0,1,0,0) \neq (0,0,1,0)$, we have $a \otimes_K b \neq b \otimes_K a$.
 \end{proof}
 
 \paragraph{Practical Implications of Non-Commutativity}
-The non-commutativity of the Kronecker product is not merely a theoretical curiosity; it is a crucial feature for many applications. In quantum computing, the state of a multi-qubit system is described by the Kronecker product of single-qubit states, and the order of the product is significant. Similarly, in tensor network methods for simulating many-body quantum systems, such as Matrix Product States (MPS) or Projected Entangled Pair States (PEPS), the non-commutative nature of the Kronecker product is fundamental to capturing the entanglement structure of the system. In these domains, VSLA's Model B provides a natural and efficient framework for representing and manipulating these non-commutative structures, especially when the constituent systems have different dimensions.
+The non-commutativity of the Kronecker product is not merely a theoretical curiosity; it is a crucial feature for many applications. In quantum computing, the state of a multi-qubit system is described by the Kronecker product of single-qubit states, and the order of the product is significant. Similarly, in tensor network methods for simulating many-body quantum systems, such as Matrix Product States (MPS) or Projected Entangled Pair States (PEPS) \cite{Orus2019}, the non-commutative nature of the Kronecker product is fundamental to capturing the entanglement structure of the system. In these domains, VSLA's Model B provides a natural and efficient framework for representing and manipulating these non-commutative structures, especially when the constituent systems have different dimensions.
+
+\textbf{Computational Challenges:} The non-commutativity of Model B introduces specific algorithmic considerations beyond the $\mathcal{O}(mnd_{\max}^2)$ complexity bound. Unlike commutative operations that can benefit from reordering optimizations, non-commutative Kronecker products require careful preservation of operand order throughout the computation pipeline. This affects parallelization strategies: while element-wise operations can be distributed arbitrarily, Kronecker operations must maintain strict left-to-right evaluation order within each computational thread. Additionally, memory access patterns become less predictable since $A \otimes_K B$ and $B \otimes_K A$ produce different matrix structures, potentially affecting cache efficiency and memory bandwidth utilization compared to Model A's commutative convolution operations.
 
 \begin{proposition}\label{prop:commCase}
 $x\otimes_K y = y\otimes_K x$ iff $\vdim x =1$ or $\vdim y =1$ (i.e. one operand is scalar).
@@ -67,3 +69,11 @@ If $x=\alpha\,1$ with $\alpha\in\mathbb R$ then $x\otimes_K y = y\otimes_K x$ fo
 \end{lemma}
 \begin{proof}
 Both products equal $\alpha\,y$ by definition.\end{proof}
+
+\begin{lemma}[Scalar-commutation lemma for Model B]\label{lem:commutativityComparison}
+The two VSLA semiring models exhibit fundamentally different commutativity properties:
+\begin{enumerate}
+\item \textbf{Model A (Convolution):} $(D, +, \otimes_c)$ forms a commutative semiring with $x \otimes_c y = y \otimes_c x$ for all $x, y \in D$.
+\item \textbf{Model B (Kronecker):} $(D, +, \otimes_K)$ forms a non-commutative semiring where $x \otimes_K y = y \otimes_K x$ if and only if one operand is scalar ($\vdim(x) = 1$ or $\vdim(y) = 1$), as established by Proposition~\ref{prop:commCase}.
+\end{enumerate}
+\end{lemma}

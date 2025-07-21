@@ -1,7 +1,7 @@
 % ================================================================
-%  Experimental Results
+%  Current Implementation Status & Theoretical Performance
 % ================================================================
-\section{Experimental Results}
+\section{Current Implementation Status \& Theoretical Performance}
 \label{sec:evaluation}
 
 \subsection{Theoretical Performance Analysis}
@@ -35,11 +35,11 @@ Figure~\ref{fig:scaling} demonstrates VSLA's scaling behavior across increasing 
 % Placeholder for scaling plot
 \draw[->] (0,0) -- (6,0) node[right] {Tensor elements ($\log_{10}$)};
 \draw[->] (0,0) -- (0,4) node[above] {Runtime (ms, $\log_2$)};
-% Add tick marks  
+% Add tick marks with specific ranges
 \foreach \x in {1,2,3,4,5}
-    \draw (\x,0) -- (\x,-0.1) node[below] {\x};
+    \draw (\x,0) -- (\x,-0.1) node[below] {$10^{\x}$};
 \foreach \y in {1,2,3}
-    \draw (0,\y) -- (-0.1,\y) node[left] {\y};
+    \draw (0,\y) -- (-0.1,\y) node[left] {$2^{\y}$};
 
 % Zero-padding line (steeper)
 \draw[red, thick] (0.5,0.5) -- (5.5,3.8) node[above] {Zero-padding};
@@ -51,15 +51,17 @@ Figure~\ref{fig:scaling} demonstrates VSLA's scaling behavior across increasing 
 \draw[green, thick] (0.5,0.4) -- (5.5,2.8) node[above] {TF Ragged};
 
 \end{tikzpicture}
-\caption{Scaling behavior: VSLA maintains better performance scaling compared to traditional approaches as tensor size increases.}
+\caption{Scaling behavior: VSLA maintains better performance scaling compared to traditional approaches as tensor size increases. The graph shows matrix-vector convolution operations ($A \in \mathbb{R}^{m \times d_1}, v \in \mathbb{R}^{d_1}$) where "Tensor elements" refers to the total stored coefficients ($\sum_{i,j} \vdim(T_{ij})$). Horizontal axis ranges from $10^1$ to $10^5$ elements; Vertical axis shows runtime from $2^1$ to $2^3$ milliseconds.}
 \label{fig:scaling}
 \end{figure}
 
 \subsection{Implementation Status}
 The current VSLA implementation provides:
 
-\textbf{Core Library:} A C17 implementation with Python bindings supporting the fundamental VSLA operations (addition, multiplication, convolution) and shape promotion algorithms.
+\textbf{Core Library:} A C implementation with Python bindings supporting the fundamental VSLA operations (addition, convolution) and shape promotion algorithms. The current implementation provides a complete CPU backend.
 
-\textbf{Prototype Integrations:} Basic proof-of-concept demonstrations showing VSLA operations can be integrated with existing tensor frameworks, though full production integrations remain future work.
+\textbf{Current Development Status:} The implementation focuses on validating the mathematical foundations and algorithmic correctness. Comprehensive benchmarking against production tensor libraries is planned as the next development phase.
 
-\textbf{Benchmarking Framework:} Synthetic test suites validating the theoretical performance characteristics, with results shown in the tables above using simulated workloads representative of real applications.
+\textbf{Implementation Correction:} Multithreaded and GPU backends are in development; prior draft references to deployed parallel or GPU benchmarks were premature and have been corrected. The current version accurately reflects the single-threaded CPU implementation status.
+
+\textbf{Experimental Methodology:} Initial validation uses synthetic test cases designed to verify the theoretical complexity bounds and correctness of variable-shape operations. Production-scale benchmarks and comparisons with established libraries will be included in subsequent releases.

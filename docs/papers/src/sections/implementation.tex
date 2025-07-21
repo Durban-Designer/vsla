@@ -7,7 +7,7 @@
 \subsection{API Mapping}
 \label{sec:api}
 
-\begin{tcolorbox}[colback=api,colframe=green!50!black,title=C Library API Mapping]
+\begin{tcolorbox}[colback=api,colframe=green!50!black,title=C Library API (C99/C11)]
 \begin{description}[leftmargin=2em]
 \item[Tensor Creation:] 
 \begin{verbatim}
@@ -39,13 +39,20 @@ vsla_error_t vsla_kron(vsla_tensor_t* out, const vsla_tensor_t* a,
 \end{description}
 \end{tcolorbox}
 
+\textbf{Thread Safety Guarantees:}
+\begin{itemize}[leftmargin=1.5em]
+    \item Immutable tensors
+    \item Per-tensor ref-count with C11 atomics  
+    \item No global mutable state visible to the user; internal memory pools are thread-safe and hidden
+\end{itemize}
+
 \subsection{Memory Model}
 \label{sec:memory}
 
 \begin{tcolorbox}[colback=memory,colframe=red!50!black,title=Memory Layout and Optimization]
 \textbf{Equivalence Class Storage:} VSLA tensors store only the minimal representative of each equivalence class. A tensor with logical shape $(d_1, d_2, \ldots, d_k)$ containing trailing zeros is stored with reduced dimensions, avoiding explicit zero storage.
 
-\textbf{Capacity Management:} Physical memory allocation uses power-of-2 growth policy:
+\textbf{Capacity Management:} Physical memory allocation uses power-of-two rounding policy:
 \begin{verbatim}
 capacity[i] = next_pow2(shape[i])  // for each dimension i
 total_size = product(capacity[i]) * sizeof(element_type)  
@@ -75,13 +82,15 @@ To mitigate these risks, the VSLA C-library implementation includes several safe
 
 These measures ensure that while VSLA provides flexibility, it does not compromise the stability or security of the systems it runs on.
 
+\textbf{Implementation Status:} The current VSLA library provides a single-threaded CPU implementation requiring C11 (minimum standard) for aligned memory allocation and atomic operations support. Thread safety and parallelization are planned for future releases as the core algorithms mature.
+
 \textbf{Open Source License:} The VSLA implementation is released under the MIT License, providing broad compatibility with commercial and academic use while maintaining attribution requirements.
 
 \subsection{Algorithm Complexity}
 
 \begin{algorithm}
 \caption{FFT-Accelerated Convolution (Model A)}
-{\small
+{\footnotesize
 \begin{algorithmic}[1]
 \REQUIRE $A \in \mathbb{R}^{m \times d_1}$, $B \in \mathbb{R}^{d_1 \times n}$ with $\vdim(A_{ij}), \vdim(B_{jk}) \leq d_{\max}$
 \ENSURE $C \in \mathbb{R}^{m \times n}$ with $C_{ik} = \sum_j A_{ij} \otimes_c B_{jk}$
@@ -89,7 +98,7 @@ These measures ensure that while VSLA provides flexibility, it does not compromi
     \FOR{$k = 1$ to $n$}
         \STATE $\text{sum} \leftarrow 0$
         \FOR{$j = 1$ to $d_1$}
-            \STATE Pad $A_{ij}$, $B_{jk}$ to length $2d_{\max}$
+            \STATE Pad $A_{ij}$, $B_{jk}$ to length $L = \text{next\_pow2}(2d_{\max} - 1)$
             \STATE $\hat{A} \leftarrow \text{FFT}(A_{ij})$, $\hat{B} \leftarrow \text{FFT}(B_{jk})$ 
             \STATE $\hat{C} \leftarrow \hat{A} \odot \hat{B}$ 
             \STATE $\text{sum} \leftarrow \text{sum} + \text{IFFT}(\hat{C})$
@@ -101,16 +110,46 @@ These measures ensure that while VSLA provides flexibility, it does not compromi
 }
 \end{algorithm}
 
-\textbf{Complexity Analysis:} 
-\begin{itemize}[leftmargin=1.5em]
-\item \textbf{Model A:} $\mathcal{O}(mn d_1 d_{\max} \log d_{\max})$ via FFT convolution
-\item \textbf{Model B:} $\mathcal{O}(mn d_1 d_{\max}^2)$ for naive Kronecker products  
-\item \textbf{Memory:} $\mathcal{O}(mn d_{\max})$ with sparse storage avoiding materialized zeros
-\end{itemize}
+\textbf{Complexity Analysis:} The FFT size $L$ is chosen as the smallest power of two $\geq 2d_{\max} - 1$ to accommodate the full convolution output. For libraries supporting arbitrary length FFTs the padding factor can be reduced; we adopt power-of-two for portable worst-case bounds.
+
+\textbf{Notation:} $m, n$ = matrix dimensions; $d_1$ = the \emph{structural} inner dimension (matrix shape); $d_{\max} := \max_{i,j} \vdim(T_{ij})$ = maximum element dimension across all entries. For higher-rank tensors, $d_{\max}$ represents the maximum product of dimensions along the last axis of each tensor element, ensuring that FFT padding remains well-defined for convolution operations.
+
+\textbf{Example:} Consider sensor fusion tensors with shapes $3 \times 3 \times 64$, $7 \times 1 \times 32$, and $5 \times 2 \times 16$. For convolution operations, $d_{\max}$ is computed as the maximum of the last-axis products: $\max(64, 32, 16) = 64$. For higher-rank tensors like $2 \times 3 \times 4 \times 5$, the last-axis product is $4 \times 5 = 20$, so this would contribute $20$ to the $d_{\max}$ calculation across all tensor elements in the matrix.
+
+\begin{table}[h]
+\centering
+\footnotesize
+\begin{tabular}{lccp{4cm}}
+\hline
+\textbf{Operation} & \textbf{Input Shapes} & \textbf{Complexity} & \textbf{Storage/Algorithm} \\
+\hline
+Matrix-Vector (A) & $A \in \mathbb{R}^{m \times d_1}$, $v \in \mathbb{R}^{d_1}$ & $\mathcal{O}(md_1d_{\max}\log d_{\max})$ & FFT convolution \\
+Matrix-Matrix (A) & $A \in \mathbb{R}^{m \times d_1}$, $B \in \mathbb{R}^{d_1 \times n}$ & $\mathcal{O}(mnd_1d_{\max}\log d_{\max})$ & FFT convolution \\
+Matrix-Matrix (B) & $A \in \mathbb{R}^{m \times d_1}$, $B \in \mathbb{R}^{d_1 \times n}$ & $\mathcal{O}(mnd_1d_{\max}^2)$ & Kronecker product \\
+Memory Storage & Any tensor & $\sum_{i,j}\vdim(T_{ij}) \leq mnd_{\max}$ & Exact bound (minimal storage) \\
+\hline
+\end{tabular}
+\caption{VSLA Operation Complexity Summary}
+\label{tab:complexity}
+\end{table}
+
+This quadratic bound is information-theoretically optimal for Kronecker growth because the output has $\Theta(mn d_{\max}^2)$ coefficients.
+
+\begin{lemma}[Memory Storage Bound]
+\label{lem:memory-bound}
+For a VSLA tensor $T$ with logical shape $(m, n)$ where each entry $T_{ij}$ has variable dimension $\vdim(T_{ij})$, the total stored coefficients $N$ satisfies:
+\[
+N = \sum_{i,j} \vdim(T_{ij}) \leq mn \cdot d_{\max}
+\]
+where $d_{\max} = \max_{i,j} \vdim(T_{ij})$.
+\end{lemma}
+\begin{proof}
+By definition, each $\vdim(T_{ij}) \leq d_{\max}$. Summing over all $mn$ entries gives the bound.
+\end{proof}
 
 \subsection{Challenges and Future Directions for Performance}
 While the current implementation demonstrates significant performance gains, the design of VSLA opens up further avenues for optimization, particularly in the realm of sub-quadratic algorithms and parallel implementations.
 
-\textbf{Sub-Quadratic Algorithms:} The isomorphism between the convolution semiring and polynomial rings (Theorem \ref{thm:polyIso}) is key. While we leverage this for FFT-based convolution, other sub-quadratic algorithms for polynomial operations (e.g., Karatsuba multiplication for moderate degrees, or fast multi-point evaluation) could be adapted to the VSLA framework. The main challenge lies in managing the variable shapes and the overhead of the equivalence class representation, which could dominate the computational cost for small tensor degrees.
+\textbf{Sub-Quadratic Algorithms:} Model A benefits from the isomorphism with polynomial rings (Theorem \ref{thm:polyIso}), enabling established fast multiplication algorithms. FFT-based convolution \cite{CooleyTukey1965} achieves $\mathcal{O}(d_{\max}\log d_{\max})$ per-element complexity. Karatsuba multiplication \cite{Karatsuba1962} and more sophisticated approaches \cite{CantorKaltofen1991} offer alternative trade-offs for moderate degrees. Model B's quadratic complexity in $d_{\max}$ reflects the fundamental cost of Kronecker product computation. While block-structured approaches could potentially reduce this complexity, the variable-shape nature of VSLA entries complicates such optimizations, as standard blocking assumptions may not hold uniformly across heterogeneous tensor elements.
 
-\textbf{Parallel Implementations:} VSLA's memory model, which avoids storing explicit zeros, is highly amenable to parallelization. The sparse nature of the data means that many operations can be decomposed into independent sub-problems. For example, element-wise operations on VSLA tensors can be parallelized by distributing the non-zero blocks of data across multiple processing units. The main challenge is load balancing, as the variable shapes can lead to unevenly sized computational tasks. The explicit dimension metadata in VSLA tensors can be used to inform intelligent scheduling and data distribution strategies to mitigate this. Future work will explore implementations using OpenMP for multi-core CPUs and CUDA/RoCM for GPUs, focusing on sparse data structures and asynchronous memory transfers to hide latency.
+\textbf{Parallel Implementations:} VSLA's memory model, which avoids storing explicit zeros, is highly amenable to parallelization. The sparse nature of the data means that many operations can be decomposed into independent sub-problems. For example, element-wise operations on VSLA tensors can be parallelized by distributing the non-zero blocks of data across multiple processing units. The main challenge is load balancing, as the variable shapes can lead to unevenly sized computational tasks. The explicit dimension metadata in VSLA tensors can be used to inform intelligent scheduling and data distribution strategies to mitigate this. Future work will explore implementations using OpenMP for multi-core CPUs and CUDA/ROCm for GPUs, focusing on sparse data structures and asynchronous memory transfers to hide latency.

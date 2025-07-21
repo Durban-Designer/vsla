@@ -10,7 +10,16 @@ VSLA's mathematical foundations enable transformative applications across divers
 
 The stacking operator $\Stack_k: (\mathbb{T}_r)^k \to \mathbb{T}_{r+1}$ revolutionizes heterogeneous sensor integration, particularly in autonomous systems requiring real-time fusion of disparate data sources.
 
-\textbf{Autonomous Vehicle Sensor Fusion:} Consider an autonomous vehicle integrating camera patches (3×3×64 features), LIDAR returns (7×1×32), and radar signatures (5×2×16). Traditional frameworks require padding to a common shape (7×3×64), wasting 85\% of memory on artificial zeros. VSLA's $\Stack_3$ operator computes the ambient shape (7,3,64), applies zero-padding equivalence only during computation, and stacks into a unified 3×7×3×64 representation. The mathematical guarantee $\vdim(\Sigma_k(A^{(1)}, \ldots, A^{(k)})) = \max_i \vdim(A^{(i)})$ ensures optimal memory usage while preserving all sensor information.
+\textbf{Concrete Memory Savings Example:} Consider an autonomous vehicle integrating camera patches (3×3×64 features), LIDAR returns (7×1×32), and radar signatures (5×2×16). 
+
+\textit{Traditional approach:} Requires padding to common shape (7×3×64):
+\begin{itemize}
+\item Padded storage: $3 \times (7 \times 3 \times 64) = 4032$ elements
+\item Actual data: $(3 \times 3 \times 64) + (7 \times 1 \times 32) + (5 \times 2 \times 16) = 576 + 224 + 160 = 960$ elements
+\item Memory waste: $(4032 - 960) / 4032 = 76.2\%$
+\end{itemize}
+
+\textit{VSLA approach:} Stores only minimal representatives (960 elements) plus lightweight dimension metadata, achieving $>75\%$ memory reduction for this sparse configuration. VSLA's $\Stack_3$ operator computes the ambient shape (7,3,64), applies zero-padding equivalence only during computation, and stacks into a unified 3×7×3×64 representation. The mathematical guarantee $\vdim(\Stack_k(A^{(1)}, \ldots, A^{(k)})) = \max_i \vdim(A^{(i)})$ ensures optimal memory usage while preserving all sensor information.
 
 \textbf{IoT Network Integration:} In smart city applications, VSLA handles heterogeneous sensor networks where temperature sensors report single values, air quality monitors produce 5-dimensional vectors, and traffic cameras generate variable-length feature sequences. The stacking operator creates coherent multi-modal representations without the computational overhead of padding short sensor readings to match the longest sequence.
 
@@ -28,7 +37,7 @@ Window-stacking $\Omega_w$ creates tensor pyramids for real-time processing, ena
 
 \subsection{Adaptive AI Architectures}
 
-VSLA enables next-generation neural architectures that dynamically resize based on input complexity, moving beyond the fixed-size limitations of current frameworks.
+VSLA enables next-generation neural architectures that dynamically resize based on input complexity, moving beyond the fixed-size limitations of current frameworks. This extends recent advances in dynamic convolution \cite{WuFan2019} and adaptive computation \cite{Graves2016} to a mathematically principled variable-shape framework.
 
 \textbf{Mixture-of-Experts with Variable Specialists:} In language models, specialist networks can dynamically resize from 16 to 1024 dimensions based on input complexity. Simple tokens (articles, prepositions) engage narrow specialists, while complex technical terms activate wider networks. VSLA's automatic shape promotion eliminates the need for manual padding or complex routing mechanisms.
 

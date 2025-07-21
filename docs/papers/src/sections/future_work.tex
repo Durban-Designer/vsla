@@ -6,6 +6,13 @@
 
 The mathematical foundations and practical implementations of VSLA open several promising research directions that could significantly advance variable-shape computation.
 
+\textbf{Research Priority Assessment:} Based on immediate impact potential and broader adoption requirements, we identify three priority tiers:
+\begin{itemize}
+\item \textit{High Priority:} Real-world benchmarking, GPU implementations, framework integrations
+\item \textit{Medium Priority:} Sub-quadratic algorithms, distributed computing, quantum computing applications  
+\item \textit{Long-term:} Categorical formulations, topological considerations, domain-specific specializations
+\end{itemize}
+
 \subsection{Theoretical Extensions}
 
 \textbf{Categorical Formulation:} While this paper establishes VSLA's semiring foundations, a complete categorical treatment could provide deeper structural insights. Investigating VSLA as a semiring-enriched category with tensor products as morphisms could reveal new optimization opportunities and enable automated reasoning about variable-shape transformations. The relationship between the stacking operator and categorical limits deserves particular attention.
@@ -16,7 +23,7 @@ The mathematical foundations and practical implementations of VSLA open several 
 
 \subsection{Algorithmic Advances}
 
-\textbf{Sub-Quadratic Tensor Operations:} Current VSLA implementations achieve significant practical speedups, but theoretical complexity bounds suggest further improvements. The isomorphism between convolution semirings and polynomial rings (Theorem~\ref{thm:polyIso}) enables adaptation of advanced polynomial algorithms—Karatsuba multiplication for moderate degrees, fast multi-point evaluation, and sparse interpolation techniques.
+\textbf{Sub-Quadratic Tensor Operations:} Current VSLA implementations achieve significant practical speedups, but theoretical complexity bounds suggest further improvements. The isomorphism between convolution semirings and polynomial rings (Theorem~\ref{thm:polyIso}) enables adaptation of advanced polynomial algorithms such as Karatsuba multiplication for moderate degrees, fast multi-point evaluation, and sparse interpolation techniques.
 
 \textbf{Parallel and Distributed Implementations:} VSLA's sparse-by-design memory model naturally supports parallelization, but optimal load balancing across variable-shaped data remains challenging. Research directions include: (1) NUMA-aware memory placement for large-scale tensor operations, (2) GPU implementations leveraging sparse tensor cores, and (3) distributed algorithms for variable-shape data across cluster computing environments.
 

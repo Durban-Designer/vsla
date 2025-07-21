@@ -26,7 +26,7 @@ VSLA incorporates the shape directly into every algebraic object through mathema
 
 \textbf{Core Innovation:} Rather than forcing all tensors into fixed dimensions, VSLA treats dimension as intrinsic data through equivalence classes $(d,v) \sim (d',v')$ when their zero-padded extensions match. This enables automatic shape promotion: $(3,[1,-1,2]) + (5,[3,0,-1,1,2]) = (5,[4,-1,1,1,2])$ without explicit padding operations.
 
-\textbf{Mathematical Rigor:} VSLA operations form semiring structures enabling algebraic manipulation while preserving computational efficiency. Two instantiations provide different computational trade-offs: convolution semiring ($\mathcal{O}(mn d_{\max} \log d_{\max})$) and Kronecker semiring ($\mathcal{O}(mn d_{\max}^2)$).
+\textbf{Mathematical Rigor:} VSLA operations form semiring structures enabling algebraic manipulation while preserving computational efficiency. Two instantiations provide different computational trade-offs: convolution semiring ($\mbox{$\mathcal{O}(mn d_{\max} \log d_{\max})$}$) and Kronecker semiring ($\mbox{$\mathcal{O}(mn d_{\max}^2)$}$).
 
 \textbf{Practical Impact:} Variable-shape computation eliminates memory waste from artificial padding, enables adaptive neural architectures, and provides mathematical foundations for emerging applications in multi-sensor fusion, quantum simulation, and edge computing.
 
