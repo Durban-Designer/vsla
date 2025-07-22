@@ -7,9 +7,8 @@
 
 #include "vsla/vsla_unified.h"
 #include "vsla/vsla_tensor.h"
+#include "vsla/vsla_tensor_internal.h"
 #include "vsla/vsla_gpu.h"
-#include "vsla/vsla_conv.h"
-#include "vsla/vsla_ops.h"
 #include "vsla/vsla_core.h"
 #include "vsla/vsla_backend.h"
 #include "vsla/vsla_backend_cpu.h"
@@ -51,7 +50,7 @@ struct vsla_context {
     // Configuration
     vsla_config_t config;
     vsla_backend_t active_backend_type;
-    vsla_backend_interface_t* active_backend;
+    const vsla_backend_interface_t* active_backend;
     
     // Hardware info
     bool cuda_available;
@@ -75,7 +74,7 @@ struct vsla_context {
     size_t memory_threshold;  // Threshold for GPU allocation
     
 #ifdef VSLA_ENABLE_CUDA
-    vsla_gpu_context_t* gpu_ctx;
+    void* gpu_ctx;
 #endif
 };
 
@@ -140,34 +139,31 @@ vsla_context_t* vsla_init(const vsla_config_t* config) {
     ctx->active_backend_type = select_best_backend(&ctx->config);
 
     // Initialize backend function pointers
-    if (ctx->active_backend_type == VSLA_BACKEND_CPU) {
-        ctx->active_backend = (vsla_backend_interface_t*)malloc(sizeof(vsla_backend_interface_t));
-        ctx->active_backend->add = vsla_cpu_add;
-        ctx->active_backend->sub = vsla_cpu_sub;
-        ctx->active_backend->scale = vsla_cpu_scale;
-        ctx->active_backend->hadamard = vsla_cpu_hadamard;
-        ctx->active_backend->matmul = vsla_cpu_matmul;
-        ctx->active_backend->transpose = vsla_cpu_transpose;
-        ctx->active_backend->reshape = vsla_cpu_reshape;
-        ctx->active_backend->sum = vsla_cpu_sum;
-        ctx->active_backend->norm = vsla_cpu_norm;
-        ctx->active_backend->max = vsla_cpu_max;
-        ctx->active_backend->min = vsla_cpu_min;
-    } else {
-        // TODO: Initialize other backends
+    switch (ctx->active_backend_type) {
+        case VSLA_BACKEND_CPU:
+            ctx->active_backend = vsla_backend_cpu_create();
+            break;
+#ifdef VSLA_ENABLE_CUDA
+        case VSLA_BACKEND_CUDA:
+            ctx->active_backend = vsla_backend_cuda_create();
+            break;
+#endif
+        default:
+            ctx->active_backend = vsla_backend_cpu_create();
+            break;
     }
     
     // Initialize GPU context if available
 #ifdef VSLA_ENABLE_CUDA
     if (ctx->active_backend_type == VSLA_BACKEND_CUDA) {
-        ctx->gpu_ctx = vsla_gpu_init(ctx->config.device_id);
-        if (ctx->gpu_ctx) {
-            size_t free_mb, total_mb;
-            if (vsla_gpu_get_memory_usage(ctx->gpu_ctx, &free_mb, &total_mb) == VSLA_SUCCESS) {
-                ctx->gpu_memory_total = total_mb * 1024 * 1024;
-                ctx->gpu_memory_free = free_mb * 1024 * 1024;
-            }
-        }
+        // ctx->gpu_ctx = vsla_gpu_init(ctx->config.device_id);
+        // if (ctx->gpu_ctx) {
+        //     size_t free_mb, total_mb;
+        //     if (vsla_gpu_get_memory_usage(ctx->gpu_ctx, &free_mb, &total_mb) == VSLA_SUCCESS) {
+        //         ctx->gpu_memory_total = total_mb * 1024 * 1024;
+        //         ctx->gpu_memory_free = free_mb * 1024 * 1024;
+        //     }
+        // }
     }
 #endif
     
@@ -185,9 +181,9 @@ void vsla_cleanup(vsla_context_t* ctx) {
     if (!ctx) return;
     
 #ifdef VSLA_ENABLE_CUDA
-    if (ctx->gpu_ctx) {
-        vsla_gpu_destroy(ctx->gpu_ctx);
-    }
+    // if (ctx->gpu_ctx) {
+    //     vsla_gpu_destroy(ctx->gpu_ctx);
+    // }
 #endif
     
     free(ctx->fft_backends);
@@ -200,19 +196,19 @@ vsla_error_t vsla_get_runtime_info(const vsla_context_t* ctx,
                                     double* memory_gb) {
     if (!ctx) return VSLA_ERROR_INVALID_ARGUMENT;
     
-    if (backend) *backend = ctx->active_backend;
+    if (backend) *backend = ctx->active_backend_type;
     
     if (device_name) {
-        switch (ctx->active_backend) {
+        switch (ctx->active_backend_type) {
             case VSLA_BACKEND_CPU:
                 strcpy(device_name, "CPU");
                 break;
             case VSLA_BACKEND_CUDA:
 #ifdef VSLA_ENABLE_CUDA
-                if (ctx->gpu_ctx) {
-                    vsla_gpu_get_device_info(ctx->gpu_device_id, device_name, memory_gb);
-                    return VSLA_SUCCESS;
-                }
+                // if (ctx->gpu_ctx) {
+                //     vsla_gpu_get_device_info(ctx->gpu_device_id, device_name, memory_gb);
+                //     return VSLA_SUCCESS;
+                // }
 #endif
                 strcpy(device_name, "CUDA (not initialized)");
                 break;
@@ -222,7 +218,7 @@ vsla_error_t vsla_get_runtime_info(const vsla_context_t* ctx,
     }
     
     if (memory_gb) {
-        if (ctx->active_backend == VSLA_BACKEND_CUDA) {
+        if (ctx->active_backend_type == VSLA_BACKEND_CUDA) {
             *memory_gb = ctx->gpu_memory_total / (1024.0 * 1024.0 * 1024.0);
         } else {
             *memory_gb = 0.0;  // TODO: Get system memory
@@ -243,7 +239,7 @@ static size_t calculate_tensor_size(uint8_t rank, const uint64_t* shape, vsla_dt
 }
 
 static bool should_use_gpu(vsla_context_t* ctx, size_t data_size) {
-    if (!ctx || ctx->active_backend != VSLA_BACKEND_CUDA) return false;
+    if (!ctx || ctx->active_backend_type != VSLA_BACKEND_CUDA) return false;
     if (!ctx->auto_migration) return false;
     if (data_size < ctx->memory_threshold) return false;
     if (ctx->gpu_memory_free < data_size * 2) return false;  // Need space for operations
@@ -264,18 +260,15 @@ vsla_tensor_t* vsla_tensor_create(vsla_context_t* ctx,
     tensor->rank = rank;
     tensor->model = model;
     tensor->dtype = dtype;
-    tensor->ctx = ctx;
     
     // Allocate shape arrays
     size_t shape_size = rank * sizeof(uint64_t);
     tensor->shape = malloc(shape_size);
     tensor->cap = malloc(shape_size);
-    tensor->stride = malloc(shape_size);
     
-    if (!tensor->shape || !tensor->cap || !tensor->stride) {
+    if (!tensor->shape || !tensor->cap) {
         free(tensor->shape);
         free(tensor->cap);
-        free(tensor->stride);
         free(tensor);
         return NULL;
     }
@@ -284,35 +277,19 @@ vsla_tensor_t* vsla_tensor_create(vsla_context_t* ctx,
     memcpy(tensor->shape, shape, shape_size);
     memcpy(tensor->cap, shape, shape_size);  // Initially no padding
     
-    // Calculate strides (row-major)
-    size_t stride = vsla_dtype_size(dtype);
-    for (int i = rank - 1; i >= 0; i--) {
-        tensor->stride[i] = stride;
-        stride *= tensor->cap[i];
-    }
-    
-    // Calculate total size
-    tensor->data_size = calculate_tensor_size(rank, shape, dtype);
-    
     // Decide where to allocate
-    bool use_gpu = should_use_gpu(ctx, tensor->data_size);
+    bool use_gpu = should_use_gpu(ctx, calculate_tensor_size(rank, shape, dtype));
     
     if (use_gpu) {
 #ifdef VSLA_ENABLE_CUDA
         // Allocate on GPU
-        vsla_gpu_tensor_t gpu_temp = {0};
-        gpu_temp.rank = rank;
-        gpu_temp.dtype = dtype;
-        gpu_temp.cap = tensor->cap;
-        
-        if (vsla_gpu_tensor_alloc(&gpu_temp, ctx->gpu_ctx) == VSLA_SUCCESS) {
-            tensor->gpu_data = gpu_temp.gpu_data;
-            tensor->gpu_valid = true;
-            tensor->location = VSLA_BACKEND_CUDA;
-            ctx->stats.gpu_operations++;
-        } else {
-            use_gpu = false;  // Fall back to CPU
-        }
+        // if (vsla_gpu_tensor_alloc(tensor, ctx->gpu_ctx) == VSLA_SUCCESS) {
+        //     tensor->gpu_valid = true;
+        //     tensor->location = VSLA_BACKEND_CUDA;
+        //     ctx->stats.gpu_operations++;
+        // } else {
+        //     use_gpu = false;  // Fall back to CPU
+        // }
 #else
         use_gpu = false;
 #endif
@@ -320,16 +297,7 @@ vsla_tensor_t* vsla_tensor_create(vsla_context_t* ctx,
     
     if (!use_gpu) {
         // Allocate on CPU
-        tensor->cpu_data = calloc(1, tensor->data_size);
-        if (!tensor->cpu_data) {
-            free(tensor->shape);
-            free(tensor->cap);
-            free(tensor->stride);
-            free(tensor);
-            return NULL;
-        }
-        tensor->cpu_valid = true;
-        tensor->location = VSLA_BACKEND_CPU;
+        ctx->active_backend->allocate(ctx, tensor);
         ctx->stats.cpu_operations++;
     }
     
@@ -340,42 +308,47 @@ vsla_tensor_t* vsla_tensor_create(vsla_context_t* ctx,
 void vsla_tensor_free(vsla_tensor_t* tensor) {
     if (!tensor) return;
     
-    free(tensor->cpu_data);
+    // free(tensor->cpu_data);
 #ifdef VSLA_ENABLE_CUDA
-    if (tensor->gpu_data) {
-        cudaFree(tensor->gpu_data);
-    }
+    // if (tensor->gpu_data) {
+    //     cudaFree(tensor->gpu_data);
+    // }
 #endif
     
     free(tensor->shape);
     free(tensor->cap);
-    free(tensor->stride);
     free(tensor);
 }
 
 // === Data Access ===
 
+vsla_error_t vsla_tensor_copy_to_host(vsla_context_t* ctx, vsla_tensor_t* tensor) {
+    printf("Copying to host\n");
+    if (!ctx || !tensor) return VSLA_ERROR_INVALID_ARGUMENT;
+    return ctx->active_backend->copy_to_host(ctx, tensor);
+}
+
 static vsla_error_t ensure_cpu_valid(vsla_tensor_t* tensor) {
     if (!tensor) return VSLA_ERROR_INVALID_ARGUMENT;
     
-    if (tensor->cpu_valid) return VSLA_SUCCESS;
+    // if (tensor->cpu_valid) return VSLA_SUCCESS;
     
 #ifdef VSLA_ENABLE_CUDA
-    if (tensor->gpu_valid && tensor->gpu_data) {
-        // Allocate CPU memory if needed
-        if (!tensor->cpu_data) {
-            tensor->cpu_data = malloc(tensor->data_size);
-            if (!tensor->cpu_data) return VSLA_ERROR_MEMORY;
-        }
+    // if (tensor->gpu_valid && tensor->gpu_data) {
+    //     // Allocate CPU memory if needed
+    //     if (!tensor->cpu_data) {
+    //         tensor->cpu_data = malloc(tensor->data_size);
+    //         if (!tensor->cpu_data) return VSLA_ERROR_MEMORY;
+    //     }
         
-        // Copy from GPU to CPU
-        cudaError_t err = cudaMemcpy(tensor->cpu_data, tensor->gpu_data,
-                                      tensor->data_size, cudaMemcpyDeviceToHost);
-        if (err != cudaSuccess) return VSLA_ERROR_GPU_FAILURE;
+    //     // Copy from GPU to CPU
+    //     cudaError_t err = cudaMemcpy(tensor->cpu_data, tensor->gpu_data,
+    //                                   tensor->data_size, cudaMemcpyDeviceToHost);
+    //     if (err != cudaSuccess) return VSLA_ERROR_GPU_FAILURE;
         
-        tensor->cpu_valid = true;
-        tensor->ctx->stats.transfer_time_ms += 0.1;  // TODO: Actual timing
-    }
+    //     tensor->cpu_valid = true;
+    //     tensor->ctx->stats.transfer_time_ms += 0.1;  // TODO: Actual timing
+    // }
 #endif
     
     return VSLA_SUCCESS;
@@ -384,31 +357,31 @@ static vsla_error_t ensure_cpu_valid(vsla_tensor_t* tensor) {
 static vsla_error_t ensure_gpu_valid(vsla_tensor_t* tensor) {
     if (!tensor) return VSLA_ERROR_INVALID_ARGUMENT;
     
-    if (tensor->gpu_valid) return VSLA_SUCCESS;
+    // if (tensor->gpu_valid) return VSLA_SUCCESS;
     
 #ifdef VSLA_ENABLE_CUDA
-    if (tensor->cpu_valid && tensor->cpu_data) {
-        // Allocate GPU memory if needed
-        if (!tensor->gpu_data) {
-            vsla_gpu_tensor_t gpu_temp = {0};
-            gpu_temp.rank = tensor->rank;
-            gpu_temp.dtype = tensor->dtype;
-            gpu_temp.cap = tensor->cap;
+    // if (tensor->cpu_valid && tensor->cpu_data) {
+    //     // Allocate GPU memory if needed
+    //     if (!tensor->gpu_data) {
+    //         vsla_gpu_tensor_t gpu_temp = {0};
+    //         gpu_temp.rank = tensor->rank;
+    //         gpu_temp.dtype = tensor->dtype;
+    //         gpu_temp.cap = tensor->cap;
             
-            if (vsla_gpu_tensor_alloc(&gpu_temp, tensor->ctx->gpu_ctx) != VSLA_SUCCESS) {
-                return VSLA_ERROR_GPU_FAILURE;
-            }
-            tensor->gpu_data = gpu_temp.gpu_data;
-        }
+    //         if (vsla_gpu_tensor_alloc(&gpu_temp, tensor->ctx->gpu_ctx) != VSLA_SUCCESS) {
+    //             return VSLA_ERROR_GPU_FAILURE;
+    //         }
+    //         tensor->gpu_data = gpu_temp.gpu_data;
+    //     }
         
-        // Copy from CPU to GPU
-        cudaError_t err = cudaMemcpy(tensor->gpu_data, tensor->cpu_data,
-                                      tensor->data_size, cudaMemcpyHostToDevice);
-        if (err != cudaSuccess) return VSLA_ERROR_GPU_FAILURE;
+    //     // Copy from CPU to GPU
+    //     cudaError_t err = cudaMemcpy(tensor->gpu_data, tensor->cpu_data,
+    //                                   tensor->data_size, cudaMemcpyHostToDevice);
+    //     if (err != cudaSuccess) return VSLA_ERROR_GPU_FAILURE;
         
-        tensor->gpu_valid = true;
-        tensor->ctx->stats.transfer_time_ms += 0.1;  // TODO: Actual timing
-    }
+    //     tensor->gpu_valid = true;
+    //     tensor->ctx->stats.transfer_time_ms += 0.1;  // TODO: Actual timing
+    // }
 #endif
     
     return VSLA_SUCCESS;
@@ -445,7 +418,7 @@ vsla_error_t vsla_add(vsla_context_t* ctx,
                       const vsla_tensor_t* a,
                       const vsla_tensor_t* b) {
     if (!ctx || !out || !a || !b) return VSLA_ERROR_INVALID_ARGUMENT;
-    return ctx->active_backend->add(out, a, b);
+    return ctx->active_backend->add(ctx, out, a, b);
 }
 
 vsla_error_t vsla_sub(vsla_context_t* ctx,
@@ -453,7 +426,7 @@ vsla_error_t vsla_sub(vsla_context_t* ctx,
                       const vsla_tensor_t* a,
                       const vsla_tensor_t* b) {
     if (!ctx || !out || !a || !b) return VSLA_ERROR_INVALID_ARGUMENT;
-    return ctx->active_backend->sub(out, a, b);
+    return ctx->active_backend->sub(ctx, out, a, b);
 }
 
 vsla_error_t vsla_scale(vsla_context_t* ctx,
@@ -461,7 +434,7 @@ vsla_error_t vsla_scale(vsla_context_t* ctx,
                         const vsla_tensor_t* in,
                         double scalar) {
     if (!ctx || !out || !in) return VSLA_ERROR_INVALID_ARGUMENT;
-    return ctx->active_backend->scale(out, in, scalar);
+    return ctx->active_backend->scale(ctx, out, in, scalar);
 }
 
 vsla_error_t vsla_hadamard(vsla_context_t* ctx,
@@ -469,69 +442,26 @@ vsla_error_t vsla_hadamard(vsla_context_t* ctx,
                            const vsla_tensor_t* a,
                            const vsla_tensor_t* b) {
     if (!ctx || !out || !a || !b) return VSLA_ERROR_INVALID_ARGUMENT;
-    return ctx->active_backend->hadamard(out, a, b);
+    return ctx->active_backend->hadamard(ctx, out, a, b);
 }
 
-vsla_error_t vsla_matmul(vsla_context_t* ctx,
-                         vsla_tensor_t* out,
-                         const vsla_tensor_t* a,
-                         const vsla_tensor_t* b) {
-    if (!ctx || !out || !a || !b) return VSLA_ERROR_INVALID_ARGUMENT;
-    return ctx->active_backend->matmul(out, a, b);
-}
-
-vsla_error_t vsla_transpose(vsla_context_t* ctx,
-                            vsla_tensor_t* out,
-                            const vsla_tensor_t* in) {
-    if (!ctx || !out || !in) return VSLA_ERROR_INVALID_ARGUMENT;
-    return ctx->active_backend->transpose(out, in);
-}
-
-vsla_error_t vsla_reshape(vsla_context_t* ctx,
-                          vsla_tensor_t* tensor,
-                          uint8_t new_rank,
-                          const uint64_t* new_shape) {
-    if (!ctx || !tensor || !new_shape) return VSLA_ERROR_INVALID_ARGUMENT;
-    return ctx->active_backend->reshape(tensor, new_rank, new_shape);
+vsla_error_t vsla_fill(vsla_context_t* ctx, vsla_tensor_t* tensor, double value) {
+    if (!ctx || !tensor) return VSLA_ERROR_INVALID_ARGUMENT;
+    return ctx->active_backend->fill(ctx, tensor, value);
 }
 
 vsla_error_t vsla_sum(vsla_context_t* ctx,
                       const vsla_tensor_t* tensor,
                       double* result) {
     if (!ctx || !tensor || !result) return VSLA_ERROR_INVALID_ARGUMENT;
-    return ctx->active_backend->sum(tensor, result);
-}
-
-vsla_error_t vsla_mean(vsla_context_t* ctx,
-                       const vsla_tensor_t* tensor,
-                       double* result) {
-    if (!ctx || !tensor || !result) return VSLA_ERROR_INVALID_ARGUMENT;
-    vsla_error_t err = ctx->active_backend->sum(tensor, result);
-    if (err == VSLA_SUCCESS) {
-        *result /= vsla_numel(tensor);
-    }
-    return err;
-}
-
-vsla_error_t vsla_max(vsla_context_t* ctx,
-                      const vsla_tensor_t* tensor,
-                      double* result) {
-    if (!ctx || !tensor || !result) return VSLA_ERROR_INVALID_ARGUMENT;
-    return ctx->active_backend->max(tensor, result);
-}
-
-vsla_error_t vsla_min(vsla_context_t* ctx,
-                      const vsla_tensor_t* tensor,
-                      double* result) {
-    if (!ctx || !tensor || !result) return VSLA_ERROR_INVALID_ARGUMENT;
-    return ctx->active_backend->min(tensor, result);
+    return ctx->active_backend->sum(ctx, tensor, result);
 }
 
 vsla_error_t vsla_norm(vsla_context_t* ctx,
                        const vsla_tensor_t* tensor,
                        double* result) {
     if (!ctx || !tensor || !result) return VSLA_ERROR_INVALID_ARGUMENT;
-    return ctx->active_backend->norm(tensor, result);
+    return ctx->active_backend->norm(ctx, tensor, result);
 }
 
 vsla_error_t vsla_conv(vsla_context_t* ctx,
@@ -539,203 +469,18 @@ vsla_error_t vsla_conv(vsla_context_t* ctx,
                        const vsla_tensor_t* signal,
                        const vsla_tensor_t* kernel) {
     if (!ctx || !out || !signal || !kernel) return VSLA_ERROR_INVALID_ARGUMENT;
-    
-    // For large convolutions, prefer FFT on GPU if available
-    size_t signal_size = signal->shape[0];
-    size_t kernel_size = kernel->shape[0];
-    bool use_fft = (signal_size * kernel_size) > 1024;
-    bool use_gpu = use_fft && ctx->active_backend == VSLA_BACKEND_CUDA;
-    
-    if (use_gpu) {
-#ifdef VSLA_ENABLE_CUDA
-        // Ensure tensors are on GPU
-        vsla_tensor_t* mut_signal = (vsla_tensor_t*)signal;
-        vsla_tensor_t* mut_kernel = (vsla_tensor_t*)kernel;
-        
-        vsla_error_t err;
-        err = ensure_gpu_valid(out);
-        if (err == VSLA_SUCCESS) err = ensure_gpu_valid(mut_signal);
-        if (err == VSLA_SUCCESS) err = ensure_gpu_valid(mut_kernel);
-        
-        if (err == VSLA_SUCCESS) {
-            // Create GPU tensor wrappers and call GPU convolution
-            vsla_gpu_tensor_t gpu_out = {
-                .rank = out->rank, .dtype = out->dtype,
-                .shape = out->shape, .cap = out->cap,
-                .gpu_data = out->gpu_data
-            };
-            vsla_gpu_tensor_t gpu_signal = {
-                .rank = signal->rank, .dtype = signal->dtype,
-                .shape = signal->shape, .cap = signal->cap,
-                .gpu_data = mut_signal->gpu_data
-            };
-            vsla_gpu_tensor_t gpu_kernel = {
-                .rank = kernel->rank, .dtype = kernel->dtype,
-                .shape = kernel->shape, .cap = kernel->cap,
-                .gpu_data = mut_kernel->gpu_data
-            };
-            
-            err = vsla_gpu_conv_fft(&gpu_out, &gpu_signal, &gpu_kernel, ctx->gpu_ctx);
-            if (err == VSLA_SUCCESS) {
-                out->gpu_valid = true;
-                out->cpu_valid = false;
-                ctx->stats.gpu_operations++;
-                return VSLA_SUCCESS;
-            }
-        }
-#endif
-    }
-    
-    // Fall back to CPU
-    ensure_cpu_valid((vsla_tensor_t*)signal);
-    ensure_cpu_valid((vsla_tensor_t*)kernel);
-    ensure_cpu_valid(out);
-    
-    // Create CPU tensor wrappers
-    vsla_tensor_t cpu_out = {
-        .rank = out->rank, .model = out->model, .dtype = out->dtype,
-        .shape = out->shape, .cap = out->cap, .stride = out->stride,
-        .data = out->cpu_data
-    };
-    vsla_tensor_t cpu_signal = {
-        .rank = signal->rank, .model = signal->model, .dtype = signal->dtype,
-        .shape = signal->shape, .cap = signal->cap, .stride = signal->stride,
-        .data = ((vsla_tensor_t*)signal)->cpu_data
-    };
-    vsla_tensor_t cpu_kernel = {
-        .rank = kernel->rank, .model = kernel->model, .dtype = kernel->dtype,
-        .shape = kernel->shape, .cap = kernel->cap, .stride = kernel->stride,
-        .data = ((vsla_tensor_t*)kernel)->cpu_data
-    };
-    
-    vsla_error_t err;
-    if (use_fft) {
-        err = vsla_conv_fft(&cpu_out, &cpu_signal, &cpu_kernel);
-    } else {
-        err = vsla_conv_direct(&cpu_out, &cpu_signal, &cpu_kernel);
-    }
-    
-    if (err == VSLA_SUCCESS) {
-        out->cpu_valid = true;
-        out->gpu_valid = false;
-        ctx->stats.cpu_operations++;
-    }
-    
-    ctx->stats.total_operations++;
-    return err;
+    return ctx->active_backend->conv(ctx, out, signal, kernel);
+}
+
+vsla_error_t vsla_kron(vsla_context_t* ctx,
+                       vsla_tensor_t* out,
+                       const vsla_tensor_t* a,
+                       const vsla_tensor_t* b) {
+    if (!ctx || !out || !a || !b) return VSLA_ERROR_INVALID_ARGUMENT;
+    return ctx->active_backend->kron(ctx, out, a, b);
 }
 
 // === Performance and Statistics ===
-
-// === Additional Operations (Stubs) ===
-
-vsla_error_t vsla_fill(vsla_context_t* ctx, vsla_tensor_t* tensor, double value) {
-    if (!ctx || !tensor) return VSLA_ERROR_INVALID_ARGUMENT;
-    
-    ensure_cpu_valid(tensor);
-    
-    // Simple CPU implementation
-    size_t elements = 1;
-    for (uint8_t i = 0; i < tensor->rank; i++) {
-        elements *= tensor->shape[i];
-    }
-    
-    if (tensor->dtype == VSLA_DTYPE_F32) {
-        float* data = (float*)tensor->cpu_data;
-        for (size_t i = 0; i < elements; i++) {
-            data[i] = (float)value;
-        }
-    } else {
-        double* data = (double*)tensor->cpu_data;
-        for (size_t i = 0; i < elements; i++) {
-            data[i] = value;
-        }
-    }
-    
-    tensor->cpu_valid = true;
-    tensor->gpu_valid = false;
-    
-    return VSLA_SUCCESS;
-}
-
-vsla_error_t vsla_scale(vsla_context_t* ctx,
-                        vsla_tensor_t* out,
-                        const vsla_tensor_t* in,
-                        double scalar) {
-    if (!ctx || !out || !in) return VSLA_ERROR_INVALID_ARGUMENT;
-    
-    // Simple CPU implementation for now
-    ensure_cpu_valid((vsla_tensor_t*)in);
-    ensure_cpu_valid(out);
-    
-    size_t elements = 1;
-    for (uint8_t i = 0; i < in->rank; i++) {
-        elements *= in->shape[i];
-    }
-    
-    if (in->dtype == VSLA_DTYPE_F32) {
-        const float* in_data = (const float*)in->cpu_data;
-        float* out_data = (float*)out->cpu_data;
-        float scale_f = (float)scalar;
-        
-        for (size_t i = 0; i < elements; i++) {
-            out_data[i] = in_data[i] * scale_f;
-        }
-    } else {
-        const double* in_data = (const double*)in->cpu_data;
-        double* out_data = (double*)out->cpu_data;
-        
-        for (size_t i = 0; i < elements; i++) {
-            out_data[i] = in_data[i] * scalar;
-        }
-    }
-    
-    out->cpu_valid = true;
-    out->gpu_valid = false;
-    
-    return VSLA_SUCCESS;
-}
-
-vsla_backend_t vsla_recommend_backend(vsla_context_t* ctx,
-                                       const char* operation,
-                                       const vsla_tensor_t** inputs,
-                                       size_t input_count) {
-    if (!ctx || !operation || !inputs) return VSLA_BACKEND_CPU;
-    
-    // Simple heuristic: use GPU for large tensors
-    size_t total_elements = 0;
-    for (size_t i = 0; i < input_count; i++) {
-        if (inputs[i]) {
-            size_t elements = 1;
-            for (uint8_t j = 0; j < inputs[i]->rank; j++) {
-                elements *= inputs[i]->shape[j];
-            }
-            total_elements += elements;
-        }
-    }
-    
-    // Use GPU for operations on large tensors
-    if (total_elements > 1024 && ctx->active_backend == VSLA_BACKEND_CUDA) {
-        return VSLA_BACKEND_CUDA;
-    }
-    
-    return VSLA_BACKEND_CPU;
-}
-
-vsla_error_t vsla_tensor_get_info(const vsla_tensor_t* tensor,
-                                   uint8_t* rank,
-                                   const uint64_t** shape,
-                                   vsla_model_t* model,
-                                   vsla_dtype_t* dtype) {
-    if (!tensor) return VSLA_ERROR_INVALID_ARGUMENT;
-    
-    if (rank) *rank = tensor->rank;
-    if (shape) *shape = tensor->shape;
-    if (model) *model = tensor->model;
-    if (dtype) *dtype = tensor->dtype;
-    
-    return VSLA_SUCCESS;
-}
 
 vsla_error_t vsla_get_stats(const vsla_context_t* ctx, vsla_stats_t* stats) {
     if (!ctx || !stats) return VSLA_ERROR_INVALID_ARGUMENT;
@@ -750,7 +495,7 @@ vsla_error_t vsla_synchronize(vsla_context_t* ctx) {
     if (!ctx) return VSLA_ERROR_INVALID_ARGUMENT;
     
 #ifdef VSLA_ENABLE_CUDA
-    if (ctx->active_backend == VSLA_BACKEND_CUDA) {
+    if (ctx->active_backend_type == VSLA_BACKEND_CUDA) {
         cudaError_t err = cudaDeviceSynchronize();
         if (err != cudaSuccess) return VSLA_ERROR_GPU_FAILURE;
     }

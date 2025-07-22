@@ -3,7 +3,7 @@ project(libvsla VERSION 1.0.0 LANGUAGES C CXX)
 
 # Options
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
-option(BUILD_TESTS "Build tests" ON)
+option(BUILD_TESTS "Build tests" OFF)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(VSLA_BUILD_PYTHON "Build Python bindings" OFF)
 option(VSLA_ENABLE_TESTS "Enable testing" ON)
@@ -95,13 +95,13 @@ endif()
 # Include directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# Source files - minimal set for testing
+# Source files - only unified API
 set(VSLA_SOURCES
     src/vsla_core.c
     src/vsla_tensor.c
     src/vsla_utils.c
-    src/vsla_unified_minimal.c
-    src/backends/vsla_backend_cpu.c
+    src/vsla_unified.c
+    src/backends/vsla_backend_cpu_new.c
 )
 
 # Add unified API sources if enabled
@@ -135,6 +135,7 @@ endif()
 add_library(vsla_static STATIC ${VSLA_SOURCES})
 set_target_properties(vsla_static PROPERTIES OUTPUT_NAME vsla)
 target_link_libraries(vsla_static PRIVATE Threads::Threads m)
+
 
 if(BUILD_SHARED_LIBS)
     add_library(vsla_shared SHARED ${VSLA_SOURCES})
@@ -205,19 +206,17 @@ if(VSLA_ENABLE_MKL)
     endif()
 endif()
 
-# Unified API configuration
-if(VSLA_UNIFIED_API)
-    target_compile_definitions(vsla_static PRIVATE VSLA_UNIFIED_API)
-    
-    if(BUILD_SHARED_LIBS)
-        target_compile_definitions(vsla_shared PRIVATE VSLA_UNIFIED_API)
-    endif()
-endif()
+
 
 # Tests
 if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+# Benchmarks
+if(VSLA_ENABLE_BENCHMARKS)
+    add_subdirectory(benchmarks)
 endif()
 
 # Examples

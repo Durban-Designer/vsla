@@ -1,0 +1,151 @@
+{
+  "extraction_date": "2025-07-21T16:42:46.556888",
+  "total_sessions": 18,
+  "successful_extractions": 18,
+  "sessions": [
+    {
+      "session_id": null,
+      "start_timestamp": null,
+      "cwd": null,
+      "message_count": 47,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-Downloads/9cc4a4b0-cba8-4e56-b79f-80b730735150.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/unknown_None.md"
+    },
+    {
+      "session_id": "9dd861b1-71f8-41ee-bb93-7d3724bcb337",
+      "start_timestamp": "2025-07-16T19:51:19.374Z",
+      "cwd": "/home/kenth56/Downloads",
+      "message_count": 14,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-Downloads/9dd861b1-71f8-41ee-bb93-7d3724bcb337.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/20250716_195119_9dd861b1-71f8-41ee-bb93-7d3724bcb337.md"
+    },
+    {
+      "session_id": null,
+      "start_timestamp": null,
+      "cwd": null,
+      "message_count": 56,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/6dc88126-2048-43a9-b5c2-b9747d5a0301.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/unknown_None.md"
+    },
+    {
+      "session_id": null,
+      "start_timestamp": null,
+      "cwd": null,
+      "message_count": 4,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/c001d2c0-fa59-4098-9d96-e46afcfa1170.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/unknown_None.md"
+    },
+    {
+      "session_id": "da4409c0-22ff-4ced-95ce-96c5411830a9",
+      "start_timestamp": "2025-07-21T21:26:02.358Z",
+      "cwd": "/home/kenth56/vsla",
+      "message_count": 1163,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/da4409c0-22ff-4ced-95ce-96c5411830a9.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/20250721_212602_da4409c0-22ff-4ced-95ce-96c5411830a9.md"
+    },
+    {
+      "session_id": "225ffd67-c639-4b68-8a4f-7c147283a8d5",
+      "start_timestamp": "2025-07-16T01:05:43.602Z",
+      "cwd": "/home/kenth56/vsla",
+      "message_count": 1192,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/225ffd67-c639-4b68-8a4f-7c147283a8d5.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/20250716_010543_225ffd67-c639-4b68-8a4f-7c147283a8d5.md"
+    },
+    {
+      "session_id": null,
+      "start_timestamp": null,
+      "cwd": null,
+      "message_count": 52,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/e80aa543-6eff-4cb5-91e0-6d4e8e7951e9.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/unknown_None.md"
+    },
+    {
+      "session_id": "dc7e9081-a507-4c59-9c3b-f9b714e4a44c",
+      "start_timestamp": "2025-07-21T18:41:25.853Z",
+      "cwd": "/home/kenth56/vsla",
+      "message_count": 63,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/dc7e9081-a507-4c59-9c3b-f9b714e4a44c.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/20250721_184125_dc7e9081-a507-4c59-9c3b-f9b714e4a44c.md"
+    },
+    {
+      "session_id": null,
+      "start_timestamp": null,
+      "cwd": null,
+      "message_count": 613,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/9034225e-c367-4ab6-b1eb-1f478a7ae27a.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/unknown_None.md"
+    },
+    {
+      "session_id": "f67ab274-e83b-41ac-ac85-77488d6b5c28",
+      "start_timestamp": "2025-07-16T20:12:02.094Z",
+      "cwd": "/home/kenth56/vsla",
+      "message_count": 727,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/f67ab274-e83b-41ac-ac85-77488d6b5c28.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/20250716_201202_f67ab274-e83b-41ac-ac85-77488d6b5c28.md"
+    },
+    {
+      "session_id": null,
+      "start_timestamp": null,
+      "cwd": null,
+      "message_count": 805,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/de4c50ca-9c27-43e3-94d3-44007f7aea22.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/unknown_None.md"
+    },
+    {
+      "session_id": "0a725fb5-6378-432a-9e84-9f3f49d4043d",
+      "start_timestamp": "2025-07-20T03:51:20.360Z",
+      "cwd": "/home/kenth56/vsla",
+      "message_count": 609,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/0a725fb5-6378-432a-9e84-9f3f49d4043d.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/20250720_035120_0a725fb5-6378-432a-9e84-9f3f49d4043d.md"
+    },
+    {
+      "session_id": "5f8cbb78-38d3-47e9-9504-baa93bb166c9",
+      "start_timestamp": "2025-07-17T16:49:26.226Z",
+      "cwd": "/home/kenth56/vsla",
+      "message_count": 532,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/5f8cbb78-38d3-47e9-9504-baa93bb166c9.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/20250717_164926_5f8cbb78-38d3-47e9-9504-baa93bb166c9.md"
+    },
+    {
+      "session_id": "d7d349f9-c243-46e2-9a32-4a0eddfc634b",
+      "start_timestamp": "2025-07-17T20:42:54.081Z",
+      "cwd": "/home/kenth56/vsla",
+      "message_count": 241,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/d7d349f9-c243-46e2-9a32-4a0eddfc634b.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/20250717_204254_d7d349f9-c243-46e2-9a32-4a0eddfc634b.md"
+    },
+    {
+      "session_id": "9b92ce83-1981-4cdc-9f5d-7f66c4b10389",
+      "start_timestamp": "2025-07-16T20:11:06.548Z",
+      "cwd": "/home/kenth56/vsla",
+      "message_count": 5,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/9b92ce83-1981-4cdc-9f5d-7f66c4b10389.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/20250716_201106_9b92ce83-1981-4cdc-9f5d-7f66c4b10389.md"
+    },
+    {
+      "session_id": "2cba43de-c8d2-4a69-add8-9fae3ad93900",
+      "start_timestamp": "2025-07-19T00:27:59.564Z",
+      "cwd": "/home/kenth56/vsla",
+      "message_count": 28,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/2cba43de-c8d2-4a69-add8-9fae3ad93900.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/20250719_002759_2cba43de-c8d2-4a69-add8-9fae3ad93900.md"
+    },
+    {
+      "session_id": null,
+      "start_timestamp": null,
+      "cwd": null,
+      "message_count": 1711,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/0a8d5d51-8feb-4387-95b5-ca495ec8a734.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/unknown_None.md"
+    },
+    {
+      "session_id": null,
+      "start_timestamp": null,
+      "cwd": null,
+      "message_count": 64,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/069508a5-1193-487c-a9b5-a6f5f3ae4f98.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/unknown_None.md"
+    }
+  ]
+}

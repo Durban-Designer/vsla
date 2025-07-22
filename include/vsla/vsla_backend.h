@@ -42,37 +42,41 @@ struct vsla_backend_interface_s {
     vsla_backend_caps_t caps;
     
     /* Memory management */
-    vsla_error_t (*allocate)(vsla_tensor_t* tensor);
-    vsla_error_t (*deallocate)(vsla_tensor_t* tensor);
-    vsla_error_t (*copy_to_device)(vsla_tensor_t* tensor);
-    vsla_error_t (*copy_to_host)(vsla_tensor_t* tensor);
-    vsla_error_t (*synchronize)(void);
+    vsla_error_t (*allocate)(vsla_context_t* ctx, vsla_tensor_t* tensor);
+    vsla_error_t (*deallocate)(vsla_context_t* ctx, vsla_tensor_t* tensor);
+    vsla_error_t (*copy_to_device)(vsla_context_t* ctx, vsla_tensor_t* tensor);
+    vsla_error_t (*copy_to_host)(vsla_context_t* ctx, vsla_tensor_t* tensor);
+    vsla_error_t (*synchronize)(vsla_context_t* ctx);
     
     /* Basic arithmetic operations */
-    vsla_error_t (*add)(vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
-    vsla_error_t (*sub)(vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
-    vsla_error_t (*scale)(vsla_tensor_t* out, const vsla_tensor_t* tensor, double scalar);
-    vsla_error_t (*hadamard)(vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
-    vsla_error_t (*fill)(vsla_tensor_t* tensor, double value);
+    vsla_error_t (*add)(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
+    vsla_error_t (*sub)(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
+    vsla_error_t (*scale)(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* tensor, double scalar);
+    vsla_error_t (*hadamard)(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
+    vsla_error_t (*fill)(vsla_context_t* ctx, vsla_tensor_t* tensor, double value);
     
     /* Linear algebra operations */
-    vsla_error_t (*matmul)(vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
-    vsla_error_t (*transpose)(vsla_tensor_t* out, const vsla_tensor_t* tensor);
+    vsla_error_t (*matmul)(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
+    vsla_error_t (*transpose)(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* tensor);
     
     /* Tensor operations */
-    vsla_error_t (*reshape)(vsla_tensor_t* tensor, uint8_t new_rank, const uint64_t new_shape[]);
-    vsla_error_t (*broadcast)(vsla_tensor_t* out, const vsla_tensor_t* in);
+    vsla_error_t (*reshape)(vsla_context_t* ctx, vsla_tensor_t* tensor, uint8_t new_rank, const uint64_t new_shape[]);
+    vsla_error_t (*broadcast)(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* in);
     
     /* Reduction operations */
-    vsla_error_t (*sum)(const vsla_tensor_t* tensor, double* sum);
-    vsla_error_t (*mean)(const vsla_tensor_t* tensor, double* mean);
-    vsla_error_t (*norm)(const vsla_tensor_t* tensor, double* norm);
-    vsla_error_t (*max)(const vsla_tensor_t* tensor, double* max);
-    vsla_error_t (*min)(const vsla_tensor_t* tensor, double* min);
+    vsla_error_t (*sum)(vsla_context_t* ctx, const vsla_tensor_t* tensor, double* sum);
+    vsla_error_t (*mean)(vsla_context_t* ctx, const vsla_tensor_t* tensor, double* mean);
+    vsla_error_t (*norm)(vsla_context_t* ctx, const vsla_tensor_t* tensor, double* norm);
+    vsla_error_t (*max)(vsla_context_t* ctx, const vsla_tensor_t* tensor, double* max);
+    vsla_error_t (*min)(vsla_context_t* ctx, const vsla_tensor_t* tensor, double* min);
     
     /* Advanced operations */
-    vsla_error_t (*conv)(vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
-    vsla_error_t (*kron)(vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
+    vsla_error_t (*conv)(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
+    vsla_error_t (*kron)(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
+    
+    /* Structural operations */
+    vsla_error_t (*stack)(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* const* tensors, size_t k);
+    vsla_error_t (*shrink)(vsla_context_t* ctx, vsla_tensor_t* tensor);
     
     /* Backend lifecycle */
     vsla_error_t (*init)(void* config);

@@ -16,6 +16,9 @@
 #define VSLA_VERSION_PATCH 0
 #define VSLA_VERSION_STRING "1.0.0"
 
+// Maximum number of tensor dimensions (as per v3.1 spec)
+#define VSLA_MAX_RANK 16
+
 /**
  * @brief Error codes returned by VSLA functions
  */
@@ -34,6 +37,7 @@ typedef enum {
     VSLA_ERROR_FFT,
     VSLA_ERROR_INVALID_FILE,
     VSLA_ERROR_INCOMPATIBLE_MODELS,
+    VSLA_ERROR_INCOMPATIBLE_SHAPES,
     VSLA_ERROR_GPU_FAILURE,
     VSLA_ERROR_INVALID_STATE
 } vsla_error_t;

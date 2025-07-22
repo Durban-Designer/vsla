@@ -1,0 +1,500 @@
+{
+  "title": "VSLA v0.3 Paper Search",
+  "create_time": 1752948834.401394,
+  "update_time": 1752948843.028105,
+  "mapping": {
+    "bc0bfd88-c675-4516-b973-c47916ba4d4a": {
+      "id": "bc0bfd88-c675-4516-b973-c47916ba4d4a",
+      "message": null,
+      "parent": null,
+      "children": [
+        "471396aa-6a2d-41ac-9115-fed572d1d074"
+      ]
+    },
+    "471396aa-6a2d-41ac-9115-fed572d1d074": {
+      "id": "471396aa-6a2d-41ac-9115-fed572d1d074",
+      "message": {
+        "id": "471396aa-6a2d-41ac-9115-fed572d1d074",
+        "author": {
+          "role": "system",
+          "name": null,
+          "metadata": {}
+        },
+        "create_time": null,
+        "update_time": null,
+        "content": {
+          "content_type": "text",
+          "parts": [
+            ""
+          ]
+        },
+        "status": "finished_successfully",
+        "end_turn": true,
+        "weight": 0.0,
+        "metadata": {
+          "is_visually_hidden_from_conversation": true
+        },
+        "recipient": "all",
+        "channel": null
+      },
+      "parent": "bc0bfd88-c675-4516-b973-c47916ba4d4a",
+      "children": [
+        "a45327ac-9bb0-40f8-93f9-0586730267e8"
+      ]
+    },
+    "a45327ac-9bb0-40f8-93f9-0586730267e8": {
+      "id": "a45327ac-9bb0-40f8-93f9-0586730267e8",
+      "message": {
+        "id": "a45327ac-9bb0-40f8-93f9-0586730267e8",
+        "author": {
+          "role": "system",
+          "name": null,
+          "metadata": {}
+        },
+        "create_time": null,
+        "update_time": null,
+        "content": {
+          "content_type": "text",
+          "parts": [
+            ""
+          ]
+        },
+        "status": "finished_successfully",
+        "end_turn": true,
+        "weight": 0.0,
+        "metadata": {
+          "rebase_developer_message": true,
+          "is_visually_hidden_from_conversation": true
+        },
+        "recipient": "all",
+        "channel": null
+      },
+      "parent": "471396aa-6a2d-41ac-9115-fed572d1d074",
+      "children": [
+        "c039a5a3-4b02-49f7-8f8d-82c9532bc622"
+      ]
+    },
+    "c039a5a3-4b02-49f7-8f8d-82c9532bc622": {
+      "id": "c039a5a3-4b02-49f7-8f8d-82c9532bc622",
+      "message": {
+        "id": "c039a5a3-4b02-49f7-8f8d-82c9532bc622",
+        "author": {
+          "role": "system",
+          "name": null,
+          "metadata": {}
+        },
+        "create_time": null,
+        "update_time": null,
+        "content": {
+          "content_type": "text",
+          "parts": [
+            ""
+          ]
+        },
+        "status": "finished_successfully",
+        "end_turn": null,
+        "weight": 1.0,
+        "metadata": {
+          "is_contextual_answers_system_message": true,
+          "is_visually_hidden_from_conversation": true
+        },
+        "recipient": "all",
+        "channel": null
+      },
+      "parent": "a45327ac-9bb0-40f8-93f9-0586730267e8",
+      "children": [
+        "130d3b01-0fd3-4076-a8e4-aa5b3320c684"
+      ]
+    },
+    "130d3b01-0fd3-4076-a8e4-aa5b3320c684": {
+      "id": "130d3b01-0fd3-4076-a8e4-aa5b3320c684",
+      "message": {
+        "id": "130d3b01-0fd3-4076-a8e4-aa5b3320c684",
+        "author": {
+          "role": "user",
+          "name": null,
+          "metadata": {}
+        },
+        "create_time": 1752948833.991005,
+        "update_time": null,
+        "content": {
+          "content_type": "text",
+          "parts": [
+            "Are you able to access the most recent v0.3 VSLA paper from our recent chat?"
+          ]
+        },
+        "status": "finished_successfully",
+        "end_turn": null,
+        "weight": 1.0,
+        "metadata": {
+          "dictation": false,
+          "request_id": "961c3204fe042ff6-PHX",
+          "message_source": null,
+          "timestamp_": "absolute"
+        },
+        "recipient": "all",
+        "channel": null
+      },
+      "parent": "c039a5a3-4b02-49f7-8f8d-82c9532bc622",
+      "children": [
+        "b02ebb5c-935f-4a2c-90b8-3ff2ddf443ca"
+      ]
+    },
+    "b02ebb5c-935f-4a2c-90b8-3ff2ddf443ca": {
+      "id": "b02ebb5c-935f-4a2c-90b8-3ff2ddf443ca",
+      "message": {
+        "id": "b02ebb5c-935f-4a2c-90b8-3ff2ddf443ca",
+        "author": {
+          "role": "assistant",
+          "name": null,
+          "metadata": {}
+        },
+        "create_time": 1752948841.642628,
+        "update_time": null,
+        "content": {
+          "content_type": "model_editable_context",
+          "model_set_context": "",
+          "repository": null,
+          "repo_summary": null,
+          "structured_context": null
+        },
+        "status": "finished_successfully",
+        "end_turn": null,
+        "weight": 1.0,
+        "metadata": {
+          "request_id": "961c3204fe042ff6-PHX",
+          "message_type": "next",
+          "model_slug": "o3",
+          "default_model_slug": "o3",
+          "parent_id": "130d3b01-0fd3-4076-a8e4-aa5b3320c684",
+          "timestamp_": "absolute",
+          "model_switcher_deny": []
+        },
+        "recipient": "all",
+        "channel": null
+      },
+      "parent": "130d3b01-0fd3-4076-a8e4-aa5b3320c684",
+      "children": [
+        "71037113-a332-465e-88bc-7ba1fb71d4f5"
+      ]
+    },
+    "71037113-a332-465e-88bc-7ba1fb71d4f5": {
+      "id": "71037113-a332-465e-88bc-7ba1fb71d4f5",
+      "message": {
+        "id": "71037113-a332-465e-88bc-7ba1fb71d4f5",
+        "author": {
+          "role": "assistant",
+          "name": null,
+          "metadata": {}
+        },
+        "create_time": 1752948841.642888,
+        "update_time": null,
+        "content": {
+          "content_type": "thoughts",
+          "thoughts": [],
+          "source_analysis_msg_id": "c4c71312-5893-498f-9300-4a67a32a7e8a"
+        },
+        "status": "in_progress",
+        "end_turn": false,
+        "weight": 1.0,
+        "metadata": {
+          "reasoning_status": "is_reasoning",
+          "citations": [],
+          "content_references": [],
+          "request_id": "961c3204fe042ff6-PHX",
+          "message_type": "next",
+          "model_slug": "o3",
+          "default_model_slug": "o3",
+          "parent_id": "b02ebb5c-935f-4a2c-90b8-3ff2ddf443ca",
+          "timestamp_": "absolute",
+          "model_switcher_deny": []
+        },
+        "recipient": "all",
+        "channel": null
+      },
+      "parent": "b02ebb5c-935f-4a2c-90b8-3ff2ddf443ca",
+      "children": [
+        "3c5c1a36-89ef-49b2-b928-7d8efdbf6ead"
+      ]
+    },
+    "3c5c1a36-89ef-49b2-b928-7d8efdbf6ead": {
+      "id": "3c5c1a36-89ef-49b2-b928-7d8efdbf6ead",
+      "message": {
+        "id": "3c5c1a36-89ef-49b2-b928-7d8efdbf6ead",
+        "author": {
+          "role": "assistant",
+          "name": null,
+          "metadata": {}
+        },
+        "create_time": 1752948834.635628,
+        "update_time": null,
+        "content": {
+          "content_type": "code",
+          "language": "unknown",
+          "response_format_name": null,
+          "text": "{\"queries\":[\"+VSLA v0.3 paper --QDF=5\",\"+v0.3 VSLA --QDF=5\",\"VSLA version 0.3 paper --QDF=5\"],\"intent\":\"nav\"}"
+        },
+        "status": "finished_successfully",
+        "end_turn": false,
+        "weight": 1.0,
+        "metadata": {
+          "finish_details": {
+            "type": "stop",
+            "stop_tokens": [
+              200012
+            ]
+          },
+          "is_complete": true,
+          "citations": [],
+          "content_references": [],
+          "reasoning_status": "is_reasoning",
+          "is_visually_hidden_from_conversation": true,
+          "request_id": "961c3204fe042ff6-PHX",
+          "message_type": "next",
+          "model_slug": "o3",
+          "default_model_slug": "o3",
+          "parent_id": "71037113-a332-465e-88bc-7ba1fb71d4f5",
+          "timestamp_": "absolute",
+          "model_switcher_deny": []
+        },
+        "recipient": "file_search.msearch",
+        "channel": null
+      },
+      "parent": "71037113-a332-465e-88bc-7ba1fb71d4f5",
+      "children": [
+        "7f5cc50c-2851-48d0-bcc0-d473d2a3026c"
+      ]
+    },
+    "7f5cc50c-2851-48d0-bcc0-d473d2a3026c": {
+      "id": "7f5cc50c-2851-48d0-bcc0-d473d2a3026c",
+      "message": {
+        "id": "7f5cc50c-2851-48d0-bcc0-d473d2a3026c",
+        "author": {
+          "role": "tool",
+          "name": "file_search",
+          "metadata": {}
+        },
+        "create_time": 1752948841.64299,
+        "update_time": null,
+        "content": {
+          "content_type": "text",
+          "parts": [
+            ""
+          ]
+        },
+        "status": "finished_successfully",
+        "end_turn": null,
+        "weight": 1.0,
+        "metadata": {
+          "command": "spinner",
+          "status": "running",
+          "retrieval_search_sources": [
+            {
+              "product_type": "recording_knowledge",
+              "source_name": "recording_knowledge"
+            }
+          ],
+          "reasoning_status": "is_reasoning",
+          "is_visually_hidden_from_conversation": true,
+          "request_id": "961c3204fe042ff6-PHX",
+          "message_type": "next",
+          "model_slug": "o3",
+          "default_model_slug": "o3",
+          "parent_id": "3c5c1a36-89ef-49b2-b928-7d8efdbf6ead",
+          "timestamp_": "absolute"
+        },
+        "recipient": "all",
+        "channel": null
+      },
+      "parent": "3c5c1a36-89ef-49b2-b928-7d8efdbf6ead",
+      "children": [
+        "f4608b17-88a9-4937-8cd4-a42919ed8343"
+      ]
+    },
+    "f4608b17-88a9-4937-8cd4-a42919ed8343": {
+      "id": "f4608b17-88a9-4937-8cd4-a42919ed8343",
+      "message": {
+        "id": "f4608b17-88a9-4937-8cd4-a42919ed8343",
+        "author": {
+          "role": "tool",
+          "name": "file_search",
+          "metadata": {}
+        },
+        "create_time": 1752948841.643035,
+        "update_time": null,
+        "content": {
+          "content_type": "tether_browsing_display",
+          "result": "\nVisible: 0% - 100%",
+          "summary": null,
+          "assets": null,
+          "tether_id": null
+        },
+        "status": "finished_successfully",
+        "end_turn": null,
+        "weight": 1.0,
+        "metadata": {
+          "command": "msearch",
+          "cloud_doc_urls": [],
+          "retrieval_turn_number": 0,
+          "is_contextual_answers_supported": true,
+          "contextual_answers_available_sources": [
+            "recording_knowledge"
+          ],
+          "reasoning_status": "is_reasoning",
+          "is_visually_hidden_from_conversation": true,
+          "request_id": "961c3204fe042ff6-PHX",
+          "message_type": "next",
+          "model_slug": "o3",
+          "default_model_slug": "o3",
+          "parent_id": "7f5cc50c-2851-48d0-bcc0-d473d2a3026c",
+          "timestamp_": "absolute"
+        },
+        "recipient": "all",
+        "channel": null
+      },
+      "parent": "7f5cc50c-2851-48d0-bcc0-d473d2a3026c",
+      "children": [
+        "f094ec90-e9f1-4bd6-9591-32054c7f3af9"
+      ]
+    },
+    "f094ec90-e9f1-4bd6-9591-32054c7f3af9": {
+      "id": "f094ec90-e9f1-4bd6-9591-32054c7f3af9",
+      "message": {
+        "id": "f094ec90-e9f1-4bd6-9591-32054c7f3af9",
+        "author": {
+          "role": "tool",
+          "name": "file_search",
+          "metadata": {}
+        },
+        "create_time": 1752948841.643078,
+        "update_time": null,
+        "content": {
+          "content_type": "text",
+          "parts": [
+            "No search results matched your queries."
+          ]
+        },
+        "status": "finished_successfully",
+        "end_turn": null,
+        "weight": 1.0,
+        "metadata": {
+          "is_visually_hidden_from_conversation": true,
+          "command": "prompt",
+          "reasoning_status": "is_reasoning",
+          "request_id": "961c3204fe042ff6-PHX",
+          "message_type": "next",
+          "model_slug": "o3",
+          "default_model_slug": "o3",
+          "parent_id": "f4608b17-88a9-4937-8cd4-a42919ed8343",
+          "timestamp_": "absolute"
+        },
+        "recipient": "all",
+        "channel": null
+      },
+      "parent": "f4608b17-88a9-4937-8cd4-a42919ed8343",
+      "children": [
+        "cf388a93-3c45-4ea8-9d45-2a492abea5a6"
+      ]
+    },
+    "cf388a93-3c45-4ea8-9d45-2a492abea5a6": {
+      "id": "cf388a93-3c45-4ea8-9d45-2a492abea5a6",
+      "message": {
+        "id": "cf388a93-3c45-4ea8-9d45-2a492abea5a6",
+        "author": {
+          "role": "assistant",
+          "name": null,
+          "metadata": {}
+        },
+        "create_time": 1752948841.643125,
+        "update_time": null,
+        "content": {
+          "content_type": "reasoning_recap",
+          "content": "Thought for a few seconds"
+        },
+        "status": "finished_successfully",
+        "end_turn": false,
+        "weight": 1.0,
+        "metadata": {
+          "reasoning_status": "reasoning_ended",
+          "finished_duration_sec": 3,
+          "request_id": "961c3204fe042ff6-PHX",
+          "message_type": "next",
+          "model_slug": "o3",
+          "default_model_slug": "o3",
+          "parent_id": "f094ec90-e9f1-4bd6-9591-32054c7f3af9",
+          "timestamp_": "absolute",
+          "model_switcher_deny": []
+        },
+        "recipient": "all",
+        "channel": null
+      },
+      "parent": "f094ec90-e9f1-4bd6-9591-32054c7f3af9",
+      "children": [
+        "b9ea5727-2564-4789-86de-ab4aa8c55391"
+      ]
+    },
+    "b9ea5727-2564-4789-86de-ab4aa8c55391": {
+      "id": "b9ea5727-2564-4789-86de-ab4aa8c55391",
+      "message": {
+        "id": "b9ea5727-2564-4789-86de-ab4aa8c55391",
+        "author": {
+          "role": "assistant",
+          "name": null,
+          "metadata": {}
+        },
+        "create_time": 1752948837.461981,
+        "update_time": null,
+        "content": {
+          "content_type": "text",
+          "parts": [
+            "I tried searching your accessible recordings for variations of the title (queries used included “VSLA v0.3 paper”, “v0.3 VSLA”, and “VSLA version 0.3”), but nothing matching turned up—so I can’t currently access that document.\n\nA few possibilities / next steps:\n\n1. **It isn’t in the connected source** (only recording transcripts are searchable right now). If the paper lives in Google Drive / another repo that isn’t connected here, I won’t see it until that connector is set up or you paste / upload the content.\n2. **Different naming** – maybe the doc title doesn’t literally contain “v0.3” or “VSLA”. If you can give me:\n   - Exact (or approximate) title wording\n   - Any unique phrases in the abstract / first paragraph\n   - The date of the chat or meeting where we discussed it\n3. **You can paste or upload the text/PDF** (even partial) and I can work from that.\n4. **If you want me to keep looking**, let me know other keywords (e.g., project codename, author names, internal ticket IDs).\n\nLet me know how you’d like to proceed—provide more keywords, upload the doc, or clarify where it’s stored—and I’ll take the next step."
+          ]
+        },
+        "status": "finished_successfully",
+        "end_turn": true,
+        "weight": 1.0,
+        "metadata": {
+          "citations": [],
+          "content_references": [],
+          "request_id": "961c3204fe042ff6-PHX",
+          "message_type": "next",
+          "model_slug": "o3",
+          "default_model_slug": "o3",
+          "parent_id": "cf388a93-3c45-4ea8-9d45-2a492abea5a6",
+          "timestamp_": "absolute",
+          "model_switcher_deny": []
+        },
+        "recipient": "all",
+        "channel": "final"
+      },
+      "parent": "cf388a93-3c45-4ea8-9d45-2a492abea5a6",
+      "children": []
+    }
+  },
+  "moderation_results": [],
+  "current_node": "b9ea5727-2564-4789-86de-ab4aa8c55391",
+  "plugin_ids": null,
+  "conversation_id": "687be062-2808-8002-bf15-85e0a74f50c9",
+  "conversation_template_id": null,
+  "gizmo_id": null,
+  "gizmo_type": null,
+  "is_archived": false,
+  "is_starred": null,
+  "safe_urls": [
+    "https://www.youtube.com/watch?v=<video_id",
+    "https://docs.google.com/spreadsheets/d/1ONpTjQiCzfSkdNjfvkYl1fvGkv-yiraCiwCTlMSg9HE/edit?gid=0#gid=0",
+    "https://www.openai.com",
+    "https://docs.google.com/spreadsheets/d/1HmkfBJulhu50S6L9wuRsaVC9VL1LpbxpmgRzn33SxsQ/edit?gid=676408861#gid=676408861",
+    "https://docs.google.com/presentation/d/11n0Wjuik6jHQFe-gRLV2LOg7CQHGf-CM_JX0Y-Io_RI/edit#slide=id.g2ef8699e0eb_48_36",
+    "https://docs.google.com/document/d/1WF0NB9fnxhDPEi_arGSp18Kev9KXdoX-IePIE8KJgCQ/edit?tab=t.0#heading=h.e3mmf6q9l82j"
+  ],
+  "blocked_urls": [],
+  "default_model_slug": "o3",
+  "conversation_origin": null,
+  "voice": null,
+  "async_status": null,
+  "disabled_tool_ids": [],
+  "is_do_not_remember": false,
+  "memory_scope": "global_enabled",
+  "sugar_item_id": null
+}

@@ -42,12 +42,16 @@ dist/
 .Python
 .venv/
 venv/
+python/venv/
 ENV/
 env/
 lib/
-lib64
+lib64/
 bin/
 pyvenv.cfg
+.pytest_cache/
+.mypy_cache/
+.tox/
 
 # IDE files
 .vscode/

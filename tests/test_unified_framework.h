@@ -13,6 +13,7 @@
 #define VSLA_TEST_UNIFIED_FRAMEWORK_H
 
 #include <vsla/vsla.h>
+#include <vsla/vsla_unified.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -43,6 +44,7 @@ typedef struct {
 extern test_results_t g_test_results;
 extern test_config_t g_test_config;
 extern vsla_context_t* g_test_ctx;
+extern vsla_backend_t g_test_backend;
 
 /* Test macros */
 #define UNIFIED_TEST_INIT(backend) unified_test_framework_init(backend)

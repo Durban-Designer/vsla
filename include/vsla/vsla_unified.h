@@ -86,6 +86,16 @@ vsla_error_t vsla_max(vsla_context_t* ctx, const vsla_tensor_t* tensor, double* 
 vsla_error_t vsla_min(vsla_context_t* ctx, const vsla_tensor_t* tensor, double* result);
 vsla_error_t vsla_norm(vsla_context_t* ctx, const vsla_tensor_t* tensor, double* result);
 
+/* Structural operations */
+vsla_error_t vsla_stack(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* const* tensors, size_t k);
+vsla_error_t vsla_shrink(vsla_context_t* ctx, vsla_tensor_t* tensor);
+
+/* Window stacking structures and functions */
+typedef struct vsla_window_s vsla_window_t;
+vsla_window_t* vsla_window_create(vsla_context_t* ctx, size_t window_size, uint8_t rank, vsla_dtype_t dtype);
+void vsla_window_destroy(vsla_window_t* window);
+vsla_tensor_t* vsla_window_push(vsla_window_t* window, vsla_tensor_t* tensor);
+
 /* Synchronization */
 vsla_error_t vsla_synchronize(vsla_context_t* ctx);
 

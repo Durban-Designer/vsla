@@ -5,7 +5,7 @@
  */
 
 #include "vsla_backend_cuda_kernels.h"
-#include "vsla/vsla_gpu_types.h"
+#include "vsla/vsla_tensor_utils.h"
 #include <cuda_runtime.h>
 
 // CUDA error checking macro
@@ -28,15 +28,15 @@ vsla_error_t vsla_cuda_kernel_add(vsla_tensor_t* out, const vsla_tensor_t* a, co
         return VSLA_ERROR_DTYPE_MISMATCH;
     }
 
-    size_t n = vsla_tensor_get_num_elements(out);
-    double* d_out = (double*)out->gpu_data;
-    const double* d_a = (const double*)a->gpu_data;
-    const double* d_b = (const double*)b->gpu_data;
+    size_t n = vsla_tensor_numel(out);
+    double* d_out = (double*)vsla_tensor_get_gpu_data(out);
+    const double* d_a = (const double*)vsla_tensor_get_gpu_data(a);
+    const double* d_b = (const double*)vsla_tensor_get_gpu_data(b);
 
     size_t block_size = 256;
     size_t grid_size = (n + block_size - 1) / block_size;
 
-    add_kernel_f64<<<grid_size, block_size>>>((double*)d_out, (const double*)d_a, (const double*)d_b, n);
+    add_kernel_f64<<<grid_size, block_size>>>(d_out, d_a, d_b, n);
 
     CUDA_CHECK(cudaGetLastError());
     return VSLA_SUCCESS;
@@ -54,15 +54,15 @@ vsla_error_t vsla_cuda_kernel_sub(vsla_tensor_t* out, const vsla_tensor_t* a, co
         return VSLA_ERROR_DTYPE_MISMATCH;
     }
 
-    size_t n = vsla_tensor_get_num_elements(out);
-    double* d_out = (double*)out->gpu_data;
-    const double* d_a = (const double*)a->gpu_data;
-    const double* d_b = (const double*)b->gpu_data;
+    size_t n = vsla_tensor_numel(out);
+    double* d_out = (double*)vsla_tensor_get_gpu_data(out);
+    const double* d_a = (const double*)vsla_tensor_get_gpu_data(a);
+    const double* d_b = (const double*)vsla_tensor_get_gpu_data(b);
 
     size_t block_size = 256;
     size_t grid_size = (n + block_size - 1) / block_size;
 
-    sub_kernel_f64<<<grid_size, block_size>>>((double*)d_out, (const double*)d_a, (const double*)d_b, n);
+    sub_kernel_f64<<<grid_size, block_size>>>(d_out, d_a, d_b, n);
 
     CUDA_CHECK(cudaGetLastError());
     return VSLA_SUCCESS;
@@ -80,14 +80,14 @@ vsla_error_t vsla_cuda_kernel_scale(vsla_tensor_t* out, const vsla_tensor_t* in,
         return VSLA_ERROR_DTYPE_MISMATCH;
     }
 
-    size_t n = vsla_tensor_get_num_elements(out);
-    double* d_out = (double*)out->gpu_data;
-    const double* d_in = (const double*)in->gpu_data;
+    size_t n = vsla_tensor_numel(out);
+    double* d_out = (double*)vsla_tensor_get_gpu_data(out);
+    const double* d_in = (const double*)vsla_tensor_get_gpu_data(in);
 
     size_t block_size = 256;
     size_t grid_size = (n + block_size - 1) / block_size;
 
-    scale_kernel_f64<<<grid_size, block_size>>>((double*)d_out, (const double*)d_in, scalar, n);
+    scale_kernel_f64<<<grid_size, block_size>>>(d_out, d_in, scalar, n);
 
     CUDA_CHECK(cudaGetLastError());
     return VSLA_SUCCESS;
@@ -105,15 +105,15 @@ vsla_error_t vsla_cuda_kernel_hadamard(vsla_tensor_t* out, const vsla_tensor_t* 
         return VSLA_ERROR_DTYPE_MISMATCH;
     }
 
-    size_t n = vsla_tensor_get_num_elements(out);
-    double* d_out = (double*)out->gpu_data;
-    const double* d_a = (const double*)a->gpu_data;
-    const double* d_b = (const double*)b->gpu_data;
+    size_t n = vsla_tensor_numel(out);
+    double* d_out = (double*)vsla_tensor_get_gpu_data(out);
+    const double* d_a = (const double*)vsla_tensor_get_gpu_data(a);
+    const double* d_b = (const double*)vsla_tensor_get_gpu_data(b);
 
     size_t block_size = 256;
     size_t grid_size = (n + block_size - 1) / block_size;
 
-    hadamard_kernel_f64<<<grid_size, block_size>>>((double*)d_out, (const double*)d_a, (const double*)d_b, n);
+    hadamard_kernel_f64<<<grid_size, block_size>>>(d_out, d_a, d_b, n);
 
     CUDA_CHECK(cudaGetLastError());
     return VSLA_SUCCESS;
@@ -131,13 +131,13 @@ vsla_error_t vsla_cuda_kernel_fill(vsla_tensor_t* tensor, double value) {
         return VSLA_ERROR_DTYPE_MISMATCH;
     }
 
-    size_t n = vsla_tensor_get_num_elements(tensor);
-    double* d_out = (double*)tensor->gpu_data;
+    size_t n = vsla_tensor_numel(tensor);
+    double* d_out = (double*)vsla_tensor_get_gpu_data(tensor);
 
     size_t block_size = 256;
     size_t grid_size = (n + block_size - 1) / block_size;
 
-    fill_kernel_f64<<<grid_size, block_size>>>((double*)d_out, value, n);
+    fill_kernel_f64<<<grid_size, block_size>>>(d_out, value, n);
 
     CUDA_CHECK(cudaGetLastError());
     return VSLA_SUCCESS;
@@ -168,8 +168,8 @@ vsla_error_t vsla_cuda_kernel_sum(const vsla_tensor_t* tensor, double* result) {
         return VSLA_ERROR_DTYPE_MISMATCH;
     }
 
-    size_t n = vsla_tensor_get_num_elements(tensor);
-    const double* d_in = (const double*)tensor->gpu_data;
+    size_t n = vsla_tensor_numel(tensor);
+    const double* d_in = (const double*)vsla_tensor_get_gpu_data(tensor);
     double* d_out;
 
     CUDA_CHECK(cudaMalloc(&d_out, sizeof(double)));
@@ -178,7 +178,7 @@ vsla_error_t vsla_cuda_kernel_sum(const vsla_tensor_t* tensor, double* result) {
     size_t block_size = 256;
     size_t grid_size = (n + block_size - 1) / block_size;
 
-    sum_kernel_f64<<<grid_size, block_size, block_size * sizeof(double)>>>((const double*)d_in, d_out, n);
+    sum_kernel_f64<<<grid_size, block_size, block_size * sizeof(double)>>>(d_in, d_out, n);
 
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaMemcpy(result, d_out, sizeof(double), cudaMemcpyDeviceToHost));

@@ -1,0 +1,34 @@
+{
+  "integration_date": "2025-07-21T17:16:17.441938",
+  "source_files_processed": 14,
+  "source_files_failed": 0,
+  "total_conversations": 14,
+  "total_messages": 220,
+  "total_user_messages": 66,
+  "total_assistant_messages": 83,
+  "total_characters": 598623,
+  "date_range": {
+    "earliest": 1749620219.111063,
+    "latest": 1753140482.847328
+  },
+  "conversation_lengths": {
+    "short": 5,
+    "medium": 6,
+    "long": 3
+  },
+  "models_used": [
+    "unknown"
+  ],
+  "sample_titles": [
+    "Time Series Resolution Fusion",
+    "Stacking Operations Novelty Check",
+    "Peer Review Request",
+    "Commutative Semiring Proof",
+    "Semiring Models in Algebra",
+    "Semiring Proof Validation",
+    "Dynamic-Dimension Algebra Paper",
+    "Semi-Tensor Product Research",
+    "VSLA C Implementation Guide",
+    "Improving C Library Paper"
+  ]
+}

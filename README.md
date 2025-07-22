@@ -147,112 +147,91 @@ cmake .. && make -j$(nproc)
 int main() {
     // Initialize VSLA context with configuration
     vsla_config_t config = {
-        .backend = VSLA_BACKEND_AUTO,  // Automatically select best backend
-        .device_id = 0,
-        .memory_limit = 0,  // No limit
-        .optimization_hint = VSLA_HINT_NONE,
-        .enable_profiling = false,
-        .verbose = false
+        .backend_selection = VSLA_BACKEND_AUTO,  // Automatically select best backend
     };
     vsla_context_t* ctx = vsla_init(&config);
-    
+    if (!ctx) {
+        // Handle initialization error
+        return 1;
+    }
+
     // Create tensors with different shapes
     uint64_t shape1[] = {3};
     uint64_t shape2[] = {5};
-    
+
     vsla_tensor_t* a = vsla_tensor_create(ctx, 1, shape1, VSLA_MODEL_A, VSLA_DTYPE_F64);
     vsla_tensor_t* b = vsla_tensor_create(ctx, 1, shape2, VSLA_MODEL_A, VSLA_DTYPE_F64);
-    
-    // Fill with data
-    for (uint64_t i = 0; i < shape1[0]; i++) {
-        uint64_t idx = i;
-        vsla_set_f64(ctx, a, &idx, (double)(i + 1));
-    }
-    for (uint64_t i = 0; i < shape2[0]; i++) {
-        uint64_t idx = i;
-        vsla_set_f64(ctx, b, &idx, (double)(i + 1));
-    }
-    
+
+    // Fill with data (assuming a function to get direct data access)
+    // Note: A real implementation would use a vsla_tensor_set_data function
+    // or similar, which is not yet implemented.
+
     // Create output tensor for addition (automatically padded)
     uint64_t out_shape[] = {5}; // max(3, 5) = 5
     vsla_tensor_t* result = vsla_tensor_zeros(ctx, 1, out_shape, VSLA_MODEL_A, VSLA_DTYPE_F64);
-    
+
     // Perform variable-shape addition
-    vsla_add(ctx, result, a, b);  // [1,2,3,0,0] + [1,2,3,4,5] = [2,4,6,4,5]
-    
+    vsla_add(ctx, result, a, b);
+
     // Clean up
     vsla_tensor_free(a);
     vsla_tensor_free(b);
     vsla_tensor_free(result);
     vsla_cleanup(ctx);
-    
+
     return 0;
 }
 ```
 
 ## 📚 Core API
 
+### Context Management
+```c
+// Initialize the VSLA context
+vsla_context_t* vsla_init(const vsla_config_t* config);
+
+// Clean up the VSLA context
+void vsla_cleanup(vsla_context_t* ctx);
+```
+
 ### Tensor Creation
 ```c
-// Create new tensor
-vsla_tensor_t* vsla_new(uint8_t rank, const uint64_t shape[], 
-                        vsla_model_t model, vsla_dtype_t dtype);
+// Create a new tensor
+vsla_tensor_t* vsla_tensor_create(vsla_context_t* ctx, uint8_t rank, const uint64_t shape[],
+                                vsla_model_t model, vsla_dtype_t dtype);
 
-// Create zero/one tensors
-vsla_tensor_t* vsla_zeros(uint8_t rank, const uint64_t shape[], 
-                          vsla_model_t model, vsla_dtype_t dtype);
-vsla_tensor_t* vsla_ones(uint8_t rank, const uint64_t shape[], 
-                         vsla_model_t model, vsla_dtype_t dtype);
+// Create a tensor filled with zeros
+vsla_tensor_t* vsla_tensor_zeros(vsla_context_t* ctx, uint8_t rank, const uint64_t shape[],
+                                 vsla_model_t model, vsla_dtype_t dtype);
 
-// Semiring elements
-vsla_tensor_t* vsla_zero_element(vsla_model_t model, vsla_dtype_t dtype);
-vsla_tensor_t* vsla_one_element(vsla_model_t model, vsla_dtype_t dtype);
+// Create a tensor filled with ones
+vsla_tensor_t* vsla_tensor_ones(vsla_context_t* ctx, uint8_t rank, const uint64_t shape[],
+                                vsla_model_t model, vsla_dtype_t dtype);
 
-// Copy tensor
-vsla_tensor_t* vsla_copy(const vsla_tensor_t* tensor);
+// Create a copy of a tensor
+vsla_tensor_t* vsla_tensor_copy(vsla_context_t* ctx, const vsla_tensor_t* tensor);
 
-// Free memory
-void vsla_free(vsla_tensor_t* tensor);
+// Free a tensor
+void vsla_tensor_free(vsla_tensor_t* tensor);
 ```
 
 ### Data Access
 ```c
-// Type-safe value access
-vsla_error_t vsla_get_f64(const vsla_tensor_t* tensor, const uint64_t indices[], double* value);
-vsla_error_t vsla_set_f64(vsla_tensor_t* tensor, const uint64_t indices[], double value);
-
-// Fill tensor
-vsla_error_t vsla_fill(vsla_tensor_t* tensor, double value);
-
-// Get tensor properties
-uint64_t vsla_numel(const vsla_tensor_t* tensor);      // Number of elements
-uint64_t vsla_capacity(const vsla_tensor_t* tensor);   // Allocated capacity
-int vsla_shape_equal(const vsla_tensor_t* a, const vsla_tensor_t* b);
+// Get a pointer to the tensor's data
+// (Note: This is a simplified representation. The actual API may differ.)
+void* vsla_tensor_get_data(vsla_context_t* ctx, vsla_tensor_t* tensor);
 ```
 
 ### Variable-Shape Operations
 ```c
 // Element-wise operations (with automatic padding)
-vsla_error_t vsla_add(vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
-vsla_error_t vsla_sub(vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
-vsla_error_t vsla_scale(vsla_tensor_t* out, const vsla_tensor_t* tensor, double scalar);
+vsla_error_t vsla_add(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
+vsla_error_t vsla_sub(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
+vsla_error_t vsla_scale(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, double scalar);
 
-// Shape manipulation
-vsla_error_t vsla_pad_rank(vsla_tensor_t* tensor, uint8_t new_rank, const uint64_t target_cap[]);
-
-### Backend Discovery and Negotiation
-```c
-// Get the number of available backends
-int vsla_get_num_backends(void);
-
-// Get information about a backend
-vsla_error_t vsla_get_backend_info(int backend_index, const char** name_out, uint32_t* capabilities_out);
-
-// Initialize a backend
-vsla_error_t vsla_init_backend(int backend_index, vsla_backend_instance_t** instance_out);
-
-// Release a backend
-vsla_error_t vsla_release_backend(vsla_backend_instance_t* instance);
+// Convolution and Kronecker product
+vsla_error_t vsla_conv(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
+vsla_error_t vsla_kron(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
 ```
 
 ## 🧪 Testing
