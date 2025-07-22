@@ -1,0 +1,112 @@
+==180541== Memcheck, a memory error detector
+==180541== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==180541== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==180541== Command: ./build/tests/vsla_stacking_tests
+==180541== 
+🏗️  VSLA Stacking Operations Test Suite
+=======================================
+Testing Section 5: Structural Operators
+
+
+=== Testing Basic Stacking (Section 5.1) ===
+vsla_tensor_create called: ctx=0x4b6f080, rank=1, shape=0x1ffefffb38
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b6f080, rank=1, shape=0x1ffefffb38
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b6f080, rank=1, shape=0x1ffefffb38
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b6f080, rank=2, shape=0x1ffefffb50
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+✅ Basic stacking operation
+✅ Stacked shape [3,2]
+✅ Stacked values correct
+
+=== Testing Heterogeneous Stacking (Ambient Promotion) ===
+vsla_tensor_create called: ctx=0x4b6fb10, rank=1, shape=0x1ffefffb90
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b6fb10, rank=1, shape=0x1ffefffb98
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b6fb10, rank=1, shape=0x1ffefffba0
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b6fb10, rank=2, shape=0x1ffefffbb0
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+✅ Heterogeneous stacking operation
+✅ Ambient promotion values correct
+
+=== Testing Window Stacking (Section 5.2) ===
+✅ Window creation
+vsla_tensor_create called: ctx=0x4b70590, rank=1, shape=0x1ffefffbb0
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b70590, rank=1, shape=0x1ffefffbb0
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b70590, rank=1, shape=0x1ffefffbb0
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b70590, rank=1, shape=0x1ffefffbb0
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+✅ Window not full returns NULL
+vsla_tensor_create called: ctx=0x4b70590, rank=2, shape=0x1ffefffa80
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+✅ Window full returns stacked tensor
+✅ Window output shape [3,2]
+✅ Window stacked values correct
+✅ New window cycle returns NULL
+
+=== Testing Pyramid Stacking (Section 5.2) ===
+✅ Pyramid creation
+vsla_tensor_create called: ctx=0x4b71270, rank=1, shape=0x1ffefffb58
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b71270, rank=1, shape=0x1ffefffb58
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b71270, rank=1, shape=0x1ffefffb58
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b71270, rank=1, shape=0x1ffefffb58
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b71270, rank=1, shape=0x1ffefffb58
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b71270, rank=1, shape=0x1ffefffb58
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b71270, rank=1, shape=0x1ffefffb58
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b71270, rank=1, shape=0x1ffefffb58
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b71270, rank=2, shape=0x1ffefffa00
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b71270, rank=2, shape=0x1ffefffa00
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b71270, rank=3, shape=0x1ffefffa00
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+✅ Pyramid result has correct rank
+✅ Final pyramid shape [2,2,1]
+vsla_tensor_create called: ctx=0x4b71270, rank=2, shape=0x1ffefffa00
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b71270, rank=2, shape=0x1ffefffa00
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b71270, rank=3, shape=0x1ffefffa00
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+✅ Pyramid result has correct rank
+✅ Final pyramid shape [2,2,1]
+✅ Pyramid produces expected number of results
+✅ Pyramid flush operation
+
+=== Testing Empty Tensor Stacking ===
+vsla_tensor_create called: ctx=0x4b735b0, rank=1, shape=0x1ffefffb98
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b735b0, rank=1, shape=0x1ffefffba0
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+vsla_tensor_create called: ctx=0x4b735b0, rank=2, shape=0x1ffefffbc0
+Allocating on CPU, backend=0x113c60, allocate=0x110238
+✅ Empty tensor stacking
+✅ Empty tensor produces zeros in stack
+
+=======================================
+📊 Stacking Test Summary: 20/20 tests passed
+✅ All stacking tests passed! Section 5 implementation complete.
+==180541== 
+==180541== HEAP SUMMARY:
+==180541==     in use at exit: 0 bytes in 0 blocks
+==180541==   total heap usage: 164 allocs, 164 frees, 10,992 bytes allocated
+==180541== 
+==180541== All heap blocks were freed -- no leaks are possible
+==180541== 
+==180541== For lists of detected and suppressed errors, rerun with: -s
+==180541== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

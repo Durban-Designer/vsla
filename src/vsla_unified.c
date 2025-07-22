@@ -7,19 +7,34 @@
 
 #include "vsla/vsla_unified.h"
 #include "vsla/vsla_tensor.h"
-#include "vsla/vsla_tensor_internal.h"
-#include "vsla/vsla_gpu.h"
+#include "vsla/internal/vsla_tensor_internal.h"
+#ifdef VSLA_ENABLE_CUDA
+#include "vsla/internal/vsla_gpu.h"
+#endif
 #include "vsla/vsla_core.h"
-#include "vsla/vsla_backend.h"
-#include "vsla/vsla_backend_cpu.h"
+#include "vsla/internal/vsla_backend.h"
+#if VSLA_BUILD_CPU
+#include "vsla/internal/vsla_backend_cpu.h"
+#endif
+#include "vsla/internal/vsla_window.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <time.h>
+#include <stdio.h>
 
 #ifdef VSLA_ENABLE_CUDA
 #include <cuda_runtime.h>
 #endif
+
+// Forward declarations for CPU stacking functions - MODERN API WITH CONTEXT
+extern vsla_window_t* cpu_window_create(vsla_context_t* ctx, size_t window_size, uint8_t rank, vsla_dtype_t dtype);
+extern void cpu_window_destroy(vsla_window_t* window);
+extern vsla_tensor_t* cpu_window_push(vsla_window_t* window, vsla_tensor_t* tensor);
+extern vsla_pyramid_t* cpu_pyramid_create(vsla_context_t* ctx, size_t levels, size_t window_size, uint8_t rank, vsla_dtype_t dtype, bool discard_partials);
+extern void cpu_pyramid_destroy(vsla_pyramid_t* pyramid);
+extern vsla_tensor_t* cpu_pyramid_push(vsla_pyramid_t* pyramid, vsla_tensor_t* tensor);
+extern vsla_tensor_t** cpu_pyramid_flush(vsla_pyramid_t* pyramid, size_t* count);
 
 // Forward declarations for vendor FFT backends
 typedef struct {
@@ -105,11 +120,18 @@ static vsla_backend_t select_best_backend(const vsla_config_t* config) {
         return config->backend;
     }
     
-    // Auto-select based on availability
+    // Auto-select based on availability and what's compiled in
     if (detect_cuda()) return VSLA_BACKEND_CUDA;
     if (detect_rocm()) return VSLA_BACKEND_ROCM;
     if (detect_oneapi()) return VSLA_BACKEND_ONEAPI;
+    
+#if VSLA_BUILD_CPU
     return VSLA_BACKEND_CPU;
+#else
+    // If no backends are available, return CUDA as fallback
+    // (the init function will handle the error if CUDA isn't available)
+    return VSLA_BACKEND_CUDA;
+#endif
 }
 
 // === Context Management ===
@@ -139,18 +161,39 @@ vsla_context_t* vsla_init(const vsla_config_t* config) {
     ctx->active_backend_type = select_best_backend(&ctx->config);
 
     // Initialize backend function pointers
+    ctx->active_backend = NULL; // Initialize to NULL first
+    
     switch (ctx->active_backend_type) {
+#if VSLA_BUILD_CPU
         case VSLA_BACKEND_CPU:
             ctx->active_backend = vsla_backend_cpu_create();
             break;
+#endif
 #ifdef VSLA_ENABLE_CUDA
         case VSLA_BACKEND_CUDA:
             ctx->active_backend = vsla_backend_cuda_create();
             break;
 #endif
         default:
+            // Fallback logic: use the first available backend
+#if VSLA_BUILD_CPU
             ctx->active_backend = vsla_backend_cpu_create();
+            ctx->active_backend_type = VSLA_BACKEND_CPU;
+#elif defined(VSLA_ENABLE_CUDA)
+            ctx->active_backend = vsla_backend_cuda_create();
+            ctx->active_backend_type = VSLA_BACKEND_CUDA;
+#else
+            // No backends available - this is an error
+            free(ctx);
+            return NULL;
+#endif
             break;
+    }
+    
+    // Check if backend creation failed
+    if (!ctx->active_backend) {
+        free(ctx);
+        return NULL;
     }
     
     // Initialize GPU context if available
@@ -200,18 +243,20 @@ vsla_error_t vsla_get_runtime_info(const vsla_context_t* ctx,
     
     if (device_name) {
         switch (ctx->active_backend_type) {
+#if VSLA_BUILD_CPU
             case VSLA_BACKEND_CPU:
                 strcpy(device_name, "CPU");
                 break;
-            case VSLA_BACKEND_CUDA:
+#endif
 #ifdef VSLA_ENABLE_CUDA
+            case VSLA_BACKEND_CUDA:
                 // if (ctx->gpu_ctx) {
                 //     vsla_gpu_get_device_info(ctx->gpu_device_id, device_name, memory_gb);
                 //     return VSLA_SUCCESS;
                 // }
-#endif
                 strcpy(device_name, "CUDA (not initialized)");
                 break;
+#endif
             default:
                 strcpy(device_name, "Unknown");
         }
@@ -251,7 +296,14 @@ vsla_tensor_t* vsla_tensor_create(vsla_context_t* ctx,
                                    const uint64_t* shape,
                                    vsla_model_t model,
                                    vsla_dtype_t dtype) {
-    if (!ctx || !shape || rank == 0) return NULL;
+    printf("vsla_tensor_create called: ctx=%p, rank=%d, shape=%p\n", (void*)ctx, rank, (void*)shape);
+    fflush(stdout);
+    
+    if (!ctx || !shape || rank == 0) {
+        printf("vsla_tensor_create: invalid params\n");
+        fflush(stdout);
+        return NULL;
+    }
     
     vsla_tensor_t* tensor = calloc(1, sizeof(vsla_tensor_t));
     if (!tensor) return NULL;
@@ -260,6 +312,10 @@ vsla_tensor_t* vsla_tensor_create(vsla_context_t* ctx,
     tensor->rank = rank;
     tensor->model = model;
     tensor->dtype = dtype;
+    
+    // Initialize reference counting
+    tensor->ref_count = 1;        // Start with 1 reference
+    tensor->owns_data = true;     // By default, tensor owns its data
     
     // Allocate shape arrays
     size_t shape_size = rank * sizeof(uint64_t);
@@ -295,9 +351,54 @@ vsla_tensor_t* vsla_tensor_create(vsla_context_t* ctx,
 #endif
     }
     
+    if (!ctx->active_backend) {
+        printf("ERROR: No active backend!\n");
+        fflush(stdout);
+        free(tensor->shape);
+        free(tensor->cap);
+        free(tensor);
+        return NULL;
+    }
+
     if (!use_gpu) {
+        // Allocate stride array
+        tensor->stride = malloc(rank * sizeof(uint64_t));
+        if (!tensor->stride) {
+            free(tensor->shape);
+            free(tensor->cap);
+            free(tensor);
+            return NULL;
+        }
+        
+        // Calculate strides (row-major order)
+        size_t dtype_size = vsla_dtype_size(dtype);
+        tensor->stride[rank - 1] = dtype_size;
+        for (int i = rank - 2; i >= 0; i--) {
+            tensor->stride[i] = tensor->stride[i + 1] * tensor->cap[i + 1];
+        }
+        
         // Allocate on CPU
+        printf("Allocating on CPU, backend=%p, allocate=%p\n", 
+               (void*)ctx->active_backend, 
+               (void*)(ctx->active_backend ? ctx->active_backend->allocate : NULL));
+        fflush(stdout);
+        
+        if (!ctx->active_backend || !ctx->active_backend->allocate) {
+            printf("ERROR: No backend or allocate function!\n");
+            fflush(stdout);
+            free(tensor->shape);
+            free(tensor->cap);
+            free(tensor->stride);
+            free(tensor);
+            return NULL;
+        }
+        
         ctx->active_backend->allocate(ctx, tensor);
+        
+        // Ensure cpu_data points to data (for compatibility)
+        tensor->cpu_data = tensor->data;
+        tensor->cpu_valid = (tensor->data != NULL);
+        
         ctx->stats.cpu_operations++;
     }
     
@@ -306,27 +407,11 @@ vsla_tensor_t* vsla_tensor_create(vsla_context_t* ctx,
 }
 
 void vsla_tensor_free(vsla_tensor_t* tensor) {
-    if (!tensor) return;
-    
-    // free(tensor->cpu_data);
-#ifdef VSLA_ENABLE_CUDA
-    // if (tensor->gpu_data) {
-    //     cudaFree(tensor->gpu_data);
-    // }
-#endif
-    
-    free(tensor->shape);
-    free(tensor->cap);
-    free(tensor);
+    // Use reference counting system for memory management
+    vsla_tensor_release(tensor);
 }
 
 // === Data Access ===
-
-vsla_error_t vsla_tensor_copy_to_host(vsla_context_t* ctx, vsla_tensor_t* tensor) {
-    printf("Copying to host\n");
-    if (!ctx || !tensor) return VSLA_ERROR_INVALID_ARGUMENT;
-    return ctx->active_backend->copy_to_host(ctx, tensor);
-}
 
 static vsla_error_t ensure_cpu_valid(vsla_tensor_t* tensor) {
     if (!tensor) return VSLA_ERROR_INVALID_ARGUMENT;
@@ -385,6 +470,81 @@ static vsla_error_t ensure_gpu_valid(vsla_tensor_t* tensor) {
 #endif
     
     return VSLA_SUCCESS;
+}
+
+vsla_error_t vsla_get_f64(vsla_context_t* ctx, const vsla_tensor_t* tensor, const uint64_t indices[], double* value) {
+    if (!ctx || !tensor || !indices || !value) return VSLA_ERROR_INVALID_ARGUMENT;
+    
+    // Ensure data is available on CPU
+    vsla_tensor_t* mut_tensor = (vsla_tensor_t*)tensor;
+    if (ensure_cpu_valid(mut_tensor) != VSLA_SUCCESS) return VSLA_ERROR_MEMORY;
+    
+    // Calculate linear index
+    if (!tensor->cpu_data || !tensor->stride) return VSLA_ERROR_MEMORY;
+    
+    size_t linear_idx = 0;
+    for (uint8_t i = 0; i < tensor->rank; i++) {
+        if (indices[i] >= tensor->shape[i]) {
+            // Zero-extension for out-of-bounds access (VSLA semantics)
+            *value = 0.0;
+            return VSLA_SUCCESS;
+        }
+        linear_idx += indices[i] * (tensor->stride[i] / sizeof(double));
+    }
+    
+    // Extract value
+    if (tensor->dtype == VSLA_DTYPE_F64) {
+        double* data_ptr = (double*)tensor->cpu_data;
+        *value = data_ptr[linear_idx];
+    } else if (tensor->dtype == VSLA_DTYPE_F32) {
+        float* data_ptr = (float*)tensor->cpu_data;
+        *value = (double)data_ptr[linear_idx];
+    } else {
+        return VSLA_ERROR_INVALID_ARGUMENT;
+    }
+    
+    return VSLA_SUCCESS;
+}
+
+vsla_error_t vsla_set_f64(vsla_context_t* ctx, vsla_tensor_t* tensor, const uint64_t indices[], double value) {
+    if (!ctx || !tensor || !indices) return VSLA_ERROR_INVALID_ARGUMENT;
+    
+    // Ensure data is available on CPU
+    if (ensure_cpu_valid(tensor) != VSLA_SUCCESS) return VSLA_ERROR_MEMORY;
+    
+    // Calculate linear index
+    if (!tensor->cpu_data || !tensor->stride) return VSLA_ERROR_MEMORY;
+    
+    size_t linear_idx = 0;
+    for (uint8_t i = 0; i < tensor->rank; i++) {
+        if (indices[i] >= tensor->shape[i]) {
+            // Cannot set out-of-bounds values
+            return VSLA_ERROR_INVALID_ARGUMENT;
+        }
+        linear_idx += indices[i] * (tensor->stride[i] / sizeof(double));
+    }
+    
+    // Set value
+    if (tensor->dtype == VSLA_DTYPE_F64) {
+        double* data_ptr = (double*)tensor->cpu_data;
+        data_ptr[linear_idx] = value;
+    } else if (tensor->dtype == VSLA_DTYPE_F32) {
+        float* data_ptr = (float*)tensor->cpu_data;
+        data_ptr[linear_idx] = (float)value;
+    } else {
+        return VSLA_ERROR_INVALID_ARGUMENT;
+    }
+    
+    // Mark GPU data as invalid since CPU data was modified
+    tensor->gpu_valid = false;
+    
+    return VSLA_SUCCESS;
+}
+
+vsla_error_t vsla_tensor_copy_to_host(vsla_context_t* ctx, vsla_tensor_t* tensor) {
+    printf("Copying to host\n");
+    if (!ctx || !tensor) return VSLA_ERROR_INVALID_ARGUMENT;
+    return ctx->active_backend->copy_to_host(ctx, tensor);
 }
 
 const void* vsla_tensor_data(const vsla_tensor_t* tensor, size_t* size) {
@@ -478,6 +638,51 @@ vsla_error_t vsla_kron(vsla_context_t* ctx,
                        const vsla_tensor_t* b) {
     if (!ctx || !out || !a || !b) return VSLA_ERROR_INVALID_ARGUMENT;
     return ctx->active_backend->kron(ctx, out, a, b);
+}
+
+vsla_error_t vsla_shrink(vsla_context_t* ctx, vsla_tensor_t* tensor) {
+    if (!ctx || !tensor) return VSLA_ERROR_INVALID_ARGUMENT;
+    return ctx->active_backend->shrink(ctx, tensor);
+}
+
+vsla_error_t vsla_stack(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* const* tensors, size_t k) {
+    if (!ctx || !out || !tensors) return VSLA_ERROR_INVALID_ARGUMENT;
+    return ctx->active_backend->stack(ctx, out, tensors, k);
+}
+
+// === Window Stacking Functions ===
+
+vsla_window_t* vsla_window_create(vsla_context_t* ctx, size_t window_size, uint8_t rank, vsla_dtype_t dtype) {
+    if (!ctx) return NULL; // Context is REQUIRED for proper tensor creation
+    return cpu_window_create(ctx, window_size, rank, dtype);
+}
+
+void vsla_window_destroy(vsla_window_t* window) {
+    cpu_window_destroy(window);
+}
+
+vsla_tensor_t* vsla_window_push(vsla_window_t* window, vsla_tensor_t* tensor) {
+    if (!window || !window->ctx) return NULL; // Context must be available
+    return cpu_window_push(window, tensor);
+}
+
+// === Pyramid Stacking Functions ===
+
+vsla_pyramid_t* vsla_pyramid_create(vsla_context_t* ctx, size_t levels, size_t window_size, uint8_t rank, vsla_dtype_t dtype, bool discard_partials) {
+    if (!ctx) return NULL; // Context is REQUIRED for proper tensor creation
+    return cpu_pyramid_create(ctx, levels, window_size, rank, dtype, discard_partials);
+}
+
+void vsla_pyramid_destroy(vsla_pyramid_t* pyramid) {
+    cpu_pyramid_destroy(pyramid);
+}
+
+vsla_tensor_t* vsla_pyramid_push(vsla_pyramid_t* pyramid, vsla_tensor_t* tensor) {
+    return cpu_pyramid_push(pyramid, tensor);
+}
+
+vsla_tensor_t** vsla_pyramid_flush(vsla_pyramid_t* pyramid, size_t* count) {
+    return cpu_pyramid_flush(pyramid, count);
 }
 
 // === Performance and Statistics ===

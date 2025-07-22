@@ -5,9 +5,9 @@
  * @copyright MIT License
  */
 
-#include "vsla/vsla_backend.h"
+#include "vsla/internal/vsla_backend.h"
 #include "vsla/vsla_tensor.h"
-#include "vsla/vsla_tensor_internal.h"
+#include "vsla/internal/vsla_tensor_internal.h"
 #include "vsla/vsla_core.h"
 #include "cuda/vsla_backend_cuda_kernels.h"
 #include <stdlib.h>
@@ -24,16 +24,24 @@ static vsla_error_t cuda_allocate(vsla_context_t* ctx, vsla_tensor_t* tensor) {
     }
     size_t capacity_bytes = vsla_dtype_size(tensor->dtype);
     for (uint8_t i = 0; i < tensor->rank; ++i) {
-        capacity_bytes *= tensor->capacity[i];
+        capacity_bytes *= tensor->cap[i];
     }
     if (capacity_bytes == 0) {
-        tensor->data = NULL;
+        tensor->cpu_data = NULL;
+        tensor->gpu_data = NULL;
         return VSLA_SUCCESS;
     }
-    cudaError_t err = cudaMalloc(&tensor->data, capacity_bytes);
-    if (err != cudaSuccess) {
+    // Allocate both CPU and GPU memory
+    tensor->cpu_data = malloc(capacity_bytes);
+    if (!tensor->cpu_data) {
         return VSLA_ERROR_MEMORY;
     }
+    cudaError_t err = cudaMalloc(&tensor->gpu_data, capacity_bytes);
+    if (err != cudaSuccess) {
+        free(tensor->cpu_data);
+        return VSLA_ERROR_MEMORY;
+    }
+    tensor->data = tensor->cpu_data; // Keep `data` pointing to CPU memory for compatibility
     return VSLA_SUCCESS;
 }
 
@@ -41,41 +49,47 @@ static vsla_error_t cuda_deallocate(vsla_context_t* ctx, vsla_tensor_t* tensor) 
     if (!tensor) {
         return VSLA_ERROR_NULL_POINTER;
     }
-    if (tensor->data) {
-        cudaFree(tensor->data);
-        tensor->data = NULL;
+    if (tensor->cpu_data) {
+        free(tensor->cpu_data);
+        tensor->cpu_data = NULL;
     }
+    if (tensor->gpu_data) {
+        cudaFree(tensor->gpu_data);
+        tensor->gpu_data = NULL;
+    }
+    tensor->data = NULL;
     return VSLA_SUCCESS;
 }
 
 static vsla_error_t cuda_copy_to_device(vsla_context_t* ctx, vsla_tensor_t* tensor) {
-    if (!tensor) {
+    if (!tensor || !tensor->cpu_data || !tensor->gpu_data) {
         return VSLA_ERROR_NULL_POINTER;
     }
-    // This function is a no-op for the CUDA backend, as the data is already on the device.
+    size_t capacity_bytes = vsla_dtype_size(tensor->dtype);
+    for (uint8_t i = 0; i < tensor->rank; ++i) {
+        capacity_bytes *= tensor->cap[i];
+    }
+    cudaError_t err = cudaMemcpy(tensor->gpu_data, tensor->cpu_data, capacity_bytes, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess) {
+        return VSLA_ERROR_CUDA;
+    }
+    tensor->gpu_valid = true;
     return VSLA_SUCCESS;
 }
 
 static vsla_error_t cuda_copy_to_host(vsla_context_t* ctx, vsla_tensor_t* tensor) {
-    if (!tensor) {
+    if (!tensor || !tensor->cpu_data || !tensor->gpu_data) {
         return VSLA_ERROR_NULL_POINTER;
     }
-    size_t data_size = vsla_dtype_size(tensor->dtype);
+    size_t capacity_bytes = vsla_dtype_size(tensor->dtype);
     for (uint8_t i = 0; i < tensor->rank; ++i) {
-        data_size *= tensor->shape[i];
+        capacity_bytes *= tensor->cap[i];
     }
-    void* host_data = malloc(data_size);
-    if (!host_data) {
-        return VSLA_ERROR_MEMORY;
-    }
-    cudaError_t err = cudaMemcpy(host_data, tensor->data, data_size, cudaMemcpyDeviceToHost);
+    cudaError_t err = cudaMemcpy(tensor->cpu_data, tensor->gpu_data, capacity_bytes, cudaMemcpyDeviceToHost);
     if (err != cudaSuccess) {
-        free(host_data);
         return VSLA_ERROR_CUDA;
     }
-    // The tensor data pointer is now a CPU pointer.
-    // This is a simplification for the test, a real implementation would need to handle this better.
-    tensor->data = host_data;
+    tensor->cpu_valid = true;
     return VSLA_SUCCESS;
 }
 

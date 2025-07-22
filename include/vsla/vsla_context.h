@@ -9,7 +9,7 @@
 #define VSLA_CONTEXT_H
 
 #include "vsla_core.h"
-#include "vsla_backend.h"
+#include "internal/vsla_backend.h"
 
 #ifdef __cplusplus
 extern "C" {

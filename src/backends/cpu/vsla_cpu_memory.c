@@ -6,8 +6,8 @@
  * Based on Section 2 invariants and requirements
  */
 
-#include "vsla/vsla_backend.h"
-#include "vsla/vsla_tensor_internal.h"
+#include "vsla/internal/vsla_backend.h"
+#include "vsla/internal/vsla_tensor_internal.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -55,8 +55,10 @@ vsla_error_t cpu_allocate(vsla_tensor_t* tensor) {
     
     size_t total_bytes = capacity_elems * dtype_size;
     
-    // Allocate aligned memory for SIMD (Section 8 roadmap)
-    void* data = aligned_alloc(64, total_bytes);
+    // Allocate aligned memory for SIMD (Section 8 roadmap)  
+    // aligned_alloc requires size to be a multiple of alignment
+    size_t aligned_size = ((total_bytes + 63) / 64) * 64; // Round up to multiple of 64
+    void* data = aligned_alloc(64, aligned_size);
     if (!data) {
         return VSLA_ERROR_MEMORY;
     }

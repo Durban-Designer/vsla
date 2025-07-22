@@ -12,6 +12,8 @@
 #define ASSERT_DOUBLE_EQ(a, b, eps) assert(fabs((a) - (b)) < (eps))
 
 int test_backend_creation(void) {
+    printf("ENTERING: test_backend_creation\n");
+
     printf("Testing backend creation...\n");
     
     vsla_context_t* ctx = vsla_init(NULL);
@@ -30,6 +32,7 @@ int test_backend_creation(void) {
 }
 
 int test_tensor_operations(void) {
+    printf("ENTERING: test_tensor_operations\n");
     printf("Testing tensor operations...\n");
     
     vsla_context_t* ctx = vsla_init(NULL);
@@ -98,6 +101,7 @@ int test_tensor_operations(void) {
 }
 
 int test_backend_selection(void) {
+    printf("ENTERING: test_backend_selection\n");
     printf("Testing backend selection...\n");
     
     // Test CPU backend explicitly

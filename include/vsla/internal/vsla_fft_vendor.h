@@ -12,8 +12,8 @@
 #ifndef VSLA_FFT_VENDOR_H
 #define VSLA_FFT_VENDOR_H
 
-#include "vsla_core.h"
-#include "vsla_tensor.h"
+#include "../vsla_core.h"
+#include "../vsla_tensor.h"
 #include "vsla_gpu.h"
 #include <stdbool.h>
 #include <stddef.h>

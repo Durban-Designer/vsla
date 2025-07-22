@@ -28,7 +28,7 @@ set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG -march=native -ffast-math")
 set(CMAKE_C_FLAGS_DEBUG "-O0 -g -DDEBUG")
 
 # Link libraries for all benchmarks
-set(BENCHMARK_LIBS benchmark_utils vsla ${BLAS_LIBRARIES} m)
+set(BENCHMARK_LIBS benchmark_utils vsla_static ${BLAS_LIBRARIES} m)
 
 if(FFTW3_FOUND)
     list(APPEND BENCHMARK_LIBS ${FFTW3_LIBRARIES})
@@ -58,6 +58,18 @@ target_link_libraries(bench_comparison ${BENCHMARK_LIBS})
 # Fair comparison against established C libraries
 add_executable(bench_fair_comparison src/bench_fair_comparison.c src/benchmark_utils.c)
 target_link_libraries(bench_fair_comparison ${BENCHMARK_LIBS})
+
+# Enhanced comprehensive benchmark for real-world validation
+add_executable(enhanced_benchmark src/enhanced_benchmark.c src/benchmark_utils.c)
+target_link_libraries(enhanced_benchmark ${BENCHMARK_LIBS})
+
+# Quick benchmark for performance validation
+add_executable(quick_benchmark src/quick_benchmark.c src/benchmark_utils.c)
+target_link_libraries(quick_benchmark ${BENCHMARK_LIBS})
+
+# Minimal benchmark for basic validation
+add_executable(minimal_benchmark src/minimal_benchmark.c)
+target_link_libraries(minimal_benchmark vsla_static ${BLAS_LIBRARIES} m)
 
 # Master benchmark runner (TODO: implement)
 # add_executable(run_all_benchmarks src/run_all_benchmarks.c)

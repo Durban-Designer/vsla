@@ -8,7 +8,7 @@
 #ifndef VSLA_BACKEND_H
 #define VSLA_BACKEND_H
 
-#include "vsla_tensor.h"
+#include "../vsla_tensor.h"
 
 #ifdef __cplusplus
 extern "C" {

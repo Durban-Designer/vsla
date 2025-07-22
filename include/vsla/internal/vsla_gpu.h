@@ -12,9 +12,9 @@
 #ifndef VSLA_GPU_H
 #define VSLA_GPU_H
 
-#include "vsla/vsla_core.h"
-#include "vsla/vsla_tensor.h"
-#include "vsla/vsla_unified.h"
+#include "../vsla_core.h"
+#include "../vsla_tensor.h"
+#include "../vsla_unified.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus

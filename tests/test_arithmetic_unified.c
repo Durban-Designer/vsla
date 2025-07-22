@@ -29,11 +29,7 @@ void test_add_success(void) {
         ASSERT_SUCCESS(vsla_set_f64(g_test_ctx, b, &idx, (double)(i + 5)));
     }
 
-    if (g_test_backend == VSLA_BACKEND_CUDA) {
-        ASSERT_SUCCESS(vsla_tensor_copy_to_device(g_test_ctx, a));
-        ASSERT_SUCCESS(vsla_tensor_copy_to_device(g_test_ctx, b));
-        ASSERT_SUCCESS(vsla_tensor_copy_to_device(g_test_ctx, result));
-    }
+    
     
     /* Perform addition */
     ASSERT_SUCCESS(vsla_add(g_test_ctx, result, a, b));
@@ -294,19 +290,13 @@ void test_2d_operations(void) {
         }
     }
 
-    if (g_test_backend == VSLA_BACKEND_CUDA) {
-        ASSERT_SUCCESS(vsla_tensor_copy_to_device(g_test_ctx, a));
-        ASSERT_SUCCESS(vsla_tensor_copy_to_device(g_test_ctx, b));
-        ASSERT_SUCCESS(vsla_tensor_copy_to_device(g_test_ctx, result));
-    }
+    
     
     /* Test addition */
     ASSERT_SUCCESS(vsla_add(g_test_ctx, result, a, b));
     
     /* Verify results */
-    if (g_test_backend == VSLA_BACKEND_CUDA) {
-        ASSERT_SUCCESS(vsla_tensor_copy_to_host(g_test_ctx, result));
-    }
+    
     for (uint64_t i = 0; i < 2; i++) {
         for (uint64_t j = 0; j < 3; j++) {
             uint64_t indices[] = {i, j};

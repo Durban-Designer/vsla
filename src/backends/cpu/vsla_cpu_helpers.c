@@ -9,8 +9,8 @@
  * - Bounds checking
  */
 
-#include "vsla/vsla_backend.h"
-#include "vsla/vsla_tensor_internal.h"
+#include "vsla/internal/vsla_backend.h"
+#include "vsla/internal/vsla_tensor_internal.h"
 #include <stdint.h>
 #include <stdbool.h>
 

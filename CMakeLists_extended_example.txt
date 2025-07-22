@@ -1,0 +1,177 @@
+cmake_minimum_required(VERSION 3.18)
+project(vsla C CXX)  # CXX needed for some GPU backends
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)  # Modern GPU backends often need C++17+
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# --- Backend Build Options ---
+option(VSLA_BUILD_CPU "Build the CPU backend" ON)
+option(VSLA_BUILD_CUDA "Build the NVIDIA CUDA backend" ON)
+option(VSLA_BUILD_ROCM "Build the AMD ROCm backend" OFF)  # Default OFF - less common
+option(VSLA_BUILD_SYCL "Build the Intel oneAPI SYCL backend" OFF)
+option(VSLA_BUILD_METAL "Build the Apple Metal backend" OFF)
+option(VSLA_BUILD_OPENCL "Build the OpenCL backend" OFF)
+
+# --- Core Library Sources ---
+set(VSLA_CORE_SOURCES
+    src/vsla_core.c
+    src/vsla_tensor.c
+    src/vsla_unified.c
+)
+
+set(VSLA_ENABLED_BACKENDS "")
+
+# --- CPU Backend (Always Available) ---
+if(VSLA_BUILD_CPU)
+    list(APPEND VSLA_CORE_SOURCES src/backends/vsla_backend_cpu_new.c)
+    add_compile_definitions(VSLA_BUILD_CPU=1)
+    list(APPEND VSLA_ENABLED_BACKENDS "CPU")
+    message(STATUS "CPU backend enabled")
+endif()
+
+# --- NVIDIA CUDA Backend ---
+if(VSLA_BUILD_CUDA)
+    include(CheckLanguage)
+    check_language(CUDA)
+    
+    if(CMAKE_CUDA_COMPILER)
+        enable_language(CUDA)
+        set(CMAKE_CUDA_ARCHITECTURES native)  # Auto-detect GPU architecture
+        
+        find_package(CUDAToolkit)
+        if(CUDAToolkit_FOUND)
+            message(STATUS "NVIDIA CUDA backend enabled with native GPU architecture")
+            list(APPEND VSLA_CORE_SOURCES 
+                src/backends/vsla_backend_cuda.c 
+                src/backends/cuda/vsla_gpu.cu
+                src/backends/cuda/vsla_tensor_utils.c
+            )
+            add_compile_definitions(VSLA_BUILD_CUDA=1)
+            list(APPEND VSLA_ENABLED_BACKENDS "CUDA")
+            set(VSLA_HAS_CUDA TRUE)
+        else()
+            message(WARNING "CUDA compiler found but CUDAToolkit not found. CUDA backend disabled.")
+        endif()
+    else()
+        message(WARNING "VSLA_BUILD_CUDA is ON but CUDA compiler not found. CUDA backend disabled.")
+    endif()
+endif()
+
+# --- AMD ROCm Backend ---
+if(VSLA_BUILD_ROCM)
+    find_package(hip QUIET)
+    find_package(rocblas QUIET)
+    
+    if(hip_FOUND AND rocblas_FOUND)
+        enable_language(HIP)  # HIP is AMD's CUDA equivalent
+        message(STATUS "AMD ROCm backend enabled")
+        list(APPEND VSLA_CORE_SOURCES
+            src/backends/vsla_backend_rocm.cpp
+            src/backends/rocm/vsla_hip_kernels.hip
+            src/backends/rocm/vsla_rocm_utils.cpp
+        )
+        add_compile_definitions(VSLA_BUILD_ROCM=1)
+        list(APPEND VSLA_ENABLED_BACKENDS "ROCm")
+        set(VSLA_HAS_ROCM TRUE)
+    else()
+        message(WARNING "VSLA_BUILD_ROCM is ON but ROCm/HIP not found. ROCm backend disabled.")
+    endif()
+endif()
+
+# --- Intel oneAPI SYCL Backend ---
+if(VSLA_BUILD_SYCL)
+    find_package(IntelSYCL QUIET)
+    
+    if(IntelSYCL_FOUND)
+        message(STATUS "Intel oneAPI SYCL backend enabled")
+        list(APPEND VSLA_CORE_SOURCES
+            src/backends/vsla_backend_sycl.cpp
+            src/backends/sycl/vsla_sycl_kernels.cpp
+            src/backends/sycl/vsla_sycl_utils.cpp
+        )
+        add_compile_definitions(VSLA_BUILD_SYCL=1)
+        list(APPEND VSLA_ENABLED_BACKENDS "SYCL")
+        set(VSLA_HAS_SYCL TRUE)
+    else()
+        message(WARNING "VSLA_BUILD_SYCL is ON but Intel SYCL not found. SYCL backend disabled.")
+    endif()
+endif()
+
+# --- Apple Metal Backend ---
+if(VSLA_BUILD_METAL)
+    if(APPLE)
+        find_library(METAL_LIBRARY Metal REQUIRED)
+        find_library(METALKIT_LIBRARY MetalKit REQUIRED)
+        
+        message(STATUS "Apple Metal backend enabled")
+        list(APPEND VSLA_CORE_SOURCES
+            src/backends/vsla_backend_metal.mm  # Objective-C++
+            src/backends/metal/vsla_metal_kernels.metal
+            src/backends/metal/vsla_metal_utils.mm
+        )
+        add_compile_definitions(VSLA_BUILD_METAL=1)
+        list(APPEND VSLA_ENABLED_BACKENDS "Metal")
+        set(VSLA_HAS_METAL TRUE)
+    else()
+        message(WARNING "VSLA_BUILD_METAL is ON but not building on Apple platform. Metal backend disabled.")
+    endif()
+endif()
+
+# --- OpenCL Backend (Cross-platform fallback) ---
+if(VSLA_BUILD_OPENCL)
+    find_package(OpenCL QUIET)
+    
+    if(OpenCL_FOUND)
+        message(STATUS "OpenCL backend enabled (cross-platform GPU support)")
+        list(APPEND VSLA_CORE_SOURCES
+            src/backends/vsla_backend_opencl.cpp
+            src/backends/opencl/vsla_opencl_kernels.cl  # OpenCL kernels
+            src/backends/opencl/vsla_opencl_utils.cpp
+        )
+        add_compile_definitions(VSLA_BUILD_OPENCL=1)
+        list(APPEND VSLA_ENABLED_BACKENDS "OpenCL")
+        set(VSLA_HAS_OPENCL TRUE)
+    else()
+        message(WARNING "VSLA_BUILD_OPENCL is ON but OpenCL not found. OpenCL backend disabled.")
+    endif()
+endif()
+
+# --- VSLA Library Target ---
+add_library(vsla_static STATIC ${VSLA_CORE_SOURCES})
+target_include_directories(vsla_static PUBLIC include)
+
+# --- Backend-Specific Linking ---
+if(VSLA_HAS_CUDA)
+    target_link_libraries(vsla_static PRIVATE CUDA::cudart CUDA::cublas)
+endif()
+
+if(VSLA_HAS_ROCM)
+    target_link_libraries(vsla_static PRIVATE hip::host roc::rocblas)
+endif()
+
+if(VSLA_HAS_SYCL)
+    target_link_libraries(vsla_static PRIVATE IntelSYCL::SYCL_CXX)
+endif()
+
+if(VSLA_HAS_METAL)
+    target_link_libraries(vsla_static PRIVATE ${METAL_LIBRARY} ${METALKIT_LIBRARY})
+endif()
+
+if(VSLA_HAS_OPENCL)
+    target_link_libraries(vsla_static PRIVATE OpenCL::OpenCL)
+endif()
+
+# --- Summary ---
+list(JOIN VSLA_ENABLED_BACKENDS ", " BACKENDS_LIST)
+message(STATUS "VSLA enabled backends: ${BACKENDS_LIST}")
+
+# Tests and benchmarks
+enable_testing()
+add_subdirectory(tests)
+add_subdirectory(benchmarks)
+
+# Installation
+install(TARGETS vsla_static DESTINATION lib)
+install(DIRECTORY include/vsla DESTINATION include)

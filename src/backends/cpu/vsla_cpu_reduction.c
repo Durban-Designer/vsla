@@ -5,8 +5,8 @@
  * Implements reduction operations like sum, norm, etc.
  */
 
-#include "vsla/vsla_backend.h"
-#include "vsla/vsla_tensor_internal.h"
+#include "vsla/internal/vsla_backend.h"
+#include "vsla/internal/vsla_tensor_internal.h"
 #include <math.h>
 
 // Helper functions

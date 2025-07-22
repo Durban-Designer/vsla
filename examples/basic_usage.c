@@ -23,16 +23,16 @@ void print_tensor_data(vsla_context_t* ctx, const vsla_tensor_t* tensor, const c
         return;
     }
 
-    printf("%s (rank %u): [", name, vsla_tensor_get_rank(tensor));
+    printf("%s (rank %u): [", name, vsla_get_rank(tensor));
 
-    if (vsla_tensor_get_rank(tensor) == 1) {
-        const uint64_t* shape = vsla_tensor_get_shape(tensor);
+    if (vsla_get_rank(tensor) == 1) {
+        uint64_t shape[1];
+        vsla_get_shape(tensor, shape);
         for (uint64_t i = 0; i < shape[0]; i++) {
             double value;
-            // Note: vsla_get_f64 is not yet fully implemented, so this is a placeholder
-            // for how it would be used.
-            // vsla_get_f64(ctx, tensor, &i, &value);
-            // printf("%.1f", value);
+            uint64_t idx[] = {i};
+            vsla_get_f64(ctx, tensor, idx, &value);
+            printf("%.1f", value);
             if (i < shape[0] - 1) printf(", ");
         }
     } else {
@@ -47,7 +47,7 @@ int main() {
 
     // 1. Initialize VSLA context
     vsla_config_t config = {
-        .backend_selection = VSLA_BACKEND_AUTO,
+        .backend = VSLA_BACKEND_AUTO,
     };
     vsla_context_t* ctx = vsla_init(&config);
     if (!ctx) {
@@ -91,7 +91,7 @@ int main() {
     // VSLA will automatically pad tensor 'a' to the shape of 'result'
     vsla_error_t err = vsla_add(ctx, result, a, b);
     if (err != VSLA_SUCCESS) {
-        printf("Addition failed: %s\n", vsla_strerror(err));
+        printf("Addition failed: %s\n", vsla_error_string(err));
     } else {
         printf("Performed variable-shape addition.\n");
     }

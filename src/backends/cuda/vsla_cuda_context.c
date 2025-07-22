@@ -5,7 +5,7 @@
  * @copyright MIT License
  */
 
-#include "vsla/vsla_gpu.h"
+#include "vsla/internal/vsla_gpu.h"
 #include "vsla/vsla_core.h"
 #include "vsla/vsla_tensor.h"
 #include <stdio.h>

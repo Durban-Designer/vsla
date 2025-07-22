@@ -11,8 +11,8 @@
 #ifndef VSLA_TENSOR_INTERNAL_H
 #define VSLA_TENSOR_INTERNAL_H
 
-#include "vsla_core.h"
-#include "vsla_tensor.h"
+#include "../vsla_core.h"
+#include "../vsla_tensor.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -50,6 +50,10 @@ struct vsla_tensor {
     /* Memory management */
     size_t data_size;                /**< Total allocated size in bytes */
     size_t alignment;                /**< Memory alignment requirement */
+    
+    /* Reference counting */
+    int32_t ref_count;               /**< Reference count (atomic operations recommended) */
+    bool owns_data;                  /**< True if tensor owns its data memory */
     
     /* Context reference - compatibility */
     void* ctx;                       /**< Context pointer (for compatibility) */
@@ -106,6 +110,20 @@ bool vsla_indices_valid(const vsla_tensor_t* tensor, const uint64_t indices[]);
  * @brief Copy tensor metadata (shape, model, dtype) without data
  */
 vsla_error_t vsla_copy_metadata(vsla_tensor_t* dst, const vsla_tensor_t* src);
+
+/**
+ * @brief Increment tensor reference count (thread-safe)
+ * @param tensor Tensor to retain
+ * @return Same tensor pointer for convenience
+ */
+vsla_tensor_t* vsla_tensor_retain(vsla_tensor_t* tensor);
+
+/**
+ * @brief Decrement tensor reference count and free if zero (thread-safe)
+ * @param tensor Tensor to release
+ * @return VSLA_SUCCESS on success
+ */
+vsla_error_t vsla_tensor_release(vsla_tensor_t* tensor);
 
 #ifdef __cplusplus
 }

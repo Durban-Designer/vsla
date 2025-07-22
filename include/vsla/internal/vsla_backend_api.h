@@ -8,7 +8,7 @@
 #ifndef VSLA_BACKEND_API_H
 #define VSLA_BACKEND_API_H
 
-#include "vsla_core.h"
+#include "../vsla_core.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -8,10 +8,15 @@
  * - Pyramid stacking functionality
  */
 
-#include "vsla/vsla_backend.h"
-#include "vsla/vsla_tensor_internal.h"
+#include "vsla/internal/vsla_backend.h"
+#include "vsla/internal/vsla_tensor_internal.h"
+#include "vsla/internal/vsla_window.h"
 #include <stdlib.h>
 #include <string.h>
+
+// Ensure we have access to reference counting functions
+extern vsla_tensor_t* vsla_tensor_retain(vsla_tensor_t* tensor);
+extern vsla_error_t vsla_tensor_release(vsla_tensor_t* tensor);
 
 // Helper functions
 extern bool vsla_is_empty(const vsla_tensor_t* t);
@@ -62,7 +67,7 @@ vsla_error_t cpu_stack(vsla_tensor_t* out, const vsla_tensor_t* const* tensors, 
     for (size_t i = 0; i < k; i++) {
         if (tensors[i]) {
             if (tensors[i]->rank != base_rank) {
-                return VSLA_ERROR_RANK;
+                return VSLA_ERROR_INVALID_RANK;
             }
             if (tensors[i]->dtype != dtype) {
                 return VSLA_ERROR_INVALID_DTYPE;
@@ -106,18 +111,32 @@ vsla_error_t cpu_stack(vsla_tensor_t* out, const vsla_tensor_t* const* tensors, 
         total_capacity *= out->cap[j];
     }
     
-    // Allocate and zero-initialize output
+    // Calculate required memory size
     size_t dtype_size = vsla_dtype_size(dtype);
     if (mul_ov(total_capacity, dtype_size)) {
         return VSLA_ERROR_OVERFLOW;
     }
     
     size_t total_bytes = total_capacity * dtype_size;
-    out->data = aligned_alloc(64, total_bytes);
-    if (!out->data) {
-        return VSLA_ERROR_MEMORY;
+    
+    // Check if we need to reallocate memory
+    if (!out->data || out->data_size < total_bytes) {
+        // Free existing memory if it exists
+        if (out->data) {
+            free(out->data);
+        }
+        
+        // aligned_alloc requires size to be a multiple of alignment
+        size_t aligned_size = ((total_bytes + 63) / 64) * 64; // Round up to multiple of 64
+        out->data = aligned_alloc(64, aligned_size);
+        if (!out->data) {
+            return VSLA_ERROR_MEMORY;
+        }
+        out->data_size = total_bytes;
+        out->cpu_data = out->data;  // Ensure cpu_data points to the same memory
     }
-    out->data_size = total_bytes;
+    
+    // Zero-initialize the memory
     memset(out->data, 0, total_bytes);
     
     // Copy each input tensor into its corresponding slice
@@ -180,10 +199,10 @@ vsla_error_t cpu_stack(vsla_tensor_t* out, const vsla_tensor_t* const* tensors, 
 }
 
 /**
- * @brief Create a new window for stacking
+ * @brief Create a new window for stacking - MODERN API WITH CONTEXT
  */
-vsla_window_t* cpu_window_create(size_t window_size, uint8_t rank, vsla_dtype_t dtype) {
-    if (window_size == 0 || rank == 0) {
+vsla_window_t* cpu_window_create(vsla_context_t* ctx, size_t window_size, uint8_t rank, vsla_dtype_t dtype) {
+    if (!ctx || window_size == 0 || rank == 0) {
         return NULL;
     }
     
@@ -202,6 +221,7 @@ vsla_window_t* cpu_window_create(size_t window_size, uint8_t rank, vsla_dtype_t 
     window->window_size = window_size;
     window->base_rank = rank;
     window->dtype = dtype;
+    window->ctx = ctx;  // Store context for unified tensor creation!
     
     return window;
 }
@@ -212,11 +232,10 @@ vsla_window_t* cpu_window_create(size_t window_size, uint8_t rank, vsla_dtype_t 
 void cpu_window_destroy(vsla_window_t* window) {
     if (!window) return;
     
-    // Release any remaining tensors
+    // Release any remaining tensors using reference counting
     for (size_t i = 0; i < window->fill; i++) {
         if (window->buf[i]) {
-            // Note: This would call vsla_release if we had reference counting
-            // For now, we assume caller manages tensor lifetime
+            vsla_tensor_release(window->buf[i]);
         }
     }
     
@@ -239,13 +258,31 @@ vsla_tensor_t* cpu_window_push(vsla_window_t* window, vsla_tensor_t* tensor) {
         return NULL;
     }
     
-    // Add tensor to buffer (would do vsla_retain if we had reference counting)
-    window->buf[window->fill++] = tensor;
+    // Add tensor to buffer and retain reference since we're storing a pointer to it
+    window->buf[window->fill++] = vsla_tensor_retain(tensor);
     
     // Check if window is full
     if (window->fill == window->window_size) {
-        // Create output tensor for stacking
-        vsla_tensor_t* result = malloc(sizeof(vsla_tensor_t));
+        // Determine output shape: (window_size, max_shape[0], max_shape[1], ...)
+        uint64_t max_shape[VSLA_MAX_RANK];
+        for (int j = 0; j < window->base_rank; j++) {
+            max_shape[j] = 0;
+            for (size_t i = 0; i < window->window_size; i++) {
+                if (window->buf[i] && window->buf[i]->shape[j] > max_shape[j]) {
+                    max_shape[j] = window->buf[i]->shape[j];
+                }
+            }
+        }
+        
+        uint64_t out_shape[VSLA_MAX_RANK];
+        out_shape[0] = window->window_size;
+        for (int j = 0; j < window->base_rank; j++) {
+            out_shape[j + 1] = max_shape[j];
+        }
+        
+        // MODERN UNIFIED API - Use proper tensor creation!
+        // This eliminates dual creation methods and ensures correctness
+        vsla_tensor_t* result = vsla_tensor_create(window->ctx, window->base_rank + 1, out_shape, VSLA_MODEL_A, window->dtype);
         if (!result) {
             return NULL;
         }
@@ -253,11 +290,18 @@ vsla_tensor_t* cpu_window_push(vsla_window_t* window, vsla_tensor_t* tensor) {
         // Stack all tensors in the window
         vsla_error_t err = cpu_stack(result, (const vsla_tensor_t* const*)window->buf, window->window_size);
         if (err != VSLA_SUCCESS) {
-            free(result);
+            // Use reference counting system for cleanup
+            vsla_tensor_release(result);
             return NULL;
         }
         
-        // Reset window for next batch (would do vsla_release if we had reference counting)
+        // Release all tensors from the window buffer before resetting
+        for (size_t i = 0; i < window->window_size; i++) {
+            if (window->buf[i]) {
+                vsla_tensor_release(window->buf[i]);
+                window->buf[i] = NULL;
+            }
+        }
         window->fill = 0;
         
         return result;
@@ -266,17 +310,184 @@ vsla_tensor_t* cpu_window_push(vsla_window_t* window, vsla_tensor_t* tensor) {
     return NULL; // Window not full yet
 }
 
-// Platform-specific aligned allocation fallback (if not already defined)
-#ifdef _WIN32
-#include <malloc.h>
-static void* aligned_alloc(size_t alignment, size_t size) {
-    return _aligned_malloc(size, alignment);
+// === Pyramid Stacking Implementation (Section 5.2) ===
+
+/**
+ * @brief Create a pyramid with L levels of windows - MODERN API WITH CONTEXT
+ * 
+ * Following spec: "A pyramid is an array windows[L]; feed results recursively upward"
+ */
+vsla_pyramid_t* cpu_pyramid_create(vsla_context_t* ctx, size_t levels, size_t window_size, uint8_t rank, vsla_dtype_t dtype, bool discard_partials) {
+    if (!ctx || levels == 0 || window_size == 0 || rank == 0) {
+        return NULL;
+    }
+    
+    vsla_pyramid_t* pyramid = malloc(sizeof(vsla_pyramid_t));
+    if (!pyramid) {
+        return NULL;
+    }
+    
+    pyramid->windows = calloc(levels, sizeof(vsla_window_t*));
+    if (!pyramid->windows) {
+        free(pyramid);
+        return NULL;
+    }
+    
+    // Create windows for each level
+    // Level 0: base rank, Level 1: rank+1, Level 2: rank+2, etc.
+    for (size_t level = 0; level < levels; level++) {
+        uint8_t level_rank = rank + level;  // Each level increases rank by 1
+        pyramid->windows[level] = cpu_window_create(ctx, window_size, level_rank, dtype);
+        if (!pyramid->windows[level]) {
+            // Cleanup on failure
+            for (size_t j = 0; j < level; j++) {
+                cpu_window_destroy(pyramid->windows[j]);
+            }
+            free(pyramid->windows);
+            free(pyramid);
+            return NULL;
+        }
+    }
+    
+    pyramid->levels = levels;
+    pyramid->window_size = window_size;
+    pyramid->base_rank = rank;
+    pyramid->dtype = dtype;
+    pyramid->discard_partials = discard_partials;
+    
+    return pyramid;
 }
-#elif !defined(__STDC_VERSION__) || __STDC_VERSION__ < 201112L
-#include <unistd.h>
-static void* aligned_alloc(size_t alignment, size_t size) {
-    void* ptr = NULL;
-    int result = posix_memalign(&ptr, alignment, size);
-    return (result == 0) ? ptr : NULL;
+
+/**
+ * @brief Destroy pyramid and all its windows
+ */
+void cpu_pyramid_destroy(vsla_pyramid_t* pyramid) {
+    if (!pyramid) return;
+    
+    if (pyramid->windows) {
+        for (size_t i = 0; i < pyramid->levels; i++) {
+            cpu_window_destroy(pyramid->windows[i]);
+        }
+        free(pyramid->windows);
+    }
+    
+    free(pyramid);
 }
-#endif
+
+/**
+ * @brief Push tensor through pyramid levels recursively
+ * 
+ * Returns final output tensor if it emerges from top level, NULL otherwise
+ */
+vsla_tensor_t* cpu_pyramid_push(vsla_pyramid_t* pyramid, vsla_tensor_t* tensor) {
+    if (!pyramid || !tensor) {
+        return NULL;
+    }
+    
+    // Validate input tensor
+    if (tensor->rank != pyramid->base_rank || tensor->dtype != pyramid->dtype) {
+        return NULL;
+    }
+    
+    vsla_tensor_t* current = tensor;
+    
+    // Feed through each level of the pyramid
+    for (size_t level = 0; level < pyramid->levels; level++) {
+        if (!current) {
+            break; // No tensor to feed to this level
+        }
+        
+        // Push tensor to current level window
+        vsla_tensor_t* result = cpu_window_push(pyramid->windows[level], current);
+        
+        // If we got a result from a previous level, release our reference to it
+        // (except for the original input tensor which we don't own)
+        if (current != tensor) {
+            // Now that we have reference counting, properly release intermediate tensors
+            vsla_tensor_release(current);
+        }
+        
+        current = result; // Result becomes input for next level
+    }
+    
+    // Return final result (may be NULL if no tensor emerged from top)
+    return current;
+}
+
+/**
+ * @brief Flush pyramid by forcing partial windows to emit
+ * 
+ * Returns array of tensors from all levels with partial data
+ * Caller must free the returned array and manage tensor lifetimes
+ */
+vsla_tensor_t** cpu_pyramid_flush(vsla_pyramid_t* pyramid, size_t* count) {
+    if (!pyramid || !count) {
+        return NULL;
+    }
+    
+    *count = 0;
+    
+    if (pyramid->discard_partials) {
+        // Discard policy: just reset all windows without emitting
+        for (size_t level = 0; level < pyramid->levels; level++) {
+            pyramid->windows[level]->fill = 0;
+        }
+        return NULL;
+    }
+    
+    // Pad policy: create tensors from partial windows
+    vsla_tensor_t** results = malloc(pyramid->levels * sizeof(vsla_tensor_t*));
+    if (!results) {
+        return NULL;
+    }
+    
+    size_t result_count = 0;
+    
+    for (size_t level = 0; level < pyramid->levels; level++) {
+        vsla_window_t* window = pyramid->windows[level];
+        
+        if (window->fill > 0) {
+            // Calculate output shape for the partial window stack
+            uint64_t max_shape[VSLA_MAX_RANK];
+            for (int j = 0; j < window->base_rank; j++) {
+                max_shape[j] = 0;
+                for (size_t i = 0; i < window->fill; i++) {
+                    if (window->buf[i] && window->buf[i]->shape[j] > max_shape[j]) {
+                        max_shape[j] = window->buf[i]->shape[j];
+                    }
+                }
+            }
+            
+            uint64_t out_shape[VSLA_MAX_RANK];
+            out_shape[0] = window->fill;
+            for (int j = 0; j < window->base_rank; j++) {
+                out_shape[j + 1] = max_shape[j];
+            }
+            
+            // MODERN UNIFIED API - Use proper tensor creation with context!
+            vsla_tensor_t* result = vsla_tensor_create(window->ctx, window->base_rank + 1, out_shape, VSLA_MODEL_A, window->dtype);
+            if (result) {
+                // Stack the partial window (remaining slots are effectively zero)
+                vsla_error_t err = cpu_stack(result, (const vsla_tensor_t* const*)window->buf, window->fill);
+                if (err == VSLA_SUCCESS) {
+                    results[result_count++] = result;
+                } else {
+                    vsla_tensor_free(result);
+                }
+            }
+            
+            // Reset window
+            window->fill = 0;
+        }
+    }
+    
+    *count = result_count;
+    
+    if (result_count == 0) {
+        free(results);
+        return NULL;
+    }
+    
+    return results;
+}
+

@@ -8,11 +8,15 @@
 #ifndef VSLA_BACKEND_CPU_H
 #define VSLA_BACKEND_CPU_H
 
-#include "vsla/vsla_tensor.h"
+#include "../vsla_tensor.h"
+#include "vsla_backend.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// Backend creation function
+vsla_backend_interface_t* vsla_backend_cpu_create(void);
 
 vsla_error_t vsla_cpu_add(vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
 vsla_error_t vsla_cpu_sub(vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);

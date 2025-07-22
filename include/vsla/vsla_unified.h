@@ -10,8 +10,8 @@
 
 #include "vsla_core.h"
 #include "vsla_tensor.h"
-#include "vsla_backend.h"
 #include "vsla_context.h"
+#include "internal/vsla_backend.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -95,6 +95,13 @@ typedef struct vsla_window_s vsla_window_t;
 vsla_window_t* vsla_window_create(vsla_context_t* ctx, size_t window_size, uint8_t rank, vsla_dtype_t dtype);
 void vsla_window_destroy(vsla_window_t* window);
 vsla_tensor_t* vsla_window_push(vsla_window_t* window, vsla_tensor_t* tensor);
+
+/* Pyramid stacking structures and functions */
+typedef struct vsla_pyramid_s vsla_pyramid_t;
+vsla_pyramid_t* vsla_pyramid_create(vsla_context_t* ctx, size_t levels, size_t window_size, uint8_t rank, vsla_dtype_t dtype, bool discard_partials);
+void vsla_pyramid_destroy(vsla_pyramid_t* pyramid);
+vsla_tensor_t* vsla_pyramid_push(vsla_pyramid_t* pyramid, vsla_tensor_t* tensor);
+vsla_tensor_t** vsla_pyramid_flush(vsla_pyramid_t* pyramid, size_t* count);
 
 /* Synchronization */
 vsla_error_t vsla_synchronize(vsla_context_t* ctx);

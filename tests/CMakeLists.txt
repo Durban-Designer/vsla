@@ -30,3 +30,13 @@ add_test(NAME UnifiedTests_Auto_Verbose COMMAND unified_tests --backend auto --v
 
 add_test(NAME UnifiedTests_CUDA COMMAND unified_tests --backend cuda)
 add_test(NAME UnifiedTests_CUDA_Verbose COMMAND unified_tests --backend cuda --verbose)
+
+# VSLA specification validation tests
+add_executable(vsla_spec_tests test_vsla_spec_validation.c)
+target_link_libraries(vsla_spec_tests PRIVATE vsla_static m)
+add_test(NAME VSLASpecTests COMMAND vsla_spec_tests)
+
+# VSLA stacking operations tests
+add_executable(vsla_stacking_tests test_stacking_comprehensive.c)
+target_link_libraries(vsla_stacking_tests PRIVATE vsla_static m)
+add_test(NAME VSLAStackingTests COMMAND vsla_stacking_tests)

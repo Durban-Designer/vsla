@@ -6,7 +6,7 @@
  * Replaces the old implementation with proper VSLA semantics.
  */
 
-#include "vsla/vsla_backend.h"
+#include "vsla/internal/vsla_backend.h"
 #include "vsla/vsla_unified.h"
 
 /* Include CPU backend implementation files */
