@@ -11,7 +11,7 @@
 % --------------------------------------------------------------------
 %  Title information
 % --------------------------------------------------------------------
-\title{Variable‑Shape Linear Algebra: Mathematical Foundations and High-Performance Implementation}
+\title{Variable‑Shape Linear Algebra: Mathematical Foundations for Rigorous Variable-Dimension Computing}
 \author{Royce Birnbaum}
 \date{July 19, 2025}
 
@@ -23,7 +23,7 @@
 %  Abstract
 % ================================================================
 \begin{abstract}
-Variable‑Shape Linear Algebra (VSLA) treats dimension as intrinsic data, enabling automatic shape promotion while preserving algebraic structure. This paper formalizes VSLA through equivalence classes of finite‑dimensional vectors and develops two complete semiring instantiations: convolution and Kronecker products. We introduce the stacking operator $\Stack$ that builds higher-rank tensors from variable-shape collections, forming tensor pyramids for streaming applications. The mathematical foundation builds on classical polynomial ring theory and formal power series \cite{VonZurGathenGerhard2013}, while the dual semiring approach extends traditional matrix algebra \cite{HornJohnson2012,GondranMinoux2008}. While Cheng's Semi-Tensor Product (STP) first generalized matrix products for mismatched dimensions \cite{Cheng2001}, VSLA offers a distinct, complementary approach founded on equivalence classes and dual semiring models, leading to a sparse-by-design memory model. Complexity analysis shows FFT convolution preserves $\mathcal{O}(mn d_{\max} \log d_{\max})$ efficiency using established fast multiplication algorithms \cite{CooleyTukey1965}. Unlike existing ragged tensor frameworks \cite{TF2024,PyTorch2023,NestedTensorPyTorch2022}, VSLA provides mathematically rigorous structures with provable algebraic identities, enabling principled computation for adaptive AI architectures, sensor fusion, and scientific computing.
+Variable‑Shape Linear Algebra (VSLA) treats dimension as intrinsic data, enabling automatic shape promotion while preserving algebraic structure. This paper formalizes VSLA through equivalence classes of finite‑dimensional vectors and develops two complete semiring instantiations: convolution and Kronecker products. We introduce the stacking operator $\Stack$ that builds higher-rank tensors from variable-shape collections, forming tensor pyramids for streaming applications. The mathematical foundation builds on classical polynomial ring theory and formal power series \cite{VonZurGathenGerhard2013}, while the dual semiring approach extends traditional matrix algebra \cite{HornJohnson2012,GondranMinoux2008}. While Cheng's Semi-Tensor Product (STP) first generalized matrix products for mismatched dimensions \cite{Cheng2001}, VSLA offers a distinct, complementary approach founded on equivalence classes and dual semiring models. \textbf{Important Limitation:} Theoretical $\mathcal{O}(mn d_{\max} \log d_{\max})$ complexity for FFT-based convolution assumes relatively uniform dimensions; extreme heterogeneity (e.g., dimensions varying 1000×) degrades performance severely. \textbf{Performance claims are not validated} - empirical comparison against PyTorch NestedTensors and TensorFlow RaggedTensors remains future work. This formalism is suited for applications prioritizing mathematical correctness over raw performance: theorem proving, symbolic computation, and research requiring guaranteed algebraic properties.
 \end{abstract}
 
 \vspace{0.5em}

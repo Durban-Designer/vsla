@@ -1,0 +1,13 @@
+{
+  "benchmark_timestamp": "2025-07-24 12:18:44",
+  "system_info": {
+    "torch_available": true,
+    "torch_version": "2.7.1+cpu",
+    "nested_tensor_available": true,
+    "vsla_available": true,
+    "cpu_threads": 1
+  },
+  "benchmark_results": {},
+  "memory_profiles": {},
+  "conclusions": []
+}

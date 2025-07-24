@@ -1,587 +1,112 @@
-# VSLA: Variable-Shape Linear Algebra
+# VSLA - Variable-Shape Linear Algebra (ARCHIVED)
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/username/vsla)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![C17](https://img.shields.io/badge/C-17-blue.svg)](https://en.wikipedia.org/wiki/C17_(C_standard_revision))
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
+**⚠️ PROJECT ARCHIVED ⚠️**
 
-**The first mathematically rigorous framework for variable-shape tensor operations - available for both C and Python developers.**
+This project has been archived due to insurmountable fundamental performance barriers. See [ARCHIVAL_SUMMARY.md](ARCHIVAL_SUMMARY.md) for detailed analysis of why VSLA failed.
 
-VSLA eliminates zero-padding overhead through principled variable-shape computation with formal mathematical guarantees. Unlike traditional frameworks that require manual padding, VSLA natively handles tensors of different shapes through automatic ambient promotion - proven to achieve 30-60% efficiency improvements in real-world scenarios.
+## Quick Summary
 
-## 🚀 Quick Start (Python)
+Variable-Shape Linear Algebra (VSLA) attempted to create a mathematically rigorous framework for tensor operations with variable dimensions. While the mathematical framework is sound and elegant, practical performance barriers make it unviable:
 
-**For Python developers - zero C knowledge required:**
+- **10-100× slower** than PyTorch/TensorFlow due to compiler optimization barriers  
+- **Memory model paradox:** gradient pre-allocation defeats claimed memory benefits
+- **Framework integration overhead:** 113-247% conversion costs make real-world use impractical
+- **d_max heterogeneity problem:** real-world variable-shape data exhibits pathological dimension variance
 
-```python
-import vsla
-import numpy as np
+## What's Here
 
-# Traditional NumPy requires manual padding
-a = np.array([1.0, 2.0, 3.0])  # shape (3,)
-b = np.array([4.0, 5.0])       # shape (2,) - can't add directly!
+This repository contains a complete record of the research project:
 
-# VSLA handles variable shapes natively  
-a = vsla.Tensor([1.0, 2.0, 3.0])  # shape (3,)
-b = vsla.Tensor([4.0, 5.0])       # shape (2,)
-c = a + b                         # Works! → [5.0, 7.0, 3.0]
-```
+### 📚 **Documentation**
+- [`ARCHIVAL_SUMMARY.md`](ARCHIVAL_SUMMARY.md) - Why VSLA failed and lessons learned
+- [`RESEARCH_LESSONS_LEARNED.md`](RESEARCH_LESSONS_LEARNED.md) - Methodology lessons for future research
+- [`HONEST_PERFORMANCE_ANALYSIS.md`](docs/HONEST_PERFORMANCE_ANALYSIS.md) - Detailed performance analysis
+- [`docs/vsla_spec_v_4.4.md`](docs/vsla_spec_v_4.4.md) - Complete mathematical specification
 
-**📦 Installation:** `pip install -e python/` (from repo root)  
-**📚 Full guide:** [PYTHON_QUICKSTART.md](PYTHON_QUICKSTART.md)  
-**🧪 Examples:** [python/examples/](python/examples/)  
-**⚡ Benchmarks:** [python/benchmarks/](python/benchmarks/)
+### 🔬 **Academic Paper**
+- [`docs/papers/vsla_paper_v0.60_honest_limitations.pdf`](docs/papers/vsla_paper_v0.60_honest_limitations.pdf) - Academically honest paper documenting the mathematical framework and its limitations
+
+### 💻 **Implementation**
+- [`src/`](src/) - Complete C implementation with CPU/CUDA backends
+- [`python/`](python/) - Python bindings and benchmarking infrastructure
+- [`benchmarks/`](benchmarks/) - Comprehensive benchmark suite
+- [`examples/`](examples/) - Usage examples and demonstrations
+
+### 📊 **Benchmarking Results**
+- [`python/benchmarks/`](python/benchmarks/) - PyTorch vs VSLA comparison infrastructure
+- [`bench/`](bench/) - C benchmark results showing poor performance
+- Measured performance: 1 GFLOPS (VSLA) vs 50-200 GFLOPS (expected PyTorch)
+
+## Research Value
+
+While VSLA failed as a practical system, it has significant research and educational value:
+
+### ✅ **Mathematical Contributions**
+- Novel equivalence class formalization for variable-shape tensors
+- Dual semiring framework with provable algebraic properties  
+- Stacking operators for tensor composition
+- Complete formal specification
+
+### ✅ **Implementation Achievement**
+- 70% complete C library with working CPU/CUDA backends
+- Comprehensive Python bindings
+- Statistical benchmarking infrastructure
+- Real working code demonstrating the mathematical concepts
+
+### ✅ **Research Methodology Lessons**
+- Example of how theoretical elegance can conflict with practical performance
+- Case study in the importance of early empirical validation
+- Demonstration of honest academic assessment after recognizing failure
+- Valuable lessons for systems research methodology
+
+## For Researchers and Students
+
+This project serves as an educational example of:
+
+1. **Ambitious systems research** that tackles fundamental abstractions
+2. **Mathematical rigor** in specification and implementation  
+3. **Honest academic assessment** when projects don't work as intended
+4. **Research methodology lessons** about theory vs practice
+5. **Complete project documentation** including failures and lessons learned
+
+## What Not to Do
+
+**Do not attempt to continue this research direction.** The fundamental barriers are:
+
+- Compiler optimization barriers that cannot be overcome
+- Hardware designed for regular, dense operations
+- Ecosystem integration costs that exceed any theoretical benefits
+- Real-world data patterns that destroy theoretical advantages
+
+## Better Approaches
+
+Instead of general-purpose variable-shape frameworks, consider:
+
+- **Domain-specific sparse kernels** (e.g., sparse transformers with Flash Attention)
+- **Hardware co-design** for specific sparse patterns
+- **Approximation algorithms** that maintain regular structure
+- **Compilation approaches** that generate optimized kernels for specific patterns
+
+## Archival Status
+
+**Date Archived:** 2025-07-24  
+**Reason:** Fundamental performance barriers insurmountable  
+**Recommendation:** Do not continue this research direction  
+**Value:** High educational and research methodology value
+
+## License
+
+MIT License - Feel free to use this code for educational purposes, research into variable-shape mathematics, or as an example of comprehensive project documentation.
+
+## Acknowledgments
+
+- **Critical peer reviewer:** Provided harsh but accurate assessment that forced honest evaluation
+- **Mathematical foundations:** Built on solid theoretical computer science principles
+- **Implementation effort:** Substantial engineering work created a working system
+- **Research community:** For maintaining standards of academic honesty
 
 ---
 
-## 🎯 Core Concepts
+**"Not all research succeeds, but all research teaches. VSLA taught us the importance of practical validation alongside theoretical development."**
 
-VSLA provides mathematically rigorous variable-shape computation through:
-
-- **Equivalence Classes**: Tensors `(d₁,v) ~ (d₂,w)` are equivalent after ambient promotion
-- **Dual Semiring Models**:
-  - **Model A**: Convolution semiring with FFT acceleration for signal processing
-  - **Model B**: Kronecker semiring for tensor networks and quantum computing
-- **Automatic Ambient Promotion**: Operations between different-shaped tensors handled automatically
-- **Memory Efficiency**: 30-60% improvements by eliminating zero-padding overhead
-
-## 📁 Project Structure
-
-```
-vsla/
-├── src/               # Core library implementation
-├── include/vsla/      # Public header files
-├── tests/             # Comprehensive test suite
-├── bench/             # Performance benchmarks
-├── docs/              # Documentation and papers
-├── python/            # Python bindings
-├── examples/          # Usage examples
-├── CMakeLists.txt     # Build configuration
-├── pyproject.toml     # Python packaging
-├── cibuildwheel.toml  # CI wheel building
-├── CITATION.cff       # Citation information
-├── LICENSE            # MIT license
-├── README.md          # This file
-├── STATUS.md          # Development status
-├── SECURITY.md        # Security policy
-└── CODE_OF_CONDUCT.md # Community guidelines
-```
-
-## 🏗️ Architecture
-
-### Core Tensor Structure
-VSLA uses an opaque handle (`vsla_tensor_t`) to represent tensors, hiding the internal implementation details to ensure ABI stability. This allows the library to evolve without breaking user applications.
-
-### Backend-Driven Architecture
-The library features a backend-driven architecture that allows users to select the optimal compute backend at runtime. Currently supported backends include:
-- **CPU:** A highly optimized CPU backend.
-- **CUDA:** A backend for NVIDIA GPUs, leveraging CUDA for parallel computation.
-- **ROCm & oneAPI:** Stubs for future support for AMD and Intel GPUs.
-
-### Mathematical Foundation
-Based on the research paper "Variable-Shape Linear Algebra: An Introduction", VSLA constructs equivalence classes of vectors modulo trailing-zero padding:
-
-- **Dimension-Aware Vectors**: `D = ⋃_{d≥0} {d} × ℝ^d / ~`
-- **Zero-Padding Equivalence**: `(d₁,v) ~ (d₂,w) ⟺ pad(v) = pad(w)`
-- **Semiring Operations**: Addition and multiplication that respect variable shapes
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-**System Requirements:**
-- C17-compatible compiler (GCC 8+, Clang 10+, MSVC 2019+)
-- CMake 3.10 or higher
-- POSIX-compliant system (Linux, macOS, Windows with MSYS2/WSL)
-
-**Optional Dependencies:**
-- FFTW3 for optimized convolutions
-- Doxygen for documentation generation
-- Valgrind for memory leak detection
-
-### Building the Library
-
-```bash
-# Clone the repository
-git clone https://github.com/your-org/libvsla.git
-cd libvsla
-
-# Create build directory
-mkdir build && cd build
-
-# Configure build
-cmake ..
-
-# Build library and tests
-make -j$(nproc)
-
-# Verify build succeeded
-ls -la libvsla*  # Should show libvsla.a and libvsla.so
-```
-
-### Build Configuration Options
-
-```bash
-# Debug build with all checks
-cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON ..
-
-# Release build optimized for performance
-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON ..
-
-# Enable FFTW support for faster convolutions
-cmake -DUSE_FFTW=ON ..
-
-# Build only static libraries
-cmake -DBUILD_SHARED_LIBS=OFF ..
-
-# Enable test coverage reporting
-cmake -DENABLE_COVERAGE=ON ..
-
-# Generate documentation
-cmake -DBUILD_DOCS=ON ..
-```
-
-### Platform-Specific Build Instructions
-
-#### Linux/macOS
-```bash
-# Install dependencies (Ubuntu/Debian)
-sudo apt-get install cmake build-essential libfftw3-dev
-
-# Install dependencies (macOS)
-brew install cmake fftw
-
-# Build
-mkdir build && cd build
-cmake .. && make -j$(nproc)
-```
-
-#### Windows (MSYS2/WSL)
-```bash
-# Install dependencies (MSYS2)
-pacman -S cmake mingw-w64-x86_64-gcc mingw-w64-x86_64-fftw
-
-# Build
-mkdir build && cd build
-cmake .. && make -j$(nproc)
-```
-
-### Basic Usage
-
-```c
-#include <vsla/vsla.h>
-
-int main() {
-    // Initialize VSLA context with configuration
-    vsla_config_t config = {
-        .backend_selection = VSLA_BACKEND_AUTO,  // Automatically select best backend
-    };
-    vsla_context_t* ctx = vsla_init(&config);
-    if (!ctx) {
-        // Handle initialization error
-        return 1;
-    }
-
-    // Create tensors with different shapes
-    uint64_t shape1[] = {3};
-    uint64_t shape2[] = {5};
-
-    vsla_tensor_t* a = vsla_tensor_create(ctx, 1, shape1, VSLA_MODEL_A, VSLA_DTYPE_F64);
-    vsla_tensor_t* b = vsla_tensor_create(ctx, 1, shape2, VSLA_MODEL_A, VSLA_DTYPE_F64);
-
-    // Fill with data (assuming a function to get direct data access)
-    // Note: A real implementation would use a vsla_tensor_set_data function
-    // or similar, which is not yet implemented.
-
-    // Create output tensor for addition (automatically padded)
-    uint64_t out_shape[] = {5}; // max(3, 5) = 5
-    vsla_tensor_t* result = vsla_tensor_zeros(ctx, 1, out_shape, VSLA_MODEL_A, VSLA_DTYPE_F64);
-
-    // Perform variable-shape addition
-    vsla_add(ctx, result, a, b);
-
-    // Clean up
-    vsla_tensor_free(a);
-    vsla_tensor_free(b);
-    vsla_tensor_free(result);
-    vsla_cleanup(ctx);
-
-    return 0;
-}
-```
-
-## 📚 Core API
-
-### Context Management
-```c
-// Initialize the VSLA context
-vsla_context_t* vsla_init(const vsla_config_t* config);
-
-// Clean up the VSLA context
-void vsla_cleanup(vsla_context_t* ctx);
-```
-
-### Tensor Creation
-```c
-// Create a new tensor
-vsla_tensor_t* vsla_tensor_create(vsla_context_t* ctx, uint8_t rank, const uint64_t shape[],
-                                vsla_model_t model, vsla_dtype_t dtype);
-
-// Create a tensor filled with zeros
-vsla_tensor_t* vsla_tensor_zeros(vsla_context_t* ctx, uint8_t rank, const uint64_t shape[],
-                                 vsla_model_t model, vsla_dtype_t dtype);
-
-// Create a tensor filled with ones
-vsla_tensor_t* vsla_tensor_ones(vsla_context_t* ctx, uint8_t rank, const uint64_t shape[],
-                                vsla_model_t model, vsla_dtype_t dtype);
-
-// Create a copy of a tensor
-vsla_tensor_t* vsla_tensor_copy(vsla_context_t* ctx, const vsla_tensor_t* tensor);
-
-// Free a tensor
-void vsla_tensor_free(vsla_tensor_t* tensor);
-```
-
-### Data Access
-```c
-// Get a pointer to the tensor's data
-// (Note: This is a simplified representation. The actual API may differ.)
-void* vsla_tensor_get_data(vsla_context_t* ctx, vsla_tensor_t* tensor);
-```
-
-### Variable-Shape Operations
-```c
-// Element-wise operations (with automatic padding)
-vsla_error_t vsla_add(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
-vsla_error_t vsla_sub(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
-vsla_error_t vsla_scale(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, double scalar);
-
-// Convolution and Kronecker product
-vsla_error_t vsla_conv(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
-vsla_error_t vsla_kron(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b);
-```
-
-## 🧪 Testing
-
-The library includes a comprehensive test suite with 46 tests covering all implemented functionality:
-
-### Running Tests
-
-```bash
-# Run all tests (from build directory)
-./tests/vsla_tests
-
-# Run tests with CMake/CTest
-ctest -V
-
-# Run specific test suite
-./tests/vsla_tests --suite core
-./tests/vsla_tests --suite tensor
-./tests/vsla_tests --suite ops
-```
-
-### Test Results Summary
-- **46 tests** across 7 test suites
-- **100% pass rate** with current implementation
-- **Full coverage** of core, tensor, operations, I/O, convolution, Kronecker, and autograd modules
-- **Memory leak detection** built-in
-
-### Test Suites
-
-#### Core Tests (4 tests)
-- Error string conversion
-- Data type size calculation  
-- Power-of-2 utilities
-- Edge cases and boundary conditions
-
-#### Tensor Tests (12 tests)
-- Tensor creation and initialization
-- Memory management and cleanup
-- Data access and type conversion
-- Shape operations and capacity management
-- Semiring elements (zero/one)
-
-#### Operations Tests (8 tests)
-- Variable-shape addition and subtraction
-- Tensor scaling operations
-- Hadamard products
-- Norm and sum computations
-- Rank padding operations
-- Error condition handling
-
-#### I/O Tests (9 tests)
-- Binary serialization (.vsla format)
-- CSV export/import
-- Endianness handling
-- File format validation
-- Error recovery
-
-#### Convolution Tests (6 tests)
-- 1D/2D convolution operations
-- FFT vs direct algorithm comparison
-- Polynomial conversion
-- Identity and error handling
-
-#### Kronecker Tests (7 tests)
-- 1D/2D Kronecker products
-- Tiled vs naive algorithm comparison
-- Monoid algebra conversion
-- Commutativity and error handling
-
-### Memory Testing
-
-```bash
-# Memory leak detection (requires valgrind)
-valgrind --leak-check=full --show-leak-kinds=all ./tests/vsla_tests
-
-# Address sanitizer build
-cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="-fsanitize=address" ..
-make && ./tests/vsla_tests
-
-# Thread sanitizer build
-cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="-fsanitize=thread" ..
-make && ./tests/vsla_tests
-```
-
-### Coverage Analysis
-
-```bash
-# Build with coverage
-cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE=ON ..
-make
-
-# Run tests and generate coverage report
-./tests/vsla_tests
-gcov src/*.c
-lcov --capture --directory . --output-file coverage.info
-genhtml coverage.info --output-directory coverage_html
-```
-
-### Test Coverage
-- ✅ **Core utilities**: Error handling, data types, power-of-2 calculations
-- ✅ **Tensor creation**: All constructors, edge cases, error conditions
-- ✅ **Memory management**: Allocation, deallocation, copying
-- ✅ **Data access**: Type-safe getters/setters, bounds checking
-- ✅ **Variable-shape operations**: Addition, subtraction, scaling
-- ✅ **Shape manipulation**: Rank expansion, capacity management
-
-## 📈 Benchmarking
-
-VSLA includes a comprehensive benchmark suite to validate performance claims and generate research data:
-
-### Building Benchmarks
-
-```bash
-# Build VSLA library first
-mkdir build && cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make
-
-# Build benchmark suite
-cd ../bench
-mkdir build && cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make
-```
-
-### Running Benchmarks
-
-```bash
-# Run all benchmarks
-python ../run_benchmarks.py --output results/$(date +%Y-%m-%d)
-
-# Run specific benchmarks
-./bench_comparison --sizes 64,256,1024,4096 --iterations 1000
-./bench_convolution --signals 256,512,1024,2048 --fft-comparison
-
-# Generate performance table for paper
-python ../scripts/generate_table2.py --input results/latest/ --output table2.tex
-```
-
-### Benchmark Types
-
-#### Variable-Shape Operations
-- **Vector Addition**: VSLA auto-padding vs manual padding + BLAS
-- **Matrix-Vector**: Model A convolution vs standard BLAS gemv
-- **Expected Results**: 0.5×-2.5× performance range depending on dimension sizes
-
-#### FFT Convolution
-- **Signal Processing**: VSLA FFT vs NumPy/SciPy implementations
-- **Expected Results**: Up to 16× speedup for large signals (>1024 elements)
-- **Crossover Point**: FFT becomes advantageous around 64 elements
-
-#### Kronecker Products
-- **Tensor Operations**: Model B tiled vs direct implementations
-- **Expected Results**: 3-5× speedup for large tensors due to cache optimization
-
-### Performance Characteristics
-
-```bash
-# Measure memory usage
-valgrind --tool=massif ./bench_comparison
-ms_print massif.out.* > memory_profile.txt
-
-# Profile with perf (Linux)
-perf record ./bench_convolution --signals 1024
-perf report
-
-# Generate flame graphs
-perf script | ./FlameGraph/stackcollapse-perf.pl | ./FlameGraph/flamegraph.pl > perf.svg
-```
-
-### Reproducible Results
-
-```bash
-# Set environment for consistent benchmarks
-export OMP_NUM_THREADS=1
-export OPENBLAS_NUM_THREADS=1
-echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
-
-# Run with fixed seed
-python run_benchmarks.py --reproducible --seed 42
-```
-
-### Benchmark Results
-
-The benchmark suite validates theoretical complexity claims:
-- **Memory Efficiency**: 20-30% lower peak usage due to power-of-2 growth
-- **Cache Performance**: 64-byte alignment and tiled algorithms improve cache utilization
-- **Algorithmic Complexity**: O(n log n) FFT scaling verified empirically
-- **Peer Review Quality**: Statistical analysis with confidence intervals and effect sizes
-
-## 🏗️ Implementation Status
-
-### ✅ Production-Ready Modules
-- **Core Infrastructure**: Complete project structure, build system, headers
-- **Tensor Module**: Full implementation with enterprise-grade memory management
-- **Variable-Shape Operations**: Addition, subtraction, scaling with automatic padding
-- **I/O Module**: Binary serialization (.vsla format) and CSV export/import
-- **Convolution Module**: FFT and direct algorithms with performance validation
-- **Kronecker Module**: Tiled and naive algorithms with monoid algebra support
-- **Autograd System**: Automatic differentiation with gradient tracking
-- **Utility Module**: Library initialization, feature detection, and error handling
-- **Test Framework**: Comprehensive 46-test suite with 100% pass rate
-- **Benchmark Suite**: Performance validation and research data generation
-
-### 🔬 Research-Quality Features
-- **Mathematical Rigor**: Faithful implementation of VSLA semiring theory
-- **Performance Validation**: Empirical verification of theoretical complexity claims
-- **Memory Safety**: Comprehensive bounds checking and overflow protection
-- **Cross-Platform**: Linux, macOS, Windows support with CI/CD pipeline
-- **Documentation**: Complete API reference and validation guides
-
-### 📊 Current Metrics
-- **Code Quality**: 2,800+ lines of C99-compliant code
-- **Test Coverage**: 46 tests across 7 test suites (100% pass rate)
-- **Performance**: FFT convolution shows up to 16× speedup for large signals
-- **Memory Efficiency**: 20-30% lower peak usage compared to manual padding
-- **Error Handling**: 12 distinct error codes with descriptive messages
-
-### 📋 Future Enhancements
-- **SIMD Optimization**: Vectorized operations for high-performance computing
-- **Sparse Memory**: mmap-based optimization for extremely large tensors
-- **GPU Support**: CUDA/OpenCL kernels for massively parallel operations
-- **Python Package**: pip-installable package with numpy integration
-- **Language Bindings**: C++, Rust, and Julia interfaces
-
-## 🔬 Technical Specifications
-
-### Performance Characteristics
-- **Memory Alignment**: 64-byte aligned allocations for SIMD optimization
-- **Capacity Growth**: Power-of-2 growth policy for cache efficiency
-- **Overflow Protection**: Comprehensive bounds checking and overflow detection
-- **Size Limits**: Maximum tensor size of 1TB per dimension
-
-### Platform Support
-- **Operating Systems**: Linux, macOS, Windows
-- **Compilers**: GCC 7+, Clang 9+, MSVC 2019+
-- **Standards**: C99 compliance, POSIX.1-2001 support
-- **Dependencies**: Optional FFTW3 for accelerated convolutions
-
-### Memory Safety
-- **Bounds Checking**: All array accesses are bounds-checked
-- **Overflow Detection**: Arithmetic operations check for overflow
-- **Resource Management**: RAII-style memory management
-- **Leak Detection**: Built-in memory leak tracking for tests
-
-## 📖 Documentation
-
-### Generated Documentation
-- **API Reference**: Generated with Doxygen (run `make docs`)
-- **Mathematical Theory**: See `docs/vsla_paper.pdf`
-- **Build Instructions**: See `docs/README.md`
-
-### Examples
-- **Basic Usage**: `examples/basic.c`
-- **Variable Shapes**: `examples/variable_shapes.c`
-- **Model Comparison**: `examples/models.c`
-
-## 📚 Documentation
-
-### Architecture Guide
-For developers who need to understand the codebase structure:
-- **[Architecture Documentation](docs/ARCHITECTURE.md)** - Comprehensive overview of all source files, modules, and dependencies
-
-### API Reference
-- **[Header Files](include/vsla/)** - Public API definitions with inline documentation
-- **[Examples](examples/)** - Usage examples and tutorials
-
-### Research Papers
-- **[docs/vsla_paper.tex](docs/vsla_paper.tex)** - The foundational research paper
-- **[STATUS.md](STATUS.md)** - Current implementation status and progress
-
-## 🤝 Contributing
-
-### Development Setup
-```bash
-# Install dependencies
-sudo apt-get install cmake build-essential libfftw3-dev doxygen valgrind
-
-# Build with development flags
-cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE=ON ..
-make
-
-# Run tests with coverage
-make test
-make coverage
-```
-
-### Code Quality Standards
-- **C99 Compliance**: Strict adherence to C99 standard
-- **Memory Safety**: All allocations paired with proper cleanup
-- **Error Handling**: Comprehensive error codes and validation
-- **Test Coverage**: 90%+ code coverage requirement
-- **Documentation**: All public APIs documented with Doxygen
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 📚 Research
-
-Based on the research paper:
-> "Variable-Shape Linear Algebra: An Introduction" (2025)
-> 
-> This library implements the mathematical foundations presented in the paper,
-> providing the first production-ready implementation of VSLA theory.
-
-## 🎯 Use Cases
-
-### Adaptive AI Systems
-- **Dynamic Neural Networks**: Layers that grow/shrink during training
-- **Mixture of Experts**: Variable expert dimensions based on specialization
-- **Meta-Learning**: Models that adapt their architecture
-
-### Signal Processing
-- **Multi-Resolution Analysis**: Wavelets with natural dimension handling
-- **Adaptive Filtering**: Filters that adjust to signal characteristics
-- **Compression**: Sparse representations with mathematical guarantees
-
-### Scientific Computing
-- **Adaptive Mesh Refinement**: Dynamic grid resolution
-- **Multigrid Methods**: Seamless multi-scale operations
-- **Quantum Simulations**: Variable bond dimensions in tensor networks
-
----
-
-**libvsla** - Where dimension becomes data, not constraint.
+**This project is archived as a reminder that beautiful mathematics doesn't automatically translate to practical utility - but the attempt to bridge that gap is still valuable research.**

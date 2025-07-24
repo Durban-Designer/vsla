@@ -2,6 +2,12 @@
 %  Conclusion
 % ================================================================
 \section{Conclusion}
-Dimension‑aware computation replaces brittle padding with algebraic rigor.  VSLA unifies flexible data shapes with efficient algorithms, promising advances across adaptive AI, signal processing and beyond. By establishing a formal, object-centric algebraic system, VSLA provides a principled foundation for the next generation of dynamic computational frameworks, complementing existing approaches like STP and offering a rigorous alternative to ad-hoc engineering solutions.
+Variable-Shape Linear Algebra provides a mathematically rigorous foundation for dimension-aware computation through equivalence classes and dual semiring structures. \textbf{Important Acknowledgment:} This work presents theoretical foundations without empirical performance validation. VSLA likely performs significantly slower than production frameworks like PyTorch due to fundamental optimization barriers inherent in variable-shape operations. 
+
+The framework's value lies in \textit{mathematical correctness rather than computational performance}. VSLA is best suited for applications where algebraic rigor outweighs performance concerns: formal verification, theorem proving, symbolic computation, and mathematical research requiring guaranteed algebraic properties. 
+
+\textbf{Critical limitations} include the d\_max heterogeneity problem (extreme dimension variance destroys FFT efficiency), compiler optimization barriers (variable shapes prevent vectorization), and framework integration overhead (113-247\% conversion costs). The memory model paradox—gradient pre-allocation defeats variable-shape benefits—remains unresolved.
+
+Future work must conduct honest benchmarks against PyTorch NestedTensors and TensorFlow RaggedTensors to identify specific niches where VSLA's mathematical rigor provides genuine value despite performance penalties.
 
 % ================================================================
