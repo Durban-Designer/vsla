@@ -11,8 +11,11 @@
 
 /* Include CPU backend implementation files */
 #include "cpu/vsla_cpu_helpers.c"
+#include "cpu/vsla_cpu_helpers_optimized.c"  // New optimized helpers
 #include "cpu/vsla_cpu_memory.c"
 #include "cpu/vsla_cpu_arithmetic.c"
+#include "cpu/vsla_cpu_arithmetic_integrated.c"  // Enhanced arithmetic with Phase 2 optimizations
+#include "cpu/vsla_cpu_fft.c"
 #include "cpu/vsla_cpu_advanced.c"
 #include "cpu/vsla_cpu_reduction.c"
 #include "cpu/vsla_cpu_shrink.c"
@@ -46,7 +49,8 @@ static vsla_error_t cpu_synchronize_wrapper(vsla_context_t* ctx) {
 
 static vsla_error_t cpu_add_wrapper(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b) {
     (void)ctx; // Unused for CPU
-    return cpu_add(out, a, b);
+    // Use enhanced version with Phase 2 optimizations
+    return cpu_add_with_optimizations(out, a, b);
 }
 
 static vsla_error_t cpu_sub_wrapper(vsla_context_t* ctx, vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_tensor_t* b) {

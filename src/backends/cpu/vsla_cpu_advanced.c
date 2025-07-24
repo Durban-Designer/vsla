@@ -19,6 +19,9 @@ extern uint64_t vsla_logical_elems(const vsla_tensor_t* t);
 // FFT threshold for switching from direct to FFT convolution
 #define CONV_FFT_THRESHOLD 1024
 
+// FFT convolution function from vsla_cpu_fft.c
+extern int vsla_conv_fft(double* out, const double* A, size_t m, const double* B, size_t n);
+
 /**
  * @brief Discrete convolution for Model A following Section 4.3
  * 
@@ -108,9 +111,57 @@ vsla_error_t cpu_conv(vsla_tensor_t* out, const vsla_tensor_t* a, const vsla_ten
             return VSLA_ERROR_INVALID_DTYPE;
         }
     } else {
-        // TODO: FFT convolution path for large inputs
-        // For now, fall back to direct method
-        return cpu_conv(out, a, b); // Recursive call with direct path
+        // FFT convolution path for large inputs
+        if (out->dtype == VSLA_DTYPE_F64) {
+            const double* A = (const double*)a->data;
+            const double* B = (const double*)b->data;
+            double* OUT = (double*)out->data;
+            
+            int fft_result = vsla_conv_fft(OUT, A, m, B, n);
+            if (fft_result != 0) {
+                return VSLA_ERROR_INVALID_ARGUMENT; // FFT failed, could be allocation
+            }
+        } else if (out->dtype == VSLA_DTYPE_F32) {
+            // For float32, we need to convert to double for FFT, then back
+            // Allocate temporary double buffers
+            double* A_d = (double*)malloc(m * sizeof(double));
+            double* B_d = (double*)malloc(n * sizeof(double));
+            double* OUT_d = (double*)malloc(expected_out_size * sizeof(double));
+            
+            if (!A_d || !B_d || !OUT_d) {
+                free(A_d);
+                free(B_d);
+                free(OUT_d);
+                return VSLA_ERROR_INVALID_ARGUMENT;
+            }
+            
+            // Convert inputs to double
+            const float* A_f = (const float*)a->data;
+            const float* B_f = (const float*)b->data;
+            for (uint64_t i = 0; i < m; i++) A_d[i] = (double)A_f[i];
+            for (uint64_t i = 0; i < n; i++) B_d[i] = (double)B_f[i];
+            
+            // Run FFT convolution
+            int fft_result = vsla_conv_fft(OUT_d, A_d, m, B_d, n);
+            
+            if (fft_result == 0) {
+                // Convert result back to float
+                float* OUT_f = (float*)out->data;
+                for (uint64_t i = 0; i < expected_out_size; i++) {
+                    OUT_f[i] = (float)OUT_d[i];
+                }
+            }
+            
+            free(A_d);
+            free(B_d);
+            free(OUT_d);
+            
+            if (fft_result != 0) {
+                return VSLA_ERROR_INVALID_ARGUMENT;
+            }
+        } else {
+            return VSLA_ERROR_INVALID_DTYPE;
+        }
     }
 
     return VSLA_SUCCESS;

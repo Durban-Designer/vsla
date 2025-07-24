@@ -1,0 +1,60 @@
+VSLA PERFORMANCE BENCHMARKS - BASIC SUMMARY
+= bench benchmarks build CITATION.cff cmake-build-debug CMakeLists_extended_example.txt CMakeLists.txt CODE_OF_CONDUCT.md code-review.md docs examples include lib LICENSE paper_results python README.md REPO_STRUCTURE.md SECURITY.md src STATUS.md tests valgrind_output.txt 50
+Session: 20250723_181109
+Runs per benchmark: 10
+
+Benchmark files generated:
+paper_results/20250723_181109/parsed_data/bench_pyramid_stacking_run_10.csv
+paper_results/20250723_181109/parsed_data/bench_pyramid_stacking_run_1.csv
+paper_results/20250723_181109/parsed_data/bench_pyramid_stacking_run_2.csv
+paper_results/20250723_181109/parsed_data/bench_pyramid_stacking_run_3.csv
+paper_results/20250723_181109/parsed_data/bench_pyramid_stacking_run_4.csv
+paper_results/20250723_181109/parsed_data/bench_pyramid_stacking_run_5.csv
+paper_results/20250723_181109/parsed_data/bench_pyramid_stacking_run_6.csv
+paper_results/20250723_181109/parsed_data/bench_pyramid_stacking_run_7.csv
+paper_results/20250723_181109/parsed_data/bench_pyramid_stacking_run_8.csv
+paper_results/20250723_181109/parsed_data/bench_pyramid_stacking_run_9.csv
+paper_results/20250723_181109/parsed_data/bench_window_stacking_run_10.csv
+paper_results/20250723_181109/parsed_data/bench_window_stacking_run_1.csv
+paper_results/20250723_181109/parsed_data/bench_window_stacking_run_2.csv
+paper_results/20250723_181109/parsed_data/bench_window_stacking_run_3.csv
+paper_results/20250723_181109/parsed_data/bench_window_stacking_run_4.csv
+paper_results/20250723_181109/parsed_data/bench_window_stacking_run_5.csv
+paper_results/20250723_181109/parsed_data/bench_window_stacking_run_6.csv
+paper_results/20250723_181109/parsed_data/bench_window_stacking_run_7.csv
+paper_results/20250723_181109/parsed_data/bench_window_stacking_run_8.csv
+paper_results/20250723_181109/parsed_data/bench_window_stacking_run_9.csv
+paper_results/20250723_181109/parsed_data/fft_run_10.csv
+paper_results/20250723_181109/parsed_data/fft_run_1.csv
+paper_results/20250723_181109/parsed_data/fft_run_2.csv
+paper_results/20250723_181109/parsed_data/fft_run_3.csv
+paper_results/20250723_181109/parsed_data/fft_run_4.csv
+paper_results/20250723_181109/parsed_data/fft_run_5.csv
+paper_results/20250723_181109/parsed_data/fft_run_6.csv
+paper_results/20250723_181109/parsed_data/fft_run_7.csv
+paper_results/20250723_181109/parsed_data/fft_run_8.csv
+paper_results/20250723_181109/parsed_data/fft_run_9.csv
+paper_results/20250723_181109/parsed_data/kronecker_run_10.csv
+paper_results/20250723_181109/parsed_data/kronecker_run_1.csv
+paper_results/20250723_181109/parsed_data/kronecker_run_2.csv
+paper_results/20250723_181109/parsed_data/kronecker_run_3.csv
+paper_results/20250723_181109/parsed_data/kronecker_run_4.csv
+paper_results/20250723_181109/parsed_data/kronecker_run_5.csv
+paper_results/20250723_181109/parsed_data/kronecker_run_6.csv
+paper_results/20250723_181109/parsed_data/kronecker_run_7.csv
+paper_results/20250723_181109/parsed_data/kronecker_run_8.csv
+paper_results/20250723_181109/parsed_data/kronecker_run_9.csv
+paper_results/20250723_181109/parsed_data/vector_add_run_10.csv
+paper_results/20250723_181109/parsed_data/vector_add_run_1.csv
+paper_results/20250723_181109/parsed_data/vector_add_run_2.csv
+paper_results/20250723_181109/parsed_data/vector_add_run_3.csv
+paper_results/20250723_181109/parsed_data/vector_add_run_4.csv
+paper_results/20250723_181109/parsed_data/vector_add_run_5.csv
+paper_results/20250723_181109/parsed_data/vector_add_run_6.csv
+paper_results/20250723_181109/parsed_data/vector_add_run_7.csv
+paper_results/20250723_181109/parsed_data/vector_add_run_8.csv
+paper_results/20250723_181109/parsed_data/vector_add_run_9.csv
+
+To analyze with full statistics, install Python with pandas/numpy:
+  pip install pandas numpy
+  python3 paper_results/20250723_181109/analyze_results.py paper_results/20250723_181109

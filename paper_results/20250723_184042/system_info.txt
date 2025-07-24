@@ -1,0 +1,33 @@
+VSLA Paper Benchmarks - System Information
+==========================================
+Timestamp: Wed Jul 23 06:40:42 PM MST 2025
+Hostname: kenth56-OMEN-by-HP-Gaming-Laptop-16-wf0xxx
+CPU Info:
+CPU(s):                               32
+On-line CPU(s) list:                  0-31
+Model name:                           13th Gen Intel(R) Core(TM) i9-13900HX
+Thread(s) per core:                   2
+CPU(s) scaling MHz:                   22%
+NUMA node0 CPU(s):                    0-31
+
+Memory Info:
+               total        used        free      shared  buff/cache   available
+Mem:            15Gi       9.4Gi       3.3Gi       1.6Gi       4.5Gi       5.9Gi
+Swap:          4.0Gi       1.1Gi       2.9Gi
+
+Compiler Info:
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0
+
+Git Info:
+137814f33f652a43707c3706cb857dc6a442e359
+ M bench/CMakeLists.txt
+ M benchmarks/CMakeLists.txt
+AM docs/history/chatgpt/3-2-spec.json
+ M src/backends/cpu/vsla_cpu_advanced.c
+ M src/backends/cpu/vsla_cpu_arithmetic.c
+ M src/backends/vsla_backend_cpu_new.c
+ M tests/CMakeLists.txt
+?? bench/src/bench_comprehensive_comparison.c
+?? bench/src/bench_fft_convolution.c
+?? bench/src/bench_kronecker.c
+

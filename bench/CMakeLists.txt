@@ -51,6 +51,10 @@ endif()
 add_executable(bench_convolution src/bench_convolution.c src/benchmark_utils.c)
 target_link_libraries(bench_convolution ${BENCHMARK_LIBS})
 
+# FFT convolution benchmark
+add_executable(bench_fft_convolution src/bench_fft_convolution.c)
+target_link_libraries(bench_fft_convolution vsla_static ${BLAS_LIBRARIES} m)
+
 # Fair comparison benchmark (VSLA vs manual padding)
 add_executable(bench_comparison src/bench_comparison.c src/benchmark_utils.c)
 target_link_libraries(bench_comparison ${BENCHMARK_LIBS})

@@ -40,3 +40,8 @@ add_test(NAME VSLASpecTests COMMAND vsla_spec_tests)
 add_executable(vsla_stacking_tests test_stacking_comprehensive.c)
 target_link_libraries(vsla_stacking_tests PRIVATE vsla_static m)
 add_test(NAME VSLAStackingTests COMMAND vsla_stacking_tests)
+
+# FFT convolution tests
+add_executable(test_fft_convolution test_fft_convolution.c)
+target_link_libraries(test_fft_convolution PRIVATE vsla_static m)
+add_test(NAME FFTConvolutionTests COMMAND test_fft_convolution)
