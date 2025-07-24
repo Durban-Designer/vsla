@@ -37,8 +37,9 @@ typedef struct {
 /* Context management */
 vsla_context_t* vsla_init(const vsla_config_t* config);
 void vsla_cleanup(vsla_context_t* ctx);
-vsla_error_t vsla_set_backend(vsla_context_t* ctx, vsla_backend_t backend);
-vsla_backend_t vsla_get_backend(const vsla_context_t* ctx);
+
+/* Note: Backend is set at initialization time via vsla_config_t.backend
+ * Runtime backend switching is not supported for performance reasons */
 
 /* Tensor creation and destruction */
 vsla_tensor_t* vsla_tensor_create(vsla_context_t* ctx, uint8_t rank, const uint64_t* shape, 

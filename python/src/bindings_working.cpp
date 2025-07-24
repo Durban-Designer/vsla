@@ -213,100 +213,6 @@ public:
         return vsla_get_model(tensor_);
     }
 
-    // Matrix multiplication using universal interface
-    PyVslaTensor matmul(const PyVslaTensor& other) const {
-        if (!tensor_ || !other.tensor_) {
-            throw std::runtime_error("Invalid tensors for matmul");
-        }
-
-        // Get dimensions for output shape calculation
-        uint8_t rank_a = vsla_get_rank(tensor_);
-        uint8_t rank_b = vsla_get_rank(other.tensor_);
-        
-        if (rank_a != 2 || rank_b != 2) {
-            throw std::runtime_error("matmul requires 2D tensors");
-        }
-
-        std::vector<uint64_t> shape_a(rank_a);
-        std::vector<uint64_t> shape_b(rank_b);
-        vsla_get_shape(tensor_, shape_a.data());
-        vsla_get_shape(other.tensor_, shape_b.data());
-
-        if (shape_a[1] != shape_b[0]) {
-            throw std::runtime_error("Incompatible dimensions for matmul");
-        }
-
-        // Create output tensor with correct shape [A_rows, B_cols]
-        uint64_t out_shape[] = {shape_a[0], shape_b[1]};
-        vsla_model_t model = vsla_get_model(tensor_);
-        vsla_dtype_t dtype = vsla_get_dtype(tensor_);
-        vsla_tensor_t* result = vsla_tensor_create(ctx_, 2, out_shape, model, dtype);
-        
-        if (!result) {
-            throw std::runtime_error("Failed to create result tensor");
-        }
-
-        // Use the universal interface matmul function
-        vsla_error_t err = vsla_matmul(ctx_, result, tensor_, other.tensor_);
-        if (err != VSLA_SUCCESS) {
-            vsla_tensor_free(result);
-            throw std::runtime_error("Matrix multiplication failed: " + std::string(vsla_error_string(err)));
-        }
-
-        return PyVslaTensor(ctx_, result);
-    }
-
-    // Sum reduction - returns scalar value
-    double sum() const {
-        if (!tensor_) {
-            throw std::runtime_error("Invalid tensor for sum");
-        }
-
-        double result;
-        vsla_error_t err = vsla_sum(ctx_, tensor_, &result);
-        if (err != VSLA_SUCCESS) {
-            throw std::runtime_error("Sum failed: " + std::string(vsla_error_string(err)));
-        }
-
-        return result;
-    }
-
-    // Mean reduction - calculated from sum and element count
-    double mean() const {
-        if (!tensor_) {
-            throw std::runtime_error("Invalid tensor for mean");
-        }
-
-        double sum_result;
-        vsla_error_t err = vsla_sum(ctx_, tensor_, &sum_result);
-        if (err != VSLA_SUCCESS) {
-            throw std::runtime_error("Sum failed for mean calculation: " + std::string(vsla_error_string(err)));
-        }
-
-        // Get number of elements
-        uint64_t num_elements = vsla_numel(tensor_);
-        if (num_elements == 0) {
-            throw std::runtime_error("Cannot compute mean of empty tensor");
-        }
-
-        return sum_result / static_cast<double>(num_elements);
-    }
-
-    // Norm calculation
-    double norm() const {
-        if (!tensor_) {
-            throw std::runtime_error("Invalid tensor for norm");
-        }
-
-        double result;
-        vsla_error_t err = vsla_norm(ctx_, tensor_, &result);
-        if (err != VSLA_SUCCESS) {
-            throw std::runtime_error("Norm calculation failed: " + std::string(vsla_error_string(err)));
-        }
-
-        return result;
-    }
-
 private:
     vsla_context_t* ctx_;
     vsla_tensor_t* tensor_;
@@ -316,24 +222,11 @@ private:
 static vsla_context_t* g_ctx = nullptr;
 
 PYBIND11_MODULE(_core, m) {
-    m.doc() = R"pbdoc(
-        VSLA: Variable-Shape Linear Algebra - Core C++ bindings
-        
-        This module provides high-performance variable-shape linear algebra operations.
-        The backend (CPU/CUDA) is selected automatically at initialization time based on
-        hardware availability. Runtime backend switching is not supported for performance reasons.
-        
-        Key features:
-        - Automatic shape promotion in tensor operations
-        - Matrix multiplication, convolution, and reduction operations  
-        - Multi-dimensional tensor support (up to 8D)
-        - Memory-efficient tensor representations
-        - Both semiring models A (addition/convolution) and B (addition/Kronecker)
-    )pbdoc";
+    m.doc() = "VSLA: Variable-Shape Linear Algebra - Working Core C++ bindings";
 
-    // Initialize VSLA context with auto backend selection
+    // Initialize VSLA context
     vsla_config_t config = {};
-    config.backend = VSLA_BACKEND_AUTO;  // Automatically select best available backend
+    config.backend = VSLA_BACKEND_AUTO;
     config.device_id = 0;
     config.memory_limit = 0;
     config.optimization_hint = VSLA_HINT_NONE;
@@ -341,7 +234,7 @@ PYBIND11_MODULE(_core, m) {
     config.verbose = false;
     g_ctx = vsla_init(&config);
     if (!g_ctx) {
-        throw std::runtime_error("Failed to initialize VSLA library with auto backend selection");
+        throw std::runtime_error("Failed to initialize VSLA library");
     }
 
     // Register cleanup function
@@ -359,16 +252,7 @@ PYBIND11_MODULE(_core, m) {
         .value("B", VSLA_MODEL_B, "Kronecker semiring model");
 
     // Expose main tensor class
-    py::class_<PyVslaTensor>(m, "Tensor", R"pbdoc(
-        VSLA Tensor: High-performance variable-shape tensor with automatic dimension promotion.
-        
-        Supports both semiring Model A (addition/convolution) and Model B (addition/Kronecker).
-        Tensors automatically promote dimensions during operations for mathematical correctness.
-        
-        Args:
-            data: NumPy array containing tensor data
-            model: Semiring model - VSLA_MODEL_A (default) or VSLA_MODEL_B
-        )pbdoc")
+    py::class_<PyVslaTensor>(m, "Tensor")
         .def(py::init([](py::array_t<double> data, vsla_model_t model) {
             return new PyVslaTensor(g_ctx, data, model);
         }), py::arg("data"), py::arg("model") = VSLA_MODEL_A,
@@ -381,16 +265,6 @@ PYBIND11_MODULE(_core, m) {
              "Add two tensors with automatic shape promotion")
         .def("convolve", &PyVslaTensor::convolve,
              "Convolve with another tensor (Model A only)")
-        .def("matmul", &PyVslaTensor::matmul,
-             "Matrix multiplication with another tensor")
-        .def("__matmul__", &PyVslaTensor::matmul,
-             "Matrix multiplication with another tensor (@ operator)")
-        .def("sum", &PyVslaTensor::sum,
-             "Sum of all tensor elements")
-        .def("mean", &PyVslaTensor::mean,
-             "Mean of all tensor elements")
-        .def("norm", &PyVslaTensor::norm,
-             "Calculate L2 norm of tensor")
         .def("shape", &PyVslaTensor::shape,
              "Get tensor shape")
         .def("model", &PyVslaTensor::model,
@@ -405,56 +279,6 @@ PYBIND11_MODULE(_core, m) {
             shape_str += ")";
             return "VslaTensor(shape=" + shape_str + ", model=" + (t.model() == VSLA_MODEL_A ? "A" : "B") + ")";
         });
-
-    // Backend information function
-    m.def("get_backend_info", []() {
-        if (!g_ctx) {
-            return std::string("VSLA context not initialized");
-        }
-        
-        return std::string("Auto-selected backend (determined at initialization)");
-    }, "Get information about the active backend (auto-selected at startup)");
-
-    // Tensor creation utilities
-    m.def("zeros", [](const std::vector<uint64_t>& shape, vsla_model_t model) {
-        if (!g_ctx) {
-            throw std::runtime_error("VSLA context not initialized");
-        }
-        
-        vsla_tensor_t* tensor = vsla_tensor_create(g_ctx, shape.size(), shape.data(), model, VSLA_DTYPE_F64);
-        if (!tensor) {
-            throw std::runtime_error("Failed to create tensor");
-        }
-        
-        // Fill with zeros
-        vsla_error_t err = vsla_fill(g_ctx, tensor, 0.0);
-        if (err != VSLA_SUCCESS) {
-            vsla_tensor_free(tensor);
-            throw std::runtime_error("Failed to fill tensor with zeros");
-        }
-        
-        return PyVslaTensor(g_ctx, tensor);
-    }, py::arg("shape"), py::arg("model") = VSLA_MODEL_A, "Create a tensor filled with zeros");
-    
-    m.def("ones", [](const std::vector<uint64_t>& shape, vsla_model_t model) {
-        if (!g_ctx) {
-            throw std::runtime_error("VSLA context not initialized");
-        }
-        
-        vsla_tensor_t* tensor = vsla_tensor_create(g_ctx, shape.size(), shape.data(), model, VSLA_DTYPE_F64);
-        if (!tensor) {
-            throw std::runtime_error("Failed to create tensor");
-        }
-        
-        // Fill with ones
-        vsla_error_t err = vsla_fill(g_ctx, tensor, 1.0);
-        if (err != VSLA_SUCCESS) {
-            vsla_tensor_free(tensor);
-            throw std::runtime_error("Failed to fill tensor with ones");
-        }
-        
-        return PyVslaTensor(g_ctx, tensor);
-    }, py::arg("shape"), py::arg("model") = VSLA_MODEL_A, "Create a tensor filled with ones");
 
     // Version info
     m.attr("__version__") = "0.1.0";

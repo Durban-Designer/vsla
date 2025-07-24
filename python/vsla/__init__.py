@@ -3,6 +3,17 @@ VSLA: Variable-Shape Linear Algebra
 
 Mathematical foundations and high-performance implementation of variable-shape linear algebra
 with automatic dimension promotion and semiring structures.
+
+Backend Selection:
+The computation backend (CPU/CUDA) is automatically selected at import time based on hardware
+availability. Runtime backend switching is not supported for performance reasons.
+
+Key Features:
+- Automatic shape promotion in tensor operations
+- Matrix multiplication, convolution, and reduction operations  
+- Multi-dimensional tensor support (up to 8D)
+- Memory-efficient tensor representations
+- Both semiring models A (addition/convolution) and B (addition/Kronecker)
 """
 
 __version__ = "0.1.0"
@@ -74,10 +85,10 @@ if _has_core:
     __all__.extend([
         # Core tensor operations (from C extension)
         'Tensor',
-        'add',
-        'convolve', 
-        'kronecker',
         'Model',
+        'get_backend_info',
+        'zeros',
+        'ones',
     ])
 else:
     __all__.extend([

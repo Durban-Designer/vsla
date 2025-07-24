@@ -58,6 +58,29 @@ if(VSLA_BUILD_CUDA AND CMAKE_CUDA_COMPILER AND CUDAToolkit_FOUND)
     target_link_libraries(vsla_static PRIVATE CUDA::cudart)
 endif()
 
+# --- Python Extension (Optional) ---
+option(VSLA_BUILD_PYTHON "Build Python bindings" OFF)
+
+if(VSLA_BUILD_PYTHON)
+    # Find Python and pybind11
+    find_package(Python COMPONENTS Interpreter Development REQUIRED)
+    find_package(pybind11 REQUIRED)
+    
+    # Create Python extension module
+    pybind11_add_module(_core python/src/bindings.cpp)
+    
+    # Link with the static VSLA library
+    target_link_libraries(_core PRIVATE vsla_static)
+    
+    # Set properties for Python extension
+    target_compile_definitions(_core PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
+    
+    # Ensure proper C++ standard for pybind11
+    target_compile_features(_core PRIVATE cxx_std_11)
+    
+    message(STATUS "Python bindings enabled")
+endif()
+
 # Benchmarks
 add_subdirectory(benchmarks)
 
