@@ -1,7 +1,7 @@
 {
-  "extraction_date": "2025-07-21T16:42:46.556888",
-  "total_sessions": 18,
-  "successful_extractions": 18,
+  "extraction_date": "2025-07-24T12:50:36.230620",
+  "total_sessions": 21,
+  "successful_extractions": 21,
   "sessions": [
     {
       "session_id": null,
@@ -36,10 +36,26 @@
       "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/unknown_None.md"
     },
     {
+      "session_id": null,
+      "start_timestamp": null,
+      "cwd": null,
+      "message_count": 1942,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/28ffeaf8-fef8-426b-a386-ab42925483f5.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/unknown_None.md"
+    },
+    {
+      "session_id": "1bd49374-eaf5-4fca-a9ca-acef2641f663",
+      "start_timestamp": "2025-07-23T17:30:14.606Z",
+      "cwd": "/home/kenth56/vsla",
+      "message_count": 3732,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/1bd49374-eaf5-4fca-a9ca-acef2641f663.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/20250723_173014_1bd49374-eaf5-4fca-a9ca-acef2641f663.md"
+    },
+    {
       "session_id": "da4409c0-22ff-4ced-95ce-96c5411830a9",
       "start_timestamp": "2025-07-21T21:26:02.358Z",
       "cwd": "/home/kenth56/vsla",
-      "message_count": 1163,
+      "message_count": 1294,
       "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/da4409c0-22ff-4ced-95ce-96c5411830a9.jsonl",
       "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/20250721_212602_da4409c0-22ff-4ced-95ce-96c5411830a9.md"
     },
@@ -89,6 +105,14 @@
       "cwd": null,
       "message_count": 805,
       "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/de4c50ca-9c27-43e3-94d3-44007f7aea22.jsonl",
+      "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/unknown_None.md"
+    },
+    {
+      "session_id": null,
+      "start_timestamp": null,
+      "cwd": null,
+      "message_count": 41,
+      "file_path": "/home/kenth56/vsla/docs/history/raw_sessions/-home-kenth56-vsla/f6108699-47cc-4b21-8ca6-3223992990b3.jsonl",
       "output_file": "/home/kenth56/vsla/docs/history/processed_sessions/unknown_None.md"
     },
     {
