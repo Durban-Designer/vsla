@@ -89,3 +89,14 @@ bool in_bounds(const vsla_tensor_t* t, const uint64_t* idx) {
     }
     return true;
 }
+
+// Check if two tensors have equal shapes
+bool shapes_equal(const vsla_tensor_t* a, const vsla_tensor_t* b) {
+    if (!a || !b) return false;
+    if (a->rank != b->rank) return false;
+    
+    for (uint8_t i = 0; i < a->rank; i++) {
+        if (a->shape[i] != b->shape[i]) return false;
+    }
+    return true;
+}

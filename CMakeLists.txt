@@ -17,7 +17,7 @@ set(VSLA_CORE_SOURCES
 
 # --- CPU Backend Sources ---
 if(VSLA_BUILD_CPU)
-    list(APPEND VSLA_CORE_SOURCES src/backends/vsla_backend_cpu_new.c)
+    list(APPEND VSLA_CORE_SOURCES src/backends/vsla_backend_cpu.c)
     add_compile_definitions(VSLA_BUILD_CPU=1)
 endif()
 

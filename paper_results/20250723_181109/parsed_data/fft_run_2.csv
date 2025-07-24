@@ -1,3 +1,0 @@
-Size,Algorithm,Time_ms,Ops_per_ms
-8,FFT,0.000,279620
-16,FFT,0.001,324393

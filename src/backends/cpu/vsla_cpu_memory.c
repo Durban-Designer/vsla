@@ -11,6 +11,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Helper functions
+extern bool vsla_is_empty(const vsla_tensor_t* t);
+extern uint64_t vsla_logical_elems(const vsla_tensor_t* t);
+
 // Platform-specific includes for aligned allocation
 #ifdef _WIN32
 #include <malloc.h>

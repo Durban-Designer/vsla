@@ -296,12 +296,12 @@ vsla_tensor_t* vsla_tensor_create(vsla_context_t* ctx,
                                    const uint64_t* shape,
                                    vsla_model_t model,
                                    vsla_dtype_t dtype) {
-    printf("vsla_tensor_create called: ctx=%p, rank=%d, shape=%p\n", (void*)ctx, rank, (void*)shape);
-    fflush(stdout);
+    // printf("vsla_tensor_create called: ctx=%p, rank=%d, shape=%p\n", (void*)ctx, rank, (void*)shape);
+    // fflush(stdout);
     
     if (!ctx || !shape || rank == 0) {
-        printf("vsla_tensor_create: invalid params\n");
-        fflush(stdout);
+        // printf("vsla_tensor_create: invalid params\n");
+        // fflush(stdout);
         return NULL;
     }
     
@@ -378,10 +378,10 @@ vsla_tensor_t* vsla_tensor_create(vsla_context_t* ctx,
         }
         
         // Allocate on CPU
-        printf("Allocating on CPU, backend=%p, allocate=%p\n", 
-               (void*)ctx->active_backend, 
-               (void*)(ctx->active_backend ? ctx->active_backend->allocate : NULL));
-        fflush(stdout);
+        // printf("Allocating on CPU, backend=%p, allocate=%p\n", 
+        //        (void*)ctx->active_backend, 
+        //        (void*)(ctx->active_backend ? ctx->active_backend->allocate : NULL));
+        // fflush(stdout);
         
         if (!ctx->active_backend || !ctx->active_backend->allocate) {
             printf("ERROR: No backend or allocate function!\n");
@@ -610,6 +610,24 @@ vsla_error_t vsla_fill(vsla_context_t* ctx, vsla_tensor_t* tensor, double value)
     return ctx->active_backend->fill(ctx, tensor, value);
 }
 
+vsla_error_t vsla_matmul(vsla_context_t* ctx,
+                        vsla_tensor_t* out,
+                        const vsla_tensor_t* a,
+                        const vsla_tensor_t* b) {
+    if (!ctx || !out || !a || !b) return VSLA_ERROR_INVALID_ARGUMENT;
+    if (!ctx->active_backend->matmul) return VSLA_ERROR_NOT_IMPLEMENTED;
+    return ctx->active_backend->matmul(ctx, out, a, b);
+}
+
+vsla_error_t vsla_conv(vsla_context_t* ctx,
+                      vsla_tensor_t* out,
+                      const vsla_tensor_t* a,
+                      const vsla_tensor_t* b) {
+    if (!ctx || !out || !a || !b) return VSLA_ERROR_INVALID_ARGUMENT;
+    if (!ctx->active_backend->conv) return VSLA_ERROR_NOT_IMPLEMENTED;
+    return ctx->active_backend->conv(ctx, out, a, b);
+}
+
 vsla_error_t vsla_sum(vsla_context_t* ctx,
                       const vsla_tensor_t* tensor,
                       double* result) {
@@ -622,14 +640,6 @@ vsla_error_t vsla_norm(vsla_context_t* ctx,
                        double* result) {
     if (!ctx || !tensor || !result) return VSLA_ERROR_INVALID_ARGUMENT;
     return ctx->active_backend->norm(ctx, tensor, result);
-}
-
-vsla_error_t vsla_conv(vsla_context_t* ctx,
-                       vsla_tensor_t* out,
-                       const vsla_tensor_t* signal,
-                       const vsla_tensor_t* kernel) {
-    if (!ctx || !out || !signal || !kernel) return VSLA_ERROR_INVALID_ARGUMENT;
-    return ctx->active_backend->conv(ctx, out, signal, kernel);
 }
 
 vsla_error_t vsla_kron(vsla_context_t* ctx,
